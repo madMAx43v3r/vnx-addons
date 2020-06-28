@@ -2,4 +2,4 @@
 Addon features for VNX
 
 # Dependencies
-`zlib1g-dev`
+`vnx-base zlib1g-dev`
