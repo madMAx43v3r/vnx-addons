@@ -1,0 +1,11 @@
+package vnx.addons;
+
+class DeflatedValue extends CompressedValue {
+	
+	vnx.Buffer data;
+	
+	vnx.Value* decompress() const;
+	
+	static DeflatedValue* compress(vnx.Value* value);
+	
+}
