@@ -1,0 +1,7 @@
+Package: vnx-addons
+Section: base
+Priority: optional
+Depends:
+Maintainer: Max Wittal <max.wittal@mwittal.de>
+Description: VNX addon features
+Architecture: all
