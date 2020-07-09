@@ -15,7 +15,7 @@ namespace addons {
 
 
 const vnx::Hash64 HttpComponent_http_request::VNX_TYPE_HASH(0xe0b6c38f619bad92ull);
-const vnx::Hash64 HttpComponent_http_request::VNX_CODE_HASH(0xca538b1b02fdbc2bull);
+const vnx::Hash64 HttpComponent_http_request::VNX_CODE_HASH(0xfb2ef6c722ec93a1ull);
 
 vnx::Hash64 HttpComponent_http_request::get_type_hash() const {
 	return VNX_TYPE_HASH;
@@ -48,12 +48,14 @@ void HttpComponent_http_request::accept(vnx::Visitor& _visitor) const {
 	const vnx::TypeCode* _type_code = vnx::addons::vnx_native_type_code_HttpComponent_http_request;
 	_visitor.type_begin(*_type_code);
 	_visitor.type_field(_type_code->fields[0], 0); vnx::accept(_visitor, request);
+	_visitor.type_field(_type_code->fields[1], 1); vnx::accept(_visitor, sub_path);
 	_visitor.type_end(*_type_code);
 }
 
 void HttpComponent_http_request::write(std::ostream& _out) const {
 	_out << "{\"__type\": \"vnx.addons.HttpComponent.http_request\"";
 	_out << ", \"request\": "; vnx::write(_out, request);
+	_out << ", \"sub_path\": "; vnx::write(_out, sub_path);
 	_out << "}";
 }
 
@@ -63,6 +65,8 @@ void HttpComponent_http_request::read(std::istream& _in) {
 	for(const auto& _entry : _object) {
 		if(_entry.first == "request") {
 			vnx::from_string(_entry.second, request);
+		} else if(_entry.first == "sub_path") {
+			vnx::from_string(_entry.second, sub_path);
 		}
 	}
 }
@@ -71,6 +75,7 @@ vnx::Object HttpComponent_http_request::to_object() const {
 	vnx::Object _object;
 	_object["__type"] = "vnx.addons.HttpComponent.http_request";
 	_object["request"] = request;
+	_object["sub_path"] = sub_path;
 	return _object;
 }
 
@@ -78,6 +83,8 @@ void HttpComponent_http_request::from_object(const vnx::Object& _object) {
 	for(const auto& _entry : _object.field) {
 		if(_entry.first == "request") {
 			_entry.second.to(request);
+		} else if(_entry.first == "sub_path") {
+			_entry.second.to(sub_path);
 		}
 	}
 }
@@ -106,18 +113,24 @@ std::shared_ptr<vnx::TypeCode> HttpComponent_http_request::static_create_type_co
 	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpComponent.http_request";
 	type_code->type_hash = vnx::Hash64(0xe0b6c38f619bad92ull);
-	type_code->code_hash = vnx::Hash64(0xca538b1b02fdbc2bull);
+	type_code->code_hash = vnx::Hash64(0xfb2ef6c722ec93a1ull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->is_method = true;
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpComponent_http_request>(); };
 	type_code->return_type = ::vnx::addons::HttpComponent_http_request_return::static_get_type_code();
-	type_code->fields.resize(1);
+	type_code->fields.resize(2);
 	{
 		vnx::TypeField& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "request";
 		field.code = {16};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[1];
+		field.is_extended = true;
+		field.name = "sub_path";
+		field.code = {12, 5};
 	}
 	type_code->build();
 	return type_code;
@@ -161,6 +174,7 @@ void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request& value, const
 	for(const vnx::TypeField* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.request, type_code, _field->code.data()); break;
+			case 1: vnx::read(in, value.sub_path, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
 	}
@@ -176,6 +190,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpComponent_http_request& val
 		type_code = type_code->depends[code[1]];
 	}
 	vnx::write(out, value.request, type_code, type_code->fields[0].code.data());
+	vnx::write(out, value.sub_path, type_code, type_code->fields[1].code.data());
 }
 
 void read(std::istream& in, ::vnx::addons::HttpComponent_http_request& value) {

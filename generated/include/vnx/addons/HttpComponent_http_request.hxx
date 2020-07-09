@@ -16,6 +16,7 @@ class HttpComponent_http_request : public ::vnx::Value {
 public:
 	
 	std::shared_ptr<const ::vnx::addons::HttpRequest> request;
+	std::string sub_path;
 	
 	typedef ::vnx::Value Super;
 	

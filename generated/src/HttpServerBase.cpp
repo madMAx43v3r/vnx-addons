@@ -195,7 +195,7 @@ std::shared_ptr<vnx::Value> HttpServerBase::vnx_call_switch(std::shared_ptr<cons
 		if(!_args) {
 			throw std::logic_error("vnx_call_switch(): !_args");
 		}
-		http_request_async(_args->request, _request_id);
+		http_request_async(_args->request, _args->sub_path, _request_id);
 		return 0;
 	}
 	auto _ex = vnx::NoSuchMethod::create();

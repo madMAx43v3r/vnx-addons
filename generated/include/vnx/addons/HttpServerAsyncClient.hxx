@@ -20,7 +20,7 @@ public:
 	
 	HttpServerAsyncClient(vnx::Hash64 service_addr);
 	
-	uint64_t http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, 
+	uint64_t http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path, 
 			const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback = std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>(),
 			const std::function<void(const std::exception&)>& _error_callback = std::function<void(const std::exception&)>());
 	

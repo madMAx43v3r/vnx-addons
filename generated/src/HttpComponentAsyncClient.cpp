@@ -24,9 +24,10 @@ HttpComponentAsyncClient::HttpComponentAsyncClient(vnx::Hash64 service_addr)
 {
 }
 
-uint64_t HttpComponentAsyncClient::http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpComponentAsyncClient::http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
+	_method->sub_path = sub_path;
 	const auto _request_id = vnx_request(_method);
 	vnx_queue_http_request[_request_id] = std::make_pair(_callback, _error_callback);
 	vnx_num_pending++;
