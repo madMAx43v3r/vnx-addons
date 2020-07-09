@@ -19,10 +19,13 @@ HttpServer::HttpServer(const std::string& _vnx_name)
 	vnx_clean_exit = true;		// process remaining requests on exit
 }
 
+void HttpServer::init()
+{
+	vnx::open_pipe(vnx_name, this, 500);
+}
+
 void HttpServer::main()
 {
-	open_pipe(vnx_name, this, 500);
-
 	if(show_info) {
 		show_warnings = true;
 	}

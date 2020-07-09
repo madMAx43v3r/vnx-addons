@@ -36,6 +36,8 @@ protected:
 		std::shared_ptr<const HttpResponse> response;
 	};
 
+	void init() override;
+
 	void main() override;
 
 	void http_request_async(const std::shared_ptr<const HttpRequest>& request,
