@@ -1,0 +1,7 @@
+package vnx.addons;
+
+interface HttpComponent {
+	
+	HttpResponse* http_request(HttpRequest* request) const async;
+	
+}

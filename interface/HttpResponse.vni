@@ -1,0 +1,20 @@
+package vnx.addons;
+
+class HttpResponse {
+	
+	int status;						// HTTP status code
+	
+	string content_type;			// MIME type of payload
+	
+	vnx.Buffer payload;
+	
+	
+	static HttpResponse* from_status(int status);
+	
+	static HttpResponse* from_string(string mime_type, string content);
+	
+	static HttpResponse* from_value_json(vnx.Value* value);
+	
+	static HttpResponse* from_value_binary(vnx.Value* value);
+	
+}

@@ -1,0 +1,16 @@
+package vnx.addons;
+
+module HttpServer implements HttpComponent {
+	
+	vnx.TopicPtr output_request;			// HttpRequest
+	vnx.TopicPtr output_response;			// HttpResponse
+	
+	int port = 8080;
+	
+	bool use_epoll = false;
+	
+	long max_payload_size = -1;				// -1 = unlimited [bytes]
+	
+	map<string, string> component_map;		// [url path => module name]
+	
+}
