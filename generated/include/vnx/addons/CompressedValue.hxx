@@ -25,6 +25,7 @@ public:
 	const vnx::TypeCode* get_type_code() const override;
 	
 	virtual std::shared_ptr<const ::vnx::Value> decompress() const;
+	virtual std::shared_ptr<const ::vnx::Value> vnx_decompress() const;
 	
 	static std::shared_ptr<CompressedValue> create();
 	std::shared_ptr<vnx::Value> clone() const;

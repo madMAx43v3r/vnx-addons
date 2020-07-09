@@ -15,6 +15,10 @@ std::shared_ptr<const Value> CompressedValue::decompress() const {
 	return nullptr;
 }
 
+std::shared_ptr<const Value> CompressedValue::vnx_decompress() const {
+	return decompress();
+}
+
 
 } // addons
 } // vnx
