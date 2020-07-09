@@ -19,12 +19,12 @@ namespace addons {
 
 
 const vnx::Hash64 HttpServerBase::VNX_TYPE_HASH(0xf05b2d0ac45a8a7bull);
-const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0xd87643f029fdfa1bull);
+const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0x72833dad80654362ull);
 
 HttpServerBase::HttpServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
 {
-	vnx::read_config(vnx_name + ".component_map", component_map);
+	vnx::read_config(vnx_name + ".components", components);
 	vnx::read_config(vnx_name + ".max_payload_size", max_payload_size);
 	vnx::read_config(vnx_name + ".output_request", output_request);
 	vnx::read_config(vnx_name + ".output_response", output_response);
@@ -55,7 +55,7 @@ void HttpServerBase::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, show_info);
 	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, show_warnings);
 	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, max_payload_size);
-	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, component_map);
+	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, components);
 	_visitor.type_end(*_type_code);
 }
 
@@ -68,7 +68,7 @@ void HttpServerBase::write(std::ostream& _out) const {
 	_out << ", \"show_info\": "; vnx::write(_out, show_info);
 	_out << ", \"show_warnings\": "; vnx::write(_out, show_warnings);
 	_out << ", \"max_payload_size\": "; vnx::write(_out, max_payload_size);
-	_out << ", \"component_map\": "; vnx::write(_out, component_map);
+	_out << ", \"components\": "; vnx::write(_out, components);
 	_out << "}";
 }
 
@@ -76,8 +76,8 @@ void HttpServerBase::read(std::istream& _in) {
 	std::map<std::string, std::string> _object;
 	vnx::read_object(_in, _object);
 	for(const auto& _entry : _object) {
-		if(_entry.first == "component_map") {
-			vnx::from_string(_entry.second, component_map);
+		if(_entry.first == "components") {
+			vnx::from_string(_entry.second, components);
 		} else if(_entry.first == "max_payload_size") {
 			vnx::from_string(_entry.second, max_payload_size);
 		} else if(_entry.first == "output_request") {
@@ -106,14 +106,14 @@ vnx::Object HttpServerBase::to_object() const {
 	_object["show_info"] = show_info;
 	_object["show_warnings"] = show_warnings;
 	_object["max_payload_size"] = max_payload_size;
-	_object["component_map"] = component_map;
+	_object["components"] = components;
 	return _object;
 }
 
 void HttpServerBase::from_object(const vnx::Object& _object) {
 	for(const auto& _entry : _object.field) {
-		if(_entry.first == "component_map") {
-			_entry.second.to(component_map);
+		if(_entry.first == "components") {
+			_entry.second.to(components);
 		} else if(_entry.first == "max_payload_size") {
 			_entry.second.to(max_payload_size);
 		} else if(_entry.first == "output_request") {
@@ -156,7 +156,7 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpServer";
 	type_code->type_hash = vnx::Hash64(0xf05b2d0ac45a8a7bull);
-	type_code->code_hash = vnx::Hash64(0xd87643f029fdfa1bull);
+	type_code->code_hash = vnx::Hash64(0x72833dad80654362ull);
 	type_code->is_native = true;
 	type_code->methods.resize(1);
 	type_code->methods[0] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
@@ -206,7 +206,7 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	{
 		vnx::TypeField& field = type_code->fields[7];
 		field.is_extended = true;
-		field.name = "component_map";
+		field.name = "components";
 		field.code = {13, 4, 12, 5, 12, 5};
 	}
 	type_code->build();
@@ -308,7 +308,7 @@ void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* t
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.output_request, type_code, _field->code.data()); break;
 			case 1: vnx::read(in, value.output_response, type_code, _field->code.data()); break;
-			case 7: vnx::read(in, value.component_map, type_code, _field->code.data()); break;
+			case 7: vnx::read(in, value.components, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
 	}
@@ -331,7 +331,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpServerBase& value, const Ty
 	vnx::write_value(_buf + 7, value.max_payload_size);
 	vnx::write(out, value.output_request, type_code, type_code->fields[0].code.data());
 	vnx::write(out, value.output_response, type_code, type_code->fields[1].code.data());
-	vnx::write(out, value.component_map, type_code, type_code->fields[7].code.data());
+	vnx::write(out, value.components, type_code, type_code->fields[7].code.data());
 }
 
 void read(std::istream& in, ::vnx::addons::HttpServerBase& value) {

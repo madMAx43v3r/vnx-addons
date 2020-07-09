@@ -15,6 +15,6 @@ module HttpServer implements HttpComponent {
 	
 	long max_payload_size = -1;				// -1 = unlimited [bytes]
 	
-	map<string, string> component_map;		// [url path => module name]
+	map<string, string> components;			// [url path => module name]
 	
 }

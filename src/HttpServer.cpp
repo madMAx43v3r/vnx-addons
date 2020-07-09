@@ -43,7 +43,7 @@ void HttpServer::main()
 	}
 	log(INFO) << "Running on port " << port;
 
-	for(const auto& entry : component_map)
+	for(const auto& entry : components)
 	{
 		const auto& path = entry.first;
 		const auto& module = entry.second;
@@ -98,7 +98,7 @@ void HttpServer::process(request_state_t* state)
 	if(client) {
 		if(show_info) {
 			log(INFO) << state->request->method << " '" << state->request->path
-					<< "' => '" << component_map[prefix] << sub_path << "'";
+					<< "' => '" << components[prefix] << sub_path << "'";
 		}
 		client->http_request(state->request, sub_path,
 				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),

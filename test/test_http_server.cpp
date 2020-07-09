@@ -22,7 +22,7 @@ int main(int argc, char** argv)
 	vnx::Handle<addons::HttpServer> module = new addons::HttpServer("HttpServer");
 	module->output_request = "test.http_request";
 	module->output_response = "test.http_response";
-	module->component_map["/test/"] = "HttpServer";
+	module->components["/test/"] = "HttpServer";
 	module.start();
 
 	vnx::wait();
