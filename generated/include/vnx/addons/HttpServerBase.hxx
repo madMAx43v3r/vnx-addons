@@ -21,6 +21,8 @@ public:
 	::vnx::TopicPtr output_response;
 	int32_t port = 8080;
 	vnx::bool_t use_epoll = false;
+	vnx::bool_t show_info = false;
+	vnx::bool_t show_warnings = false;
 	int64_t max_payload_size = -1;
 	std::map<std::string, std::string> component_map;
 	

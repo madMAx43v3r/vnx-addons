@@ -16,11 +16,16 @@ namespace addons {
 HttpServer::HttpServer(const std::string& _vnx_name)
 	:	HttpServerBase(_vnx_name)
 {
+	vnx_clean_exit = true;		// process remaining requests on exit
 }
 
 void HttpServer::main()
 {
-	open_pipe(vnx_name, this, UNLIMITED);		// TODO: this should not be UNLIMITED
+	open_pipe(vnx_name, this, 500);
+
+	if(show_info) {
+		show_warnings = true;
+	}
 
 	m_daemon = MHD_start_daemon(
 			MHD_USE_SELECT_INTERNALLY | MHD_USE_SUSPEND_RESUME | (use_epoll ? MHD_USE_EPOLL_LINUX_ONLY : MHD_USE_POLL),
@@ -44,6 +49,7 @@ void HttpServer::main()
 			continue;
 		}
 		auto client = std::make_shared<HttpComponentAsyncClient>(module);
+		client->vnx_set_non_blocking(true);
 		m_client_map[path] = client;
 		add_async_client(client);
 		log(INFO) << "Got component '" << module << "' for path '" << path << "'";
@@ -70,8 +76,9 @@ void HttpServer::process(request_state_t* state)
 	}
 	const auto& path = state->request->path;
 
-	size_t best_match_length = 0;
+	std::string prefix;
 	std::string sub_path;
+	size_t best_match_length = 0;
 	std::shared_ptr<HttpComponentAsyncClient> client;
 	for(const auto& entry : m_client_map) {
 		const auto entry_size = entry.first.size();
@@ -79,16 +86,24 @@ void HttpServer::process(request_state_t* state)
 			&& entry_size > best_match_length
 			&& path.substr(0, entry_size) == entry.first)
 		{
-			client = entry.second;
+			prefix = entry.first;
 			sub_path = "/" + path.substr(entry_size);
 			best_match_length = entry_size;
+			client = entry.second;
 		}
 	}
 	if(client) {
+		if(show_info) {
+			log(INFO) << state->request->method << " '" << state->request->path
+					<< "' => '" << component_map[prefix] << sub_path << "'";
+		}
 		client->http_request(state->request, sub_path,
 				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, state, std::placeholders::_1));
 	} else {
+		if(show_warnings) {
+			log(WARN) << state->request->method << " '" << state->request->path << "' failed with: 404 (not found)";
+		}
 		reply(state, HttpResponse::from_status(404));
 	}
 }
@@ -115,7 +130,9 @@ void HttpServer::reply(	request_state_t* state,
 void HttpServer::reply_error(	request_state_t* state,
 								const std::exception& ex)
 {
-	log(WARN) << state->request->method << " '" << state->request->path << "' failed: " << ex.what();
+	if(show_warnings) {
+		log(WARN) << state->request->method << " '" << state->request->path << "' failed with: " << ex.what();
+	}
 	reply(state, HttpResponse::from_status(500));
 }
 
@@ -164,8 +181,12 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 	} else {
 		MHD_get_connection_values(connection, MHD_HEADER_KIND, &HttpServer::http_header_callback, state);
 		MHD_get_connection_values(connection, MHD_ValueKind(MHD_POSTDATA_KIND | MHD_GET_ARGUMENT_KIND), &HttpServer::query_params_callback, state);
-		MHD_suspend_connection(connection);
-		self->add_task(std::bind(&HttpServer::process, self, state));
+
+		if(self->add_task(std::bind(&HttpServer::process, self, state))) {
+			MHD_suspend_connection(connection);
+		} else {
+			return MHD_NO;
+		}
 	}
 	return MHD_YES;
 }

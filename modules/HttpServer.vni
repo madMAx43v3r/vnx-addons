@@ -9,6 +9,10 @@ module HttpServer implements HttpComponent {
 	
 	bool use_epoll = false;
 	
+	bool show_info = false;					// if to show access info
+	
+	bool show_warnings = false;				// if to show access failures
+	
 	long max_payload_size = -1;				// -1 = unlimited [bytes]
 	
 	map<string, string> component_map;		// [url path => module name]

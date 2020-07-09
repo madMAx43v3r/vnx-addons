@@ -12,9 +12,9 @@
 using namespace vnx;
 
 
-int main()
+int main(int argc, char** argv)
 {
-	vnx::init("test_http_server", 0, 0);
+	vnx::init("test_http_server", argc, argv);
 
 	vnx::Handle<Terminal> terminal = new Terminal("Terminal");
 	terminal.start();
