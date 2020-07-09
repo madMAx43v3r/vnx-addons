@@ -39,7 +39,8 @@ protected:
 	void main() override;
 
 	void http_request_async(const std::shared_ptr<const HttpRequest>& request,
-							const vnx::request_id_t& _request_id) const override;
+							const std::string& sub_path,
+							const vnx::request_id_t& request_id) const override;
 
 private:
 	void process(request_state_t* state);

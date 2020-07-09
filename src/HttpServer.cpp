@@ -20,6 +20,8 @@ HttpServer::HttpServer(const std::string& _vnx_name)
 
 void HttpServer::main()
 {
+	open_pipe(vnx_name, this, UNLIMITED);		// TODO: this should not be UNLIMITED
+
 	m_daemon = MHD_start_daemon(
 			MHD_USE_SELECT_INTERNALLY | MHD_USE_SUSPEND_RESUME | (use_epoll ? MHD_USE_EPOLL_LINUX_ONLY : MHD_USE_POLL),
 			port, NULL, NULL,
@@ -55,7 +57,8 @@ void HttpServer::main()
 }
 
 void HttpServer::http_request_async(const std::shared_ptr<const HttpRequest>& request,
-									const vnx::request_id_t& _request_id) const
+									const std::string& sub_path,
+									const vnx::request_id_t& request_id) const
 {
 	throw std::logic_error("not implemented");
 }
@@ -68,6 +71,7 @@ void HttpServer::process(request_state_t* state)
 	const auto& path = state->request->path;
 
 	size_t best_match_length = 0;
+	std::string sub_path;
 	std::shared_ptr<HttpComponentAsyncClient> client;
 	for(const auto& entry : m_client_map) {
 		const auto entry_size = entry.first.size();
@@ -76,11 +80,12 @@ void HttpServer::process(request_state_t* state)
 			&& path.substr(0, entry_size) == entry.first)
 		{
 			client = entry.second;
+			sub_path = "/" + path.substr(entry_size);
 			best_match_length = entry_size;
 		}
 	}
 	if(client) {
-		client->http_request(state->request,
+		client->http_request(state->request, sub_path,
 				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, state, std::placeholders::_1));
 	} else {
@@ -103,13 +108,14 @@ void HttpServer::reply(	request_state_t* state,
 	if(ret != MHD_YES) {
 		log(WARN) << "Failed to queue MHD response!";
 	}
-	MHD_resume_connection(state->connection);
+	MHD_resume_connection(state->connection);	// after this, 'state' may be deleted at any time
 	MHD_destroy_response(response);
 }
 
 void HttpServer::reply_error(	request_state_t* state,
 								const std::exception& ex)
 {
+	log(WARN) << state->request->method << " '" << state->request->path << "' failed: " << ex.what();
 	reply(state, HttpResponse::from_status(500));
 }
 

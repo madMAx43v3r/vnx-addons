@@ -2,6 +2,6 @@ package vnx.addons;
 
 interface HttpComponent {
 	
-	HttpResponse* http_request(HttpRequest* request) const async;
+	HttpResponse* http_request(HttpRequest* request, string sub_path) const async;
 	
 }
