@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 	vnx::Handle<Terminal> terminal = new Terminal("Terminal");
 	terminal.start();
 
-	vnx::Handle<addons::HttpServer> module = new addons::HttpServer("HttpServer");
+	vnx::Handle<addons::HttpServerBase> module = vnx::addons::new_HttpServer("HttpServer");
 	module->output_request = "test.http_request";
 	module->output_response = "test.http_response";
 	module->components["/test/"] = "HttpServer";
