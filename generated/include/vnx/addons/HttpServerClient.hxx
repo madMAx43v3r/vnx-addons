@@ -20,6 +20,8 @@ public:
 	
 	HttpServerClient(vnx::Hash64 service_addr);
 	
+	::vnx::TypeCode vnx_get_type_code();
+	
 	std::shared_ptr<const ::vnx::addons::HttpResponse> http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path);
 	
 };

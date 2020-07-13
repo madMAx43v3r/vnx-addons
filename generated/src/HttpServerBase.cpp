@@ -5,6 +5,8 @@
 #include <vnx/addons/HttpServerBase.hxx>
 #include <vnx/NoSuchMethod.hxx>
 #include <vnx/Module.h>
+#include <vnx/ModuleInterface_vnx_get_type_code.hxx>
+#include <vnx/ModuleInterface_vnx_get_type_code_return.hxx>
 #include <vnx/TopicPtr.hpp>
 #include <vnx/addons/HttpComponent_http_request.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
@@ -158,8 +160,9 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	type_code->type_hash = vnx::Hash64(0xf05b2d0ac45a8a7bull);
 	type_code->code_hash = vnx::Hash64(0x72833dad80654362ull);
 	type_code->is_native = true;
-	type_code->methods.resize(1);
-	type_code->methods[0] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
+	type_code->methods.resize(2);
+	type_code->methods[0] = ::vnx::ModuleInterface_vnx_get_type_code::static_get_type_code();
+	type_code->methods[1] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
 	type_code->fields.resize(8);
 	{
 		vnx::TypeField& field = type_code->fields[0];
@@ -218,7 +221,15 @@ void HttpServerBase::vnx_handle_switch(std::shared_ptr<const vnx::Sample> _sampl
 
 std::shared_ptr<vnx::Value> HttpServerBase::vnx_call_switch(std::shared_ptr<const vnx::Value> _method, const vnx::request_id_t& _request_id) {
 	const auto _type_hash = _method->get_type_hash();
-	if(_type_hash == vnx::Hash64(0xe0b6c38f619bad92ull)) {
+	if(_type_hash == vnx::Hash64(0x305ec4d628960e5dull)) {
+		auto _args = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_type_code>(_method);
+		if(!_args) {
+			throw std::logic_error("vnx_call_switch(): !_args");
+		}
+		auto _return_value = ::vnx::ModuleInterface_vnx_get_type_code_return::create();
+		_return_value->_ret_0 = vnx_get_type_code();
+		return _return_value;
+	} else if(_type_hash == vnx::Hash64(0xe0b6c38f619bad92ull)) {
 		auto _args = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request>(_method);
 		if(!_args) {
 			throw std::logic_error("vnx_call_switch(): !_args");
@@ -235,7 +246,7 @@ std::shared_ptr<vnx::Value> HttpServerBase::vnx_call_switch(std::shared_ptr<cons
 void HttpServerBase::http_request_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const {
 	auto _return_value = ::vnx::addons::HttpComponent_http_request_return::create();
 	_return_value->_ret_0 = _ret_0;
-	vnx_async_callback(_request_id, _return_value);
+	vnx_async_return(_request_id, _return_value);
 }
 
 

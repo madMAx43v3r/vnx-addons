@@ -29,7 +29,7 @@ public:
 	const vnx::TypeCode* get_type_code() const override;
 	
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_status(const int32_t& status);
-	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string(const std::string& mime_type, const std::string& content);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string(const std::string& content, const std::string& mime_type);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_json(const std::shared_ptr<const ::vnx::Value>& value);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_binary(const std::shared_ptr<const ::vnx::Value>& value);
 	

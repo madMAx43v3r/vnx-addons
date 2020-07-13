@@ -4,6 +4,8 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpServerClient.hxx>
 #include <vnx/Module.h>
+#include <vnx/ModuleInterface_vnx_get_type_code.hxx>
+#include <vnx/ModuleInterface_vnx_get_type_code_return.hxx>
 #include <vnx/TopicPtr.hpp>
 #include <vnx/addons/HttpComponent_http_request.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
@@ -24,6 +26,16 @@ HttpServerClient::HttpServerClient(const std::string& service_name)
 HttpServerClient::HttpServerClient(vnx::Hash64 service_addr)
 	:	Client::Client(service_addr)
 {
+}
+
+::vnx::TypeCode HttpServerClient::vnx_get_type_code() {
+	auto _method = ::vnx::ModuleInterface_vnx_get_type_code::create();
+	auto _return_value = vnx_request(_method);
+	auto _result = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_type_code_return>(_return_value);
+	if(!_result) {
+		throw std::logic_error("HttpServerClient: !_result");
+	}
+	return _result->_ret_0;
 }
 
 std::shared_ptr<const ::vnx::addons::HttpResponse> HttpServerClient::http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path) {
