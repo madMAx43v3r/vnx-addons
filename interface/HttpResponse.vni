@@ -11,7 +11,7 @@ class HttpResponse {
 	
 	static HttpResponse* from_status(int status);
 	
-	static HttpResponse* from_string(string mime_type, string content);
+	static HttpResponse* from_string(string content, string mime_type);
 	
 	static HttpResponse* from_value_json(vnx.Value* value);
 	

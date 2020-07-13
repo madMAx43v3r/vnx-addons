@@ -19,7 +19,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_status(const int32_t& sta
 	return result;
 }
 
-std::shared_ptr<const HttpResponse> HttpResponse::from_string(const std::string& mime_type, const std::string& content)
+std::shared_ptr<const HttpResponse> HttpResponse::from_string(const std::string& content, const std::string& mime_type)
 {
 	auto result = HttpResponse::create();
 	result->status = 200;
