@@ -27,6 +27,6 @@ target_link_libraries(test_http_server vnx_addons)
 
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY generated/include/ DESTINATION include)
-install(DIRECTORY interface/ DESTINATION interface/vnx/keyvalue)
+install(DIRECTORY interface/ DESTINATION interface/vnx/addons)
 
 install(TARGETS vnx_addons DESTINATION lib)
