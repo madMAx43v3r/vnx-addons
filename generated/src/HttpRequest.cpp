@@ -168,37 +168,37 @@ std::shared_ptr<vnx::TypeCode> HttpRequest::static_create_type_code() {
 		vnx::TypeField& field = type_code->fields[1];
 		field.is_extended = true;
 		field.name = "url";
-		field.code = {12, 5};
+		field.code = {32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[2];
 		field.is_extended = true;
 		field.name = "path";
-		field.code = {12, 5};
+		field.code = {32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[3];
 		field.is_extended = true;
 		field.name = "method";
-		field.code = {12, 5};
+		field.code = {32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[4];
 		field.is_extended = true;
 		field.name = "content_type";
-		field.code = {12, 5};
+		field.code = {32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[5];
 		field.is_extended = true;
 		field.name = "query_params";
-		field.code = {13, 4, 12, 5, 12, 5};
+		field.code = {13, 3, 32, 32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[6];
 		field.is_extended = true;
 		field.name = "headers";
-		field.code = {12, 23, 2, 4, 6, 12, 5, 12, 5};
+		field.code = {12, 23, 2, 4, 5, 32, 32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[7];

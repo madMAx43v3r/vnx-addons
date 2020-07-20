@@ -62,8 +62,8 @@ void HttpServerBase::accept(vnx::Visitor& _visitor) const {
 }
 
 void HttpServerBase::write(std::ostream& _out) const {
-	_out << "{\"__type\": \"vnx.addons.HttpServer\"";
-	_out << ", \"output_request\": "; vnx::write(_out, output_request);
+	_out << "{";
+	_out << "\"output_request\": "; vnx::write(_out, output_request);
 	_out << ", \"output_response\": "; vnx::write(_out, output_response);
 	_out << ", \"port\": "; vnx::write(_out, port);
 	_out << ", \"use_epoll\": "; vnx::write(_out, use_epoll);
@@ -100,7 +100,6 @@ void HttpServerBase::read(std::istream& _in) {
 
 vnx::Object HttpServerBase::to_object() const {
 	vnx::Object _object;
-	_object["__type"] = "vnx.addons.HttpServer";
 	_object["output_request"] = output_request;
 	_object["output_response"] = output_response;
 	_object["port"] = port;
@@ -210,7 +209,7 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 		vnx::TypeField& field = type_code->fields[7];
 		field.is_extended = true;
 		field.name = "components";
-		field.code = {13, 4, 12, 5, 12, 5};
+		field.code = {13, 3, 32, 32};
 	}
 	type_code->build();
 	return type_code;

@@ -130,7 +130,7 @@ std::shared_ptr<vnx::TypeCode> HttpComponent_http_request::static_create_type_co
 		vnx::TypeField& field = type_code->fields[1];
 		field.is_extended = true;
 		field.name = "sub_path";
-		field.code = {12, 5};
+		field.code = {32};
 	}
 	type_code->build();
 	return type_code;
