@@ -19,7 +19,7 @@ namespace addons {
 
 class DeflateOutputStream : public OutputStream {
 public:
-	DeflateOutputStream(Buffer* buffer_);
+	DeflateOutputStream(Buffer* buffer_, int level = 9);
 	
 	~DeflateOutputStream();
 	

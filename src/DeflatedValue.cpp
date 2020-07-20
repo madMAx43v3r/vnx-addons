@@ -25,9 +25,14 @@ std::shared_ptr<const Value> DeflatedValue::decompress() const
 
 std::shared_ptr<const DeflatedValue> DeflatedValue::compress(const std::shared_ptr<const Value>& value)
 {
+	return compress_ex(value, 9);
+}
+
+std::shared_ptr<const DeflatedValue> DeflatedValue::compress_ex(const std::shared_ptr<const Value>& value, const int32_t& level)
+{
 	auto out = DeflatedValue::create();
 	{
-		DeflateOutputStream stream(&out->data);
+		DeflateOutputStream stream(&out->data, level);
 		TypeOutput out(&stream);
 		vnx::write(out, value);
 		out.flush();
