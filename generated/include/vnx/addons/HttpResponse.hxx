@@ -17,6 +17,7 @@ public:
 	
 	int32_t status = 0;
 	std::string content_type;
+	std::vector<std::pair<std::string, std::string>> headers;
 	::vnx::Buffer payload;
 	
 	typedef ::vnx::Value Super;

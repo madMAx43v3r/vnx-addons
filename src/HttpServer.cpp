@@ -146,6 +146,17 @@ void HttpServer::process(request_state_t* state)
 	if(output_request) {
 		publish(state->request, output_request);
 	}
+	if(state->request->method == "OPTIONS")
+	{
+		auto result = HttpResponse::create();
+		result->status = 204;
+		result->headers.emplace_back("Allow", "OPTIONS, GET, HEAD, POST");
+		result->headers.emplace_back("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+		result->headers.emplace_back("Access-Control-Allow-Headers", "Content-Type");
+		result->headers.emplace_back("Access-Control-Max-Age", "86400");
+		reply(state, result);
+		return;
+	}
 	const auto& path = state->request->path;
 
 	std::string prefix;
@@ -188,8 +199,12 @@ void HttpServer::reply(	request_state_t* state,
 	}
 	state->response = result;
 	MHD_Response* response = MHD_create_response_from_buffer(result->payload.size(), (void*)result->payload.data(), MHD_RESPMEM_PERSISTENT);
+	MHD_add_response_header(response, "Server", "vnx.addons.HttpServer");
 	if(!result->content_type.empty()) {
 		MHD_add_response_header(response, "Content-Type", result->content_type.c_str());
+	}
+	for(const auto& entry : result->headers) {
+		MHD_add_response_header(response, entry.first.c_str(), entry.second.c_str());
 	}
 	const auto ret = MHD_queue_response(state->connection, result->status, response);
 	if(ret != MHD_YES) {

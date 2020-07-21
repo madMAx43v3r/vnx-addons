@@ -6,6 +6,8 @@ class HttpResponse {
 	
 	string content_type;			// MIME type of payload
 	
+	vector<pair<string, string>> headers;		// http headers
+	
 	vnx.Buffer payload;
 	
 	
