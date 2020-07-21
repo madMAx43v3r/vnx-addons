@@ -13,13 +13,13 @@ namespace addons {
 
 static const size_t CHUNK_SIZE = 262144;
 
-DeflateOutputStream::DeflateOutputStream(Buffer* buffer_)
+DeflateOutputStream::DeflateOutputStream(Buffer* buffer_, int level)
 	:	buffer(buffer_)
 {
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
-	if(::deflateInit(&strm, 9) != Z_OK) {
+	if(::deflateInit(&strm, level) != Z_OK) {
 		throw std::runtime_error("deflateInit() failed!");
 	}
 }
