@@ -151,6 +151,7 @@ void HttpServer::process(request_state_t* state)
 		auto result = HttpResponse::create();
 		result->status = 204;
 		result->headers.emplace_back("Allow", "OPTIONS, GET, HEAD, POST");
+		result->headers.emplace_back("Access-Control-Allow-Origin", "*");
 		result->headers.emplace_back("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
 		result->headers.emplace_back("Access-Control-Allow-Headers", "Content-Type");
 		result->headers.emplace_back("Access-Control-Max-Age", "86400");
