@@ -201,6 +201,7 @@ void HttpServer::reply(	request_state_t* state,
 	state->response = result;
 	MHD_Response* response = MHD_create_response_from_buffer(result->payload.size(), (void*)result->payload.data(), MHD_RESPMEM_PERSISTENT);
 	MHD_add_response_header(response, "Server", "vnx.addons.HttpServer");
+	MHD_add_response_header(response, "Access-Control-Allow-Origin", "*");
 	if(!result->content_type.empty()) {
 		MHD_add_response_header(response, "Content-Type", result->content_type.c_str());
 	}
