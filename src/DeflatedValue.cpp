@@ -25,7 +25,7 @@ std::shared_ptr<const Value> DeflatedValue::decompress() const
 
 std::shared_ptr<const DeflatedValue> DeflatedValue::compress(const std::shared_ptr<const Value>& value)
 {
-	return compress_ex(value, 9);
+	return compress_ex(value, 6);
 }
 
 std::shared_ptr<const DeflatedValue> DeflatedValue::compress_ex(const std::shared_ptr<const Value>& value, const int32_t& level)
