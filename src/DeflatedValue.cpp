@@ -30,6 +30,9 @@ std::shared_ptr<const DeflatedValue> DeflatedValue::compress(const std::shared_p
 
 std::shared_ptr<const DeflatedValue> DeflatedValue::compress_ex(const std::shared_ptr<const Value>& value, const int32_t& level)
 {
+	if(!value) {
+		return nullptr;
+	}
 	auto out = DeflatedValue::create();
 	{
 		DeflateOutputStream stream(&out->data, level);
