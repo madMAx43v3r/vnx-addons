@@ -13,6 +13,7 @@
 
 #include <atomic>
 
+#include <url.h>
 #include <microhttpd.h>
 
 #if MHD_VERSION < 0x00097002
@@ -242,14 +243,11 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 		request->id = self->m_next_id++;
 		request->url = std::string(url);
 		request->method = std::string(method);
-		{
-			const std::string tmp(url);
-			const auto pos = tmp.find_first_of("?;");
-			if(pos != std::string::npos) {
-				request->path = tmp.substr(0, pos);
-			} else {
-				request->path = tmp;
-			}
+		try {
+			// convert relative paths to absolute
+			request->path = Url::Url(request->url).abspath().path();
+		} catch(...) {
+			return MHD_NO;
 		}
 		state->request = request;
 		*con_cls = state;
