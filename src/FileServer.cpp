@@ -53,6 +53,8 @@ void FileServer::main()
 	mime_type_map[".tex"] = "text/x-tex";
 	mime_type_map[".pdf"] = "application/pdf";
 
+	log(INFO) << "Running on '" << www_root << "'";
+
 	Super::main();
 }
 
@@ -72,12 +74,22 @@ void FileServer::http_request_async(const std::shared_ptr<const HttpRequest>& re
 									const std::string& sub_path,
 									const vnx::request_id_t& request_id) const
 {
+	auto file_path = sub_path;
+	if(!file_path.empty() && file_path.back() == '/') {
+		for(const auto& file_name : directory_files) {
+			const vnx::File file(www_root + sub_path + file_name);
+			if(file.exists()) {
+				file_path = sub_path + file_name;
+				break;
+			}
+		}
+	}
 	auto response = HttpResponse::create();
 	try {
-		response->payload = read_file(sub_path);
+		response->payload = read_file(file_path);
 		response->status = 200;
 		{
-			const vnx::File file(sub_path);
+			const vnx::File file(file_path);
 			const auto iter = mime_type_map.find(file.get_extension());
 			if(iter != mime_type_map.end()) {
 				response->content_type = iter->second;

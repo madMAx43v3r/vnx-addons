@@ -22,7 +22,8 @@ int main(int argc, char** argv)
 
 	{
 		vnx::Handle<addons::FileServer> module = new vnx::addons::FileServer("FileServer");
-		module->www_root = ".";
+		module->www_root = "./www/";
+		module->directory_files.push_back("index.html");
 		module.start_detached();
 	}
 

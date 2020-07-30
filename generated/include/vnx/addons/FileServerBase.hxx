@@ -19,6 +19,7 @@ public:
 	
 	std::string www_root;
 	std::map<std::string, std::string> mime_type_map;
+	std::vector<std::string> directory_files;
 	
 	typedef ::vnx::Module Super;
 	

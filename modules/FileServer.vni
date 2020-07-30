@@ -6,6 +6,8 @@ module FileServer implements HttpComponent {
 	
 	map<string, string> mime_type_map;			// [file extension (with leading '.') => mime type]
 	
+	vector<string> directory_files;				// redirect directories to a file, like "index.html"
+	
 	
 	vnx.Buffer read_file(string path) const;
 	
