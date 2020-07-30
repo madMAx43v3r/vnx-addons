@@ -3,6 +3,9 @@
 
 #include <vnx/addons/CompressedValue.hxx>
 #include <vnx/addons/DeflatedValue.hxx>
+#include <vnx/addons/FileServerBase.hxx>
+#include <vnx/addons/FileServer_read_file.hxx>
+#include <vnx/addons/FileServer_read_file_return.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpRequest.hxx>
@@ -20,6 +23,9 @@ namespace addons {
 static void register_all_types() {
 	vnx::register_type_code(::vnx::addons::CompressedValue::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::DeflatedValue::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::FileServerBase::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::FileServer_read_file::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::FileServer_read_file_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpRequest::static_create_type_code());
@@ -35,6 +41,9 @@ static struct vnx_static_init {
 
 const vnx::TypeCode* const vnx_native_type_code_CompressedValue = vnx::get_type_code(vnx::Hash64(0x50c46e244bd9765dull));
 const vnx::TypeCode* const vnx_native_type_code_DeflatedValue = vnx::get_type_code(vnx::Hash64(0xe3d58522f6fb225dull));
+const vnx::TypeCode* const vnx_native_type_code_FileServerBase = vnx::get_type_code(vnx::Hash64(0xcf578d3ac2b39852ull));
+const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file = vnx::get_type_code(vnx::Hash64(0x36d7fc9c72b884e6ull));
+const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_return = vnx::get_type_code(vnx::Hash64(0x4a437b9075a6f5b4ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request = vnx::get_type_code(vnx::Hash64(0xe0b6c38f619bad92ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_return = vnx::get_type_code(vnx::Hash64(0x767ca843058ef233ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpRequest = vnx::get_type_code(vnx::Hash64(0x60c4b7b39fc56fd5ull));
