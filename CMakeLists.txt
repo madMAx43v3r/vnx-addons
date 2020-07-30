@@ -14,6 +14,7 @@ add_library(vnx_addons SHARED
 	src/HttpRequest.cpp
 	src/HttpResponse.cpp
 	src/HttpServer.cpp
+	src/FileServer.cpp
 )
 
 target_include_directories(vnx_addons PUBLIC include generated/include)

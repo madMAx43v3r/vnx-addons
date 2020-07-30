@@ -1,0 +1,12 @@
+package vnx.addons;
+
+module FileServer implements HttpComponent {
+	
+	string www_root;							// root directory, needs to be set
+	
+	map<string, string> mime_type_map;			// [file extension (with leading '.') => mime type]
+	
+	
+	vnx.Buffer read_file(string path) const;
+	
+}
