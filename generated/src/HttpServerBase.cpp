@@ -185,19 +185,19 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 		vnx::TypeField& field = type_code->fields[3];
 		field.name = "use_epoll";
 		field.value = vnx::to_string(false);
-		field.code = {31};
+		field.code = {1};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[4];
 		field.name = "show_info";
 		field.value = vnx::to_string(false);
-		field.code = {31};
+		field.code = {1};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[5];
 		field.name = "show_warnings";
 		field.value = vnx::to_string(false);
-		field.code = {31};
+		field.code = {1};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[6];
