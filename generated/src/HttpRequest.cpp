@@ -130,6 +130,56 @@ void HttpRequest::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant HttpRequest::get_field(const std::string& _name) const {
+	if(_name == "id") {
+		return vnx::Variant(id);
+	}
+	if(_name == "url") {
+		return vnx::Variant(url);
+	}
+	if(_name == "path") {
+		return vnx::Variant(path);
+	}
+	if(_name == "method") {
+		return vnx::Variant(method);
+	}
+	if(_name == "content_type") {
+		return vnx::Variant(content_type);
+	}
+	if(_name == "query_params") {
+		return vnx::Variant(query_params);
+	}
+	if(_name == "headers") {
+		return vnx::Variant(headers);
+	}
+	if(_name == "payload") {
+		return vnx::Variant(payload);
+	}
+	return vnx::Variant();
+}
+
+void HttpRequest::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "id") {
+		_value.to(id);
+	} else if(_name == "url") {
+		_value.to(url);
+	} else if(_name == "path") {
+		_value.to(path);
+	} else if(_name == "method") {
+		_value.to(method);
+	} else if(_name == "content_type") {
+		_value.to(content_type);
+	} else if(_name == "query_params") {
+		_value.to(query_params);
+	} else if(_name == "headers") {
+		_value.to(headers);
+	} else if(_name == "payload") {
+		_value.to(payload);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const HttpRequest& _value) {
 	_value.write(_out);

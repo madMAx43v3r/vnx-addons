@@ -81,6 +81,21 @@ void FileServer_read_file::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant FileServer_read_file::get_field(const std::string& _name) const {
+	if(_name == "path") {
+		return vnx::Variant(path);
+	}
+	return vnx::Variant();
+}
+
+void FileServer_read_file::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "path") {
+		_value.to(path);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const FileServer_read_file& _value) {
 	_value.write(_out);

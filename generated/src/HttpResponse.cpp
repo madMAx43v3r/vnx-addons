@@ -102,6 +102,36 @@ void HttpResponse::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant HttpResponse::get_field(const std::string& _name) const {
+	if(_name == "status") {
+		return vnx::Variant(status);
+	}
+	if(_name == "content_type") {
+		return vnx::Variant(content_type);
+	}
+	if(_name == "headers") {
+		return vnx::Variant(headers);
+	}
+	if(_name == "payload") {
+		return vnx::Variant(payload);
+	}
+	return vnx::Variant();
+}
+
+void HttpResponse::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "status") {
+		_value.to(status);
+	} else if(_name == "content_type") {
+		_value.to(content_type);
+	} else if(_name == "headers") {
+		_value.to(headers);
+	} else if(_name == "payload") {
+		_value.to(payload);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const HttpResponse& _value) {
 	_value.write(_out);

@@ -89,6 +89,26 @@ void HttpComponent_http_request::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant HttpComponent_http_request::get_field(const std::string& _name) const {
+	if(_name == "request") {
+		return vnx::Variant(request);
+	}
+	if(_name == "sub_path") {
+		return vnx::Variant(sub_path);
+	}
+	return vnx::Variant();
+}
+
+void HttpComponent_http_request::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "request") {
+		_value.to(request);
+	} else if(_name == "sub_path") {
+		_value.to(sub_path);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const HttpComponent_http_request& _value) {
 	_value.write(_out);

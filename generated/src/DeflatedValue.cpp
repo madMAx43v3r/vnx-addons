@@ -82,6 +82,21 @@ void DeflatedValue::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant DeflatedValue::get_field(const std::string& _name) const {
+	if(_name == "data") {
+		return vnx::Variant(data);
+	}
+	return vnx::Variant();
+}
+
+void DeflatedValue::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "data") {
+		_value.to(data);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const DeflatedValue& _value) {
 	_value.write(_out);

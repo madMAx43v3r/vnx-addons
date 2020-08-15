@@ -95,6 +95,31 @@ void FileServerBase::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant FileServerBase::get_field(const std::string& _name) const {
+	if(_name == "www_root") {
+		return vnx::Variant(www_root);
+	}
+	if(_name == "mime_type_map") {
+		return vnx::Variant(mime_type_map);
+	}
+	if(_name == "directory_files") {
+		return vnx::Variant(directory_files);
+	}
+	return vnx::Variant();
+}
+
+void FileServerBase::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "www_root") {
+		_value.to(www_root);
+	} else if(_name == "mime_type_map") {
+		_value.to(mime_type_map);
+	} else if(_name == "directory_files") {
+		_value.to(directory_files);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const FileServerBase& _value) {
 	_value.write(_out);

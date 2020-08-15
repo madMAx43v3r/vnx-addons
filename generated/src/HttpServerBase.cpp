@@ -133,6 +133,56 @@ void HttpServerBase::from_object(const vnx::Object& _object) {
 	}
 }
 
+vnx::Variant HttpServerBase::get_field(const std::string& _name) const {
+	if(_name == "output_request") {
+		return vnx::Variant(output_request);
+	}
+	if(_name == "output_response") {
+		return vnx::Variant(output_response);
+	}
+	if(_name == "port") {
+		return vnx::Variant(port);
+	}
+	if(_name == "use_epoll") {
+		return vnx::Variant(use_epoll);
+	}
+	if(_name == "show_info") {
+		return vnx::Variant(show_info);
+	}
+	if(_name == "show_warnings") {
+		return vnx::Variant(show_warnings);
+	}
+	if(_name == "max_payload_size") {
+		return vnx::Variant(max_payload_size);
+	}
+	if(_name == "components") {
+		return vnx::Variant(components);
+	}
+	return vnx::Variant();
+}
+
+void HttpServerBase::set_field(const std::string& _name, const vnx::Variant& _value) {
+	if(_name == "output_request") {
+		_value.to(output_request);
+	} else if(_name == "output_response") {
+		_value.to(output_response);
+	} else if(_name == "port") {
+		_value.to(port);
+	} else if(_name == "use_epoll") {
+		_value.to(use_epoll);
+	} else if(_name == "show_info") {
+		_value.to(show_info);
+	} else if(_name == "show_warnings") {
+		_value.to(show_warnings);
+	} else if(_name == "max_payload_size") {
+		_value.to(max_payload_size);
+	} else if(_name == "components") {
+		_value.to(components);
+	} else {
+		throw std::logic_error("no such field: '" + _name + "'");
+	}
+}
+
 /// \private
 std::ostream& operator<<(std::ostream& _out, const HttpServerBase& _value) {
 	_value.write(_out);
