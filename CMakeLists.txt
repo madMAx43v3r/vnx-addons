@@ -6,9 +6,17 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -pthread -Wall -Wno-unu
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
 
+add_library(url_cpp SHARED
+	${URL_CPP_SOURCE_FILES}
+)
+
+target_include_directories(url_cpp
+	PUBLIC
+		lib/url-cpp/include
+)
+
 add_library(vnx_addons SHARED
 	${GENERATED_SOURCE_FILES}
-	${URL_CPP_SOURCE_FILES}
 	src/CompressedValue.cpp
 	src/DeflatedValue.cpp
 	src/DeflateInputStream.cpp
@@ -23,9 +31,8 @@ target_include_directories(vnx_addons
 	PUBLIC
 		include
 		generated/include
-		lib/url-cpp/include
 )
-target_link_libraries(vnx_addons vnx_base microhttpd z)
+target_link_libraries(vnx_addons vnx_base url_cpp microhttpd z)
 
 add_executable(test_deflate test/test_deflate.cpp)
 target_link_libraries(test_deflate vnx_addons)
