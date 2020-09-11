@@ -44,4 +44,5 @@ install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY generated/include/ DESTINATION include)
 install(DIRECTORY interface/ DESTINATION interface/vnx/addons)
 
+install(TARGETS url_cpp DESTINATION lib)
 install(TARGETS vnx_addons DESTINATION lib)
