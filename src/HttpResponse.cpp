@@ -43,7 +43,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_value_json_ex(const std::
 	auto result = HttpResponse::create();
 	result->status = status;
 	result->content_type = "application/json";
-	result->payload = value->to_string();
+	result->payload = vnx::to_string(value);
 	return result;
 }
 
