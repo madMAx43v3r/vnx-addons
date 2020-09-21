@@ -33,6 +33,20 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_string_ex(const std::stri
 	return result;
 }
 
+std::shared_ptr<const HttpResponse> HttpResponse::from_string_json(const std::string& content)
+{
+	return from_string_json_ex(content, 200);
+}
+
+std::shared_ptr<const HttpResponse> HttpResponse::from_string_json_ex(const std::string& content, const int32_t& status)
+{
+	auto result = HttpResponse::create();
+	result->status = status;
+	result->content_type = "application/json; charset=utf-8";
+	result->payload = content;
+	return result;
+}
+
 std::shared_ptr<const HttpResponse> HttpResponse::from_object_json(const vnx::Object& value)
 {
 	return from_object_json_ex(value, 200);
