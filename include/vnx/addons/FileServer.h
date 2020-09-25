@@ -25,7 +25,7 @@ protected:
 
 	vnx::Buffer read_file(const std::string& path) const override;
 
-	void http_request_async(const std::shared_ptr<const HttpRequest>& request,
+	void http_request_async(std::shared_ptr<const HttpRequest> request,
 							const std::string& sub_path,
 							const vnx::request_id_t& request_id) const override;
 
