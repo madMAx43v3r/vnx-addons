@@ -23,12 +23,12 @@ std::shared_ptr<const Value> DeflatedValue::decompress() const
 	return vnx::read(in);
 }
 
-std::shared_ptr<const DeflatedValue> DeflatedValue::compress(const std::shared_ptr<const Value>& value)
+std::shared_ptr<const DeflatedValue> DeflatedValue::compress(std::shared_ptr<const Value> value)
 {
 	return compress_ex(value, 6);
 }
 
-std::shared_ptr<const DeflatedValue> DeflatedValue::compress_ex(const std::shared_ptr<const Value>& value, const int32_t& level)
+std::shared_ptr<const DeflatedValue> DeflatedValue::compress_ex(std::shared_ptr<const Value> value, const int32_t& level)
 {
 	if(!value) {
 		return nullptr;

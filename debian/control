@@ -1,7 +1,7 @@
 Package: vnx-addons
 Section: base
 Priority: optional
-Depends: vnx-base (>= 1.7.1)
+Depends: vnx-base (>= 1.8.0)
 Maintainer: Max Wittal <max.wittal@mwittal.de>
 Description: VNX addon features
 Architecture: all

@@ -24,11 +24,11 @@ HttpComponentClient::HttpComponentClient(vnx::Hash64 service_addr)
 {
 }
 
-std::shared_ptr<const ::vnx::addons::HttpResponse> HttpComponentClient::http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path) {
+std::shared_ptr<const ::vnx::addons::HttpResponse> HttpComponentClient::http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path) {
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
 	_method->sub_path = sub_path;
-	auto _return_value = vnx_request(_method);
+	auto _return_value = vnx_request(_method, false);
 	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_return_value);
 	if(!_result) {
 		throw std::logic_error("HttpComponentClient: !_result");

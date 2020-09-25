@@ -24,6 +24,7 @@ vnx::Hash64 HttpComponent_http_request::get_type_hash() const {
 const char* HttpComponent_http_request::get_type_name() const {
 	return "vnx.addons.HttpComponent.http_request";
 }
+
 const vnx::TypeCode* HttpComponent_http_request::get_type_code() const {
 	return vnx::addons::vnx_native_type_code_HttpComponent_http_request;
 }
@@ -201,6 +202,10 @@ void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request& value, const
 }
 
 void write(TypeOutput& out, const ::vnx::addons::HttpComponent_http_request& value, const TypeCode* type_code, const uint16_t* code) {
+	if(code && code[0] == CODE_OBJECT) {
+		vnx::write(out, value.to_object(), nullptr, code);
+		return;
+	}
 	if(!type_code || (code && code[0] == CODE_ANY)) {
 		type_code = vnx::addons::vnx_native_type_code_HttpComponent_http_request;
 		out.write_type_code(type_code);

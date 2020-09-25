@@ -51,7 +51,7 @@ public:
 	
 protected:
 	virtual ::vnx::Buffer read_file(const std::string& path) const = 0;
-	virtual void http_request_async(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path, const vnx::request_id_t& _request_id) const = 0;
+	virtual void http_request_async(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const vnx::request_id_t& _request_id) const = 0;
 	void http_request_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
 	
 	void vnx_handle_switch(std::shared_ptr<const vnx::Sample> _sample) override;

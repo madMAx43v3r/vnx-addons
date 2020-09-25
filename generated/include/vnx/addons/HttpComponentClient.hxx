@@ -18,7 +18,7 @@ public:
 	
 	HttpComponentClient(vnx::Hash64 service_addr);
 	
-	std::shared_ptr<const ::vnx::addons::HttpResponse> http_request(const std::shared_ptr<const ::vnx::addons::HttpRequest>& request, const std::string& sub_path);
+	std::shared_ptr<const ::vnx::addons::HttpResponse> http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path);
 	
 };
 

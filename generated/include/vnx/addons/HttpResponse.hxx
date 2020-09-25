@@ -6,6 +6,7 @@
 
 #include <vnx/addons/package.hxx>
 #include <vnx/Buffer.hpp>
+#include <vnx/Object.hpp>
 #include <vnx/Value.h>
 
 
@@ -36,10 +37,10 @@ public:
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string_json_ex(const std::string& content, const int32_t& status);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_object_json(const ::vnx::Object& value);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_object_json_ex(const ::vnx::Object& value, const int32_t& status);
-	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_json(const std::shared_ptr<const ::vnx::Value>& value);
-	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_json_ex(const std::shared_ptr<const ::vnx::Value>& value, const int32_t& status);
-	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_binary(const std::shared_ptr<const ::vnx::Value>& value);
-	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_binary_ex(const std::shared_ptr<const ::vnx::Value>& value, const int32_t& status);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_json(std::shared_ptr<const ::vnx::Value> value);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_json_ex(std::shared_ptr<const ::vnx::Value> value, const int32_t& status);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_binary(std::shared_ptr<const ::vnx::Value> value);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_binary_ex(std::shared_ptr<const ::vnx::Value> value, const int32_t& status);
 	
 	static std::shared_ptr<HttpResponse> create();
 	std::shared_ptr<vnx::Value> clone() const;

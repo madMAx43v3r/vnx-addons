@@ -61,12 +61,12 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_object_json_ex(const vnx:
 	return result;
 }
 
-std::shared_ptr<const HttpResponse> HttpResponse::from_value_json(const std::shared_ptr<const vnx::Value>& value)
+std::shared_ptr<const HttpResponse> HttpResponse::from_value_json(std::shared_ptr<const vnx::Value> value)
 {
 	return from_value_json_ex(value, 200);
 }
 
-std::shared_ptr<const HttpResponse> HttpResponse::from_value_json_ex(const std::shared_ptr<const vnx::Value>& value, const int32_t& status)
+std::shared_ptr<const HttpResponse> HttpResponse::from_value_json_ex(std::shared_ptr<const vnx::Value> value, const int32_t& status)
 {
 	auto result = HttpResponse::create();
 	result->status = status;
@@ -75,12 +75,12 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_value_json_ex(const std::
 	return result;
 }
 
-std::shared_ptr<const HttpResponse> HttpResponse::from_value_binary(const std::shared_ptr<const vnx::Value>& value)
+std::shared_ptr<const HttpResponse> HttpResponse::from_value_binary(std::shared_ptr<const vnx::Value> value)
 {
 	return from_value_binary_ex(value, 200);
 }
 
-std::shared_ptr<const HttpResponse> HttpResponse::from_value_binary_ex(const std::shared_ptr<const vnx::Value>& value, const int32_t& status)
+std::shared_ptr<const HttpResponse> HttpResponse::from_value_binary_ex(std::shared_ptr<const vnx::Value> value, const int32_t& status)
 {
 	auto result = HttpResponse::create();
 	result->status = 200;
