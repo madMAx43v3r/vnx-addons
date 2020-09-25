@@ -23,6 +23,7 @@ vnx::Hash64 FileServer_read_file::get_type_hash() const {
 const char* FileServer_read_file::get_type_name() const {
 	return "vnx.addons.FileServer.read_file";
 }
+
 const vnx::TypeCode* FileServer_read_file::get_type_code() const {
 	return vnx::addons::vnx_native_type_code_FileServer_read_file;
 }
@@ -181,6 +182,10 @@ void read(TypeInput& in, ::vnx::addons::FileServer_read_file& value, const TypeC
 }
 
 void write(TypeOutput& out, const ::vnx::addons::FileServer_read_file& value, const TypeCode* type_code, const uint16_t* code) {
+	if(code && code[0] == CODE_OBJECT) {
+		vnx::write(out, value.to_object(), nullptr, code);
+		return;
+	}
 	if(!type_code || (code && code[0] == CODE_ANY)) {
 		type_code = vnx::addons::vnx_native_type_code_FileServer_read_file;
 		out.write_type_code(type_code);

@@ -28,8 +28,8 @@ public:
 	const vnx::TypeCode* get_type_code() const override;
 	
 	virtual std::shared_ptr<const ::vnx::Value> decompress() const;
-	static std::shared_ptr<const ::vnx::addons::DeflatedValue> compress(const std::shared_ptr<const ::vnx::Value>& value);
-	static std::shared_ptr<const ::vnx::addons::DeflatedValue> compress_ex(const std::shared_ptr<const ::vnx::Value>& value, const int32_t& level);
+	static std::shared_ptr<const ::vnx::addons::DeflatedValue> compress(std::shared_ptr<const ::vnx::Value> value);
+	static std::shared_ptr<const ::vnx::addons::DeflatedValue> compress_ex(std::shared_ptr<const ::vnx::Value> value, const int32_t& level);
 	
 	static std::shared_ptr<DeflatedValue> create();
 	std::shared_ptr<vnx::Value> clone() const;

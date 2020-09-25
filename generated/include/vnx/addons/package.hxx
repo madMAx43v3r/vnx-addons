@@ -121,7 +121,7 @@ struct type<::vnx::addons::CompressedValue> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -144,7 +144,7 @@ struct type<::vnx::addons::DeflatedValue> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -167,7 +167,7 @@ struct type<::vnx::addons::FileServerBase> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -190,7 +190,7 @@ struct type<::vnx::addons::FileServer_read_file> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -213,7 +213,7 @@ struct type<::vnx::addons::FileServer_read_file_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -236,7 +236,7 @@ struct type<::vnx::addons::HttpComponent> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -259,7 +259,7 @@ struct type<::vnx::addons::HttpComponent_http_request> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -282,7 +282,7 @@ struct type<::vnx::addons::HttpComponent_http_request_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -305,7 +305,7 @@ struct type<::vnx::addons::HttpRequest> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -328,7 +328,7 @@ struct type<::vnx::addons::HttpResponse> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
@@ -351,7 +351,7 @@ struct type<::vnx::addons::HttpServerBase> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code) {
-		code.push_back(CODE_ANY);
+		code.push_back(CODE_OBJECT);
 	}
 };
 
