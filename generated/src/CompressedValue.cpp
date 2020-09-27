@@ -22,6 +22,7 @@ vnx::Hash64 CompressedValue::get_type_hash() const {
 const char* CompressedValue::get_type_name() const {
 	return "vnx.addons.CompressedValue";
 }
+
 const vnx::TypeCode* CompressedValue::get_type_code() const {
 	return vnx::addons::vnx_native_type_code_CompressedValue;
 }
@@ -150,6 +151,10 @@ void read(TypeInput& in, ::vnx::addons::CompressedValue& value, const TypeCode* 
 }
 
 void write(TypeOutput& out, const ::vnx::addons::CompressedValue& value, const TypeCode* type_code, const uint16_t* code) {
+	if(code && code[0] == CODE_OBJECT) {
+		vnx::write(out, value.to_object(), nullptr, code);
+		return;
+	}
 	if(!type_code || (code && code[0] == CODE_ANY)) {
 		type_code = vnx::addons::vnx_native_type_code_CompressedValue;
 		out.write_type_code(type_code);

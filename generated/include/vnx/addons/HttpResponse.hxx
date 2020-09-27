@@ -6,6 +6,7 @@
 
 #include <vnx/addons/package.hxx>
 #include <vnx/Buffer.hpp>
+#include <vnx/Object.hpp>
 #include <vnx/Value.h>
 
 

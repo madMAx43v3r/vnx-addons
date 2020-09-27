@@ -5,8 +5,20 @@
 #include <vnx/addons/FileServerClient.hxx>
 #include <vnx/Buffer.hpp>
 #include <vnx/Module.h>
+#include <vnx/ModuleInterface_vnx_close.hxx>
+#include <vnx/ModuleInterface_vnx_close_return.hxx>
+#include <vnx/ModuleInterface_vnx_get_config.hxx>
+#include <vnx/ModuleInterface_vnx_get_config_object.hxx>
+#include <vnx/ModuleInterface_vnx_get_config_object_return.hxx>
+#include <vnx/ModuleInterface_vnx_get_config_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code_return.hxx>
+#include <vnx/ModuleInterface_vnx_restart.hxx>
+#include <vnx/ModuleInterface_vnx_restart_return.hxx>
+#include <vnx/ModuleInterface_vnx_set_config.hxx>
+#include <vnx/ModuleInterface_vnx_set_config_object.hxx>
+#include <vnx/ModuleInterface_vnx_set_config_object_return.hxx>
+#include <vnx/ModuleInterface_vnx_set_config_return.hxx>
 #include <vnx/addons/FileServer_read_file.hxx>
 #include <vnx/addons/FileServer_read_file_return.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
@@ -30,9 +42,56 @@ FileServerClient::FileServerClient(vnx::Hash64 service_addr)
 {
 }
 
+::vnx::Object FileServerClient::vnx_get_config_object() {
+	auto _method = ::vnx::ModuleInterface_vnx_get_config_object::create();
+	auto _return_value = vnx_request(_method, false);
+	auto _result = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_config_object_return>(_return_value);
+	if(!_result) {
+		throw std::logic_error("FileServerClient: !_result");
+	}
+	return _result->_ret_0;
+}
+
+::vnx::Variant FileServerClient::vnx_get_config(const std::string& name) {
+	auto _method = ::vnx::ModuleInterface_vnx_get_config::create();
+	_method->name = name;
+	auto _return_value = vnx_request(_method, false);
+	auto _result = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_config_return>(_return_value);
+	if(!_result) {
+		throw std::logic_error("FileServerClient: !_result");
+	}
+	return _result->_ret_0;
+}
+
+void FileServerClient::vnx_set_config_object(const ::vnx::Object& config) {
+	auto _method = ::vnx::ModuleInterface_vnx_set_config_object::create();
+	_method->config = config;
+	vnx_request(_method, false);
+}
+
+void FileServerClient::vnx_set_config_object_async(const ::vnx::Object& config) {
+	auto _method = ::vnx::ModuleInterface_vnx_set_config_object::create();
+	_method->config = config;
+	vnx_request(_method, true);
+}
+
+void FileServerClient::vnx_set_config(const std::string& name, const ::vnx::Variant& value) {
+	auto _method = ::vnx::ModuleInterface_vnx_set_config::create();
+	_method->name = name;
+	_method->value = value;
+	vnx_request(_method, false);
+}
+
+void FileServerClient::vnx_set_config_async(const std::string& name, const ::vnx::Variant& value) {
+	auto _method = ::vnx::ModuleInterface_vnx_set_config::create();
+	_method->name = name;
+	_method->value = value;
+	vnx_request(_method, true);
+}
+
 ::vnx::TypeCode FileServerClient::vnx_get_type_code() {
 	auto _method = ::vnx::ModuleInterface_vnx_get_type_code::create();
-	auto _return_value = vnx_request(_method);
+	auto _return_value = vnx_request(_method, false);
 	auto _result = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_type_code_return>(_return_value);
 	if(!_result) {
 		throw std::logic_error("FileServerClient: !_result");
@@ -40,10 +99,30 @@ FileServerClient::FileServerClient(vnx::Hash64 service_addr)
 	return _result->_ret_0;
 }
 
+void FileServerClient::vnx_restart() {
+	auto _method = ::vnx::ModuleInterface_vnx_restart::create();
+	vnx_request(_method, false);
+}
+
+void FileServerClient::vnx_restart_async() {
+	auto _method = ::vnx::ModuleInterface_vnx_restart::create();
+	vnx_request(_method, true);
+}
+
+void FileServerClient::vnx_close() {
+	auto _method = ::vnx::ModuleInterface_vnx_close::create();
+	vnx_request(_method, false);
+}
+
+void FileServerClient::vnx_close_async() {
+	auto _method = ::vnx::ModuleInterface_vnx_close::create();
+	vnx_request(_method, true);
+}
+
 ::vnx::Buffer FileServerClient::read_file(const std::string& path) {
 	auto _method = ::vnx::addons::FileServer_read_file::create();
 	_method->path = path;
-	auto _return_value = vnx_request(_method);
+	auto _return_value = vnx_request(_method, false);
 	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::FileServer_read_file_return>(_return_value);
 	if(!_result) {
 		throw std::logic_error("FileServerClient: !_result");
@@ -55,7 +134,7 @@ std::shared_ptr<const ::vnx::addons::HttpResponse> FileServerClient::http_reques
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
 	_method->sub_path = sub_path;
-	auto _return_value = vnx_request(_method);
+	auto _return_value = vnx_request(_method, false);
 	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_return_value);
 	if(!_result) {
 		throw std::logic_error("FileServerClient: !_result");

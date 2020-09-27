@@ -4,6 +4,7 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpResponse.hxx>
 #include <vnx/Buffer.hpp>
+#include <vnx/Object.hpp>
 #include <vnx/Value.h>
 
 #include <vnx/vnx.h>
@@ -23,6 +24,7 @@ vnx::Hash64 HttpResponse::get_type_hash() const {
 const char* HttpResponse::get_type_name() const {
 	return "vnx.addons.HttpResponse";
 }
+
 const vnx::TypeCode* HttpResponse::get_type_code() const {
 	return vnx::addons::vnx_native_type_code_HttpResponse;
 }
@@ -241,6 +243,10 @@ void read(TypeInput& in, ::vnx::addons::HttpResponse& value, const TypeCode* typ
 }
 
 void write(TypeOutput& out, const ::vnx::addons::HttpResponse& value, const TypeCode* type_code, const uint16_t* code) {
+	if(code && code[0] == CODE_OBJECT) {
+		vnx::write(out, value.to_object(), nullptr, code);
+		return;
+	}
 	if(!type_code || (code && code[0] == CODE_ANY)) {
 		type_code = vnx::addons::vnx_native_type_code_HttpResponse;
 		out.write_type_code(type_code);

@@ -28,13 +28,18 @@ uint64_t HttpComponentAsyncClient::http_request(const std::shared_ptr<const ::vn
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
 	_method->sub_path = sub_path;
-	const auto _request_id = vnx_request(_method);
-	vnx_queue_http_request[_request_id] = std::make_pair(_callback, _error_callback);
-	vnx_num_pending++;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_http_request[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
 	return _request_id;
 }
 
 std::vector<uint64_t> HttpComponentAsyncClient::vnx_get_pending_ids() const {
+	std::lock_guard<std::mutex> _lock(vnx_mutex);
 	std::vector<uint64_t> _list;
 	for(const auto& entry : vnx_queue_http_request) {
 		_list.push_back(entry.first);
@@ -43,19 +48,24 @@ std::vector<uint64_t> HttpComponentAsyncClient::vnx_get_pending_ids() const {
 }
 
 void HttpComponentAsyncClient::vnx_purge_request(uint64_t _request_id, const std::exception& _ex) {
+	std::unique_lock<std::mutex> _lock(vnx_mutex);
 	{
 		const auto _iter = vnx_queue_http_request.find(_request_id);
 		if(_iter != vnx_queue_http_request.end()) {
-			if(_iter->second.second) {
-				_iter->second.second(_ex);
-			}
+			const auto _callback = std::move(_iter->second.second);
 			vnx_queue_http_request.erase(_iter);
 			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
 		}
 	}
 }
 
 void HttpComponentAsyncClient::vnx_callback_switch(uint64_t _request_id, std::shared_ptr<const vnx::Value> _value) {
+	std::unique_lock<std::mutex> _lock(vnx_mutex);
 	const auto _type_hash = _value->get_type_hash();
 	if(_type_hash == vnx::Hash64(0x767ca843058ef233ull)) {
 		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_value);
@@ -67,15 +77,16 @@ void HttpComponentAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			const auto _callback = std::move(_iter->second.first);
 			vnx_queue_http_request.erase(_iter);
 			vnx_num_pending--;
+			_lock.unlock();
 			if(_callback) {
 				_callback(_result->_ret_0);
 			}
 		} else {
-			throw std::runtime_error("HttpComponentAsyncClient: invalid return received");
+			throw std::runtime_error("HttpComponentAsyncClient: received unknown return request_id");
 		}
 	}
 	else {
-		throw std::runtime_error("HttpComponentAsyncClient: unknown return type");
+		throw std::runtime_error("HttpComponentAsyncClient: received unknown return type");
 	}
 }
 
