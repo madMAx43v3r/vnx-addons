@@ -24,7 +24,7 @@ HttpComponentAsyncClient::HttpComponentAsyncClient(vnx::Hash64 service_addr)
 {
 }
 
-uint64_t HttpComponentAsyncClient::http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpComponentAsyncClient::http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
 	_method->sub_path = sub_path;
@@ -47,7 +47,7 @@ std::vector<uint64_t> HttpComponentAsyncClient::vnx_get_pending_ids() const {
 	return _list;
 }
 
-void HttpComponentAsyncClient::vnx_purge_request(uint64_t _request_id, const std::exception& _ex) {
+void HttpComponentAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx::exception& _ex) {
 	std::unique_lock<std::mutex> _lock(vnx_mutex);
 	{
 		const auto _iter = vnx_queue_http_request.find(_request_id);

@@ -27,26 +27,26 @@ public:
 	const char* get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
 	
-	virtual std::shared_ptr<const ::vnx::Value> decompress() const;
+	virtual std::shared_ptr<const ::vnx::Value> decompress() const override;
 	static std::shared_ptr<const ::vnx::addons::DeflatedValue> compress(std::shared_ptr<const ::vnx::Value> value);
 	static std::shared_ptr<const ::vnx::addons::DeflatedValue> compress_ex(std::shared_ptr<const ::vnx::Value> value, const int32_t& level);
 	
 	static std::shared_ptr<DeflatedValue> create();
-	std::shared_ptr<vnx::Value> clone() const;
+	std::shared_ptr<vnx::Value> clone() const override;
 	
-	void read(vnx::TypeInput& _in, const vnx::TypeCode* _type_code, const uint16_t* _code);
-	void write(vnx::TypeOutput& _out, const vnx::TypeCode* _type_code, const uint16_t* _code) const;
+	void read(vnx::TypeInput& _in, const vnx::TypeCode* _type_code, const uint16_t* _code) override;
+	void write(vnx::TypeOutput& _out, const vnx::TypeCode* _type_code, const uint16_t* _code) const override;
 	
-	void read(std::istream& _in);
-	void write(std::ostream& _out) const;
+	void read(std::istream& _in) override;
+	void write(std::ostream& _out) const override;
 	
-	void accept(vnx::Visitor& _visitor) const;
+	void accept(vnx::Visitor& _visitor) const override;
 	
-	vnx::Object to_object() const;
-	void from_object(const vnx::Object& object);
+	vnx::Object to_object() const override;
+	void from_object(const vnx::Object& object) override;
 	
-	vnx::Variant get_field(const std::string& name) const;
-	void set_field(const std::string& name, const vnx::Variant& value);
+	vnx::Variant get_field(const std::string& name) const override;
+	void set_field(const std::string& name, const vnx::Variant& value) override;
 	
 	friend std::ostream& operator<<(std::ostream& _out, const DeflatedValue& _value);
 	friend std::istream& operator>>(std::istream& _in, DeflatedValue& _value);

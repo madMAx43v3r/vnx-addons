@@ -40,7 +40,7 @@ HttpServerAsyncClient::HttpServerAsyncClient(vnx::Hash64 service_addr)
 {
 }
 
-uint64_t HttpServerAsyncClient::vnx_get_config_object(const std::function<void(const ::vnx::Object&)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_get_config_object(const std::function<void(const ::vnx::Object&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_get_config_object::create();
 	const auto _request_id = ++vnx_next_id;
 	{
@@ -52,7 +52,7 @@ uint64_t HttpServerAsyncClient::vnx_get_config_object(const std::function<void(c
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::vnx_get_config(const std::string& name, const std::function<void(const ::vnx::Variant&)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_get_config(const std::string& name, const std::function<void(const ::vnx::Variant&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_get_config::create();
 	_method->name = name;
 	const auto _request_id = ++vnx_next_id;
@@ -65,7 +65,7 @@ uint64_t HttpServerAsyncClient::vnx_get_config(const std::string& name, const st
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::vnx_set_config_object(const ::vnx::Object& config, const std::function<void()>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_set_config_object(const ::vnx::Object& config, const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_set_config_object::create();
 	_method->config = config;
 	const auto _request_id = ++vnx_next_id;
@@ -78,7 +78,7 @@ uint64_t HttpServerAsyncClient::vnx_set_config_object(const ::vnx::Object& confi
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::vnx_set_config(const std::string& name, const ::vnx::Variant& value, const std::function<void()>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_set_config(const std::string& name, const ::vnx::Variant& value, const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_set_config::create();
 	_method->name = name;
 	_method->value = value;
@@ -92,7 +92,7 @@ uint64_t HttpServerAsyncClient::vnx_set_config(const std::string& name, const ::
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::vnx_get_type_code(const std::function<void(const ::vnx::TypeCode&)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_get_type_code(const std::function<void(const ::vnx::TypeCode&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_get_type_code::create();
 	const auto _request_id = ++vnx_next_id;
 	{
@@ -104,7 +104,7 @@ uint64_t HttpServerAsyncClient::vnx_get_type_code(const std::function<void(const
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::vnx_restart(const std::function<void()>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_restart(const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_restart::create();
 	const auto _request_id = ++vnx_next_id;
 	{
@@ -116,7 +116,7 @@ uint64_t HttpServerAsyncClient::vnx_restart(const std::function<void()>& _callba
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::vnx_close(const std::function<void()>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::vnx_close(const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_close::create();
 	const auto _request_id = ++vnx_next_id;
 	{
@@ -128,7 +128,7 @@ uint64_t HttpServerAsyncClient::vnx_close(const std::function<void()>& _callback
 	return _request_id;
 }
 
-uint64_t HttpServerAsyncClient::http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const std::exception&)>& _error_callback) {
+uint64_t HttpServerAsyncClient::http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
 	_method->sub_path = sub_path;
@@ -172,7 +172,7 @@ std::vector<uint64_t> HttpServerAsyncClient::vnx_get_pending_ids() const {
 	return _list;
 }
 
-void HttpServerAsyncClient::vnx_purge_request(uint64_t _request_id, const std::exception& _ex) {
+void HttpServerAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx::exception& _ex) {
 	std::unique_lock<std::mutex> _lock(vnx_mutex);
 	{
 		const auto _iter = vnx_queue_vnx_get_config_object.find(_request_id);
