@@ -126,6 +126,9 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 					}
 				}
 			}
+			if(!redirect_not_found.empty() && !vnx::File(file_path).exists()) {
+				file_path = redirect_not_found;
+			}
 			if(file_path.back() == '/') {
 				const auto list = read_directory(file_path);
 				auto format = request->query_params.find("format");
@@ -149,9 +152,6 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 				}
 			} else {
 				const vnx::File file(file_path);
-				if(!redirect_not_found.empty() && !file.exists()) {
-					file_path = redirect_not_found;
-				}
 				response->payload = read_file(file_path);
 				const auto iter = mime_type_map.find(file.get_extension());
 				if(iter != mime_type_map.end()) {
