@@ -151,9 +151,9 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 					response->content_type = "text/html";
 				}
 			} else {
-				const vnx::File file(file_path);
 				response->payload = read_file(file_path);
-				const auto iter = mime_type_map.find(file.get_extension());
+				const auto extension = vnx::File(file_path).get_extension();
+				const auto iter = mime_type_map.find(extension);
 				if(iter != mime_type_map.end()) {
 					response->content_type = iter->second;
 				} else {
