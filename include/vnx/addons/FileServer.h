@@ -36,6 +36,8 @@ protected:
 private:
 	void write_file_internal(const std::string& path, const vnx::Buffer& data) const;
 
+	std::string detect_mime_type(const std::string& path) const;
+
 };
 
 

@@ -51,6 +51,8 @@ void FileServer::main()
 	mime_type_map[".md5"] = "text/plain";
 	mime_type_map[".map"] = "text/plain";
 	mime_type_map[".tex"] = "text/x-tex";
+	mime_type_map[".lua"] = "text/x-lua";
+	mime_type_map[".sh"] = "text/x-shellscript";
 	mime_type_map[".pdf"] = "application/pdf";
 
 	log(INFO) << "Running on '" << www_root << "'";
@@ -78,12 +80,14 @@ std::vector<file_info_t> FileServer::read_directory(const std::string& path) con
 	for(auto sub : dir.directories()) {
 		file_info_t info;
 		info.name = sub->get_path().substr(dir.get_path().size());
+		info.mime_type = detect_mime_type(sub->get_path());
 		info.is_directory = true;
 		files.push_back(info);
 	}
 	for(auto file : dir.files()) {
 		file_info_t info;
 		info.name = file->get_path().substr(dir.get_path().size());
+		info.mime_type = detect_mime_type(file->get_path());
 		info.size = file->file_size();
 		files.push_back(info);
 	}
@@ -104,6 +108,19 @@ void FileServer::write_file_internal(const std::string& path, const vnx::Buffer&
 	file.open("wb");
 	file.out.write(data.data(), data.size());
 	file.close();
+}
+
+std::string FileServer::detect_mime_type(const std::string& path) const
+{
+	if(!path.empty() && path.back() == '/') {
+		return "inode/directory";
+	}
+	const vnx::File file(www_root + path);
+	const auto iter = mime_type_map.find(file.get_extension());
+	if(iter != mime_type_map.end()) {
+		return iter->second;
+	}
+	return "application/octet-stream";
 }
 
 void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
@@ -138,13 +155,14 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 				} else {
 					std::ostringstream out;
 					out << "<html>\n<head>\n<title>" << file_path << "</title>\n</head>\n<body>\n<table>\n";
-					out << "<tr><th>Name</th><th>Size</th></tr>\n";
+					out << "<tr><th>Name</th><th>Type</th><th>Size</th></tr>\n";
 					if(file_path != "/") {
 						out << "<tr><td><a href=\"..\">..</a></td></tr>\n";
 					}
 					for(const auto& info : list) {
-						out << "<tr><td><a href=\"" << info.name << "\">" << info.name
-							<< "</a></td><td style=\"text-align: right;\">" << info.size << "</td></tr>\n";
+						out << "<tr><td><a href=\"" << info.name << "\">" << info.name << "</a></td>"
+							<< "<td>" << info.mime_type << "</td>"
+							<< "<td style=\"text-align: right;\">" << info.size << "</td></tr>\n";
 					}
 					out << "</table></body>\n</html>\n";
 					response->payload = out.str();
@@ -152,13 +170,7 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 				}
 			} else {
 				response->payload = read_file(file_path);
-				const auto extension = vnx::File(file_path).get_extension();
-				const auto iter = mime_type_map.find(extension);
-				if(iter != mime_type_map.end()) {
-					response->content_type = iter->second;
-				} else {
-					response->content_type = "application/octet-stream";
-				}
+				response->content_type = detect_mime_type(file_path);
 			}
 			response->status = 200;
 		}
