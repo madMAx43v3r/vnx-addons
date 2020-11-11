@@ -126,7 +126,7 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 					}
 				}
 			}
-			if(!redirect_not_found.empty() && !vnx::File(file_path).exists()) {
+			if(!redirect_not_found.empty() && !vnx::File(www_root + file_path).exists()) {
 				file_path = redirect_not_found;
 			}
 			if(file_path.back() == '/') {
