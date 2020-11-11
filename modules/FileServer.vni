@@ -8,7 +8,17 @@ module FileServer implements HttpComponent {
 	
 	vector<string> directory_files;				// redirect directories to a file, like "index.html"
 	
+	string redirect_not_found;					// optional redirect target for missing files
+	
+	bool allow_directory_list;					// if to allow directory listings
+	
+	bool read_only = true;
+	
 	
 	vnx.Buffer read_file(string path) const;
+	
+	vector<file_info_t> read_directory(string path) const;
+	
+	void write_file(string path, vnx.Buffer data);
 	
 }

@@ -1,0 +1,11 @@
+package vnx.addons;
+
+struct file_info_t {
+	
+	string name;				// directories have a trailing '/'
+	
+	long size;					// [bytes]
+	
+	bool is_directory;
+	
+}
