@@ -91,6 +91,9 @@ std::vector<file_info_t> FileServer::read_directory(const std::string& path) con
 		info.size = file->file_size();
 		files.push_back(info);
 	}
+	std::sort(files.begin(), files.end(), [](const file_info_t& lhs, const file_info_t& rhs) -> bool {
+		return lhs.name < rhs.name;
+	});
 	return files;
 }
 
