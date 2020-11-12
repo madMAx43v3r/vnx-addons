@@ -72,6 +72,33 @@ vnx::Buffer FileServer::read_file(const std::string& path) const
 	return content;
 }
 
+vnx::Buffer FileServer::read_file_range(const std::string& path, const int64_t& offset, const int64_t& length) const
+{
+	vnx::File file(www_root + path);
+	const int64_t file_size = file.file_size();
+
+	int64_t offset_ = offset;
+	if(offset_ < 0) {
+		offset_ = file_size + offset_;
+	}
+	if(offset_ < 0) {
+		throw std::logic_error("invalid offset: " + std::to_string(offset));
+	}
+	int64_t length_ = length;
+	if(length_ < 0) {
+		length_ = file_size - offset_;
+	}
+	if(length_ < 0) {
+		throw std::logic_error("invalid length: " + std::to_string(length));
+	}
+	vnx::Buffer content;
+	content.resize(length_);
+	file.open("rb");
+	file.seek_to(offset_);
+	file.in.read((char*)content.data(), length_);
+	return content;
+}
+
 std::vector<file_info_t> FileServer::read_directory(const std::string& path) const
 {
 	std::vector<file_info_t> files;
