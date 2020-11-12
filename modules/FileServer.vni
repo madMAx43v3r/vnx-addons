@@ -19,6 +19,8 @@ module FileServer implements HttpComponent {
 	
 	vnx.Buffer read_file_range(string path, long offset, long length) const;
 	
+	file_info_t get_file_info(string path) const;
+	
 	vector<file_info_t> read_directory(string path) const;
 	
 	void write_file(string path, vnx.Buffer data);

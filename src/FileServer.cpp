@@ -27,6 +27,9 @@ void FileServer::main()
 	if(www_root.empty()) {
 		throw std::logic_error("www_root not set");
 	}
+	if(www_root.back() != '/') {
+		www_root.push_back('/');
+	}
 
 	mime_type_map[".html"] = "text/html";
 	mime_type_map[".css"] = "text/css";
@@ -97,6 +100,16 @@ vnx::Buffer FileServer::read_file_range(const std::string& path, const int64_t& 
 	file.seek_to(offset_);
 	file.in.read((char*)content.data(), length_);
 	return content;
+}
+
+file_info_t FileServer::get_file_info(const std::string& path) const
+{
+	vnx::File file(www_root + path);
+	file_info_t info;
+	info.name = file.get_name();
+	info.mime_type = detect_mime_type(path);
+	info.size = file.file_size();
+	return info;
 }
 
 std::vector<file_info_t> FileServer::read_directory(const std::string& path) const

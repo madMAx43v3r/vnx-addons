@@ -27,6 +27,8 @@ protected:
 
 	vnx::Buffer read_file_range(const std::string& path, const int64_t& offset, const int64_t& length) const override;
 
+	file_info_t get_file_info(const std::string& path) const override;
+
 	std::vector<file_info_t> read_directory(const std::string& path) const override;
 
 	void write_file(const std::string& path, const vnx::Buffer& data) override;
