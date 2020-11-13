@@ -51,8 +51,10 @@ void DeflateOutputStream::flush()
 int DeflateOutputStream::compress_loop(bool flush)
 {
 	const auto offset = buffer->size();
-	buffer->reserve(std::max(offset + CHUNK_SIZE, buffer->capacity() * 2));
-	const auto avail = buffer->capacity() - buffer->size();
+	if(buffer->capacity() < offset + CHUNK_SIZE) {
+		buffer->reserve(std::max(offset + CHUNK_SIZE, buffer->capacity() * 2));
+	}
+	const auto avail = buffer->capacity() - offset;
 	strm.avail_out = avail;
 	strm.next_out = (::Bytef*)buffer->data(offset);
 	const auto ret = ::deflate(&strm, flush ? Z_FINISH : Z_NO_FLUSH);
