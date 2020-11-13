@@ -8,6 +8,8 @@ struct file_info_t {
 	
 	long size;					// [bytes]
 	
+	long last_modified;			// posix timestamp [sec]
+	
 	bool is_directory;
 	
 }

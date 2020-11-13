@@ -109,6 +109,7 @@ file_info_t FileServer::get_file_info(const std::string& path) const
 	info.name = file.get_name();
 	info.mime_type = detect_mime_type(path);
 	info.size = file.file_size();
+	info.last_modified = file.last_write_time();
 	return info;
 }
 
@@ -129,6 +130,7 @@ std::vector<file_info_t> FileServer::read_directory(const std::string& path) con
 		info.name = file->get_path().substr(dir.get_path().size());
 		info.mime_type = detect_mime_type(file->get_path());
 		info.size = file->file_size();
+		info.last_modified = file->last_write_time();
 		files.push_back(info);
 	}
 	std::sort(files.begin(), files.end(), [](const file_info_t& lhs, const file_info_t& rhs) -> bool {
