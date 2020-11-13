@@ -17,10 +17,11 @@ int main()
 	{
 		auto value = LogMsg::create();
 		value->level = 1337;
-		value->message.resize(1024 * 1024 + 1337);
+		value->message.resize(1 * 1024 * 1024 + 1337);
 		
 		auto deflated = addons::DeflatedValue::compress(value);
 		std::cout << "deflated size = " << deflated->data.size() << " bytes" << std::endl;
+		std::cout << vnx::to_string(deflated->data) << std::endl;
 		
 		auto value2 = std::dynamic_pointer_cast<const LogMsg>(deflated->decompress());
 		if(value2->level != value->level) {
