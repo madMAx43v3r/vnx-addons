@@ -10,6 +10,8 @@ class HttpResponse {
 	
 	vnx.Buffer payload;
 	
+	bool is_chunked;				// if response is split into chunks
+	
 	
 	static HttpResponse* from_status(int status);
 	
