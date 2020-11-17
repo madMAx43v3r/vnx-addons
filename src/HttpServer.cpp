@@ -122,7 +122,7 @@ void HttpServer::main()
 			continue;
 		}
 		auto client = std::make_shared<HttpComponentAsyncClient>(module);
-		client->vnx_set_non_blocking(true);
+		client->vnx_set_non_blocking(non_blocking);
 		m_client_map[path] = client;
 		add_async_client(client);
 		log(INFO) << "Got component '" << module << "' for path '" << path << "'";

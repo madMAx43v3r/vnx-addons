@@ -7,7 +7,9 @@ module HttpServer implements HttpComponent {
 	
 	int port = 8080;
 	
-	bool use_epoll = false;
+	bool use_epoll = false;					// if to use epoll() interface (might be buggy)
+	
+	bool non_blocking = true;				// if to send requests non-blocking (fail in case of overload)
 	
 	bool show_info = false;					// if to show access info
 	
