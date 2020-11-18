@@ -177,8 +177,8 @@ void HttpServer::process(request_state_t* state)
 	{
 		auto result = HttpResponse::create();
 		result->status = 204;
-		result->headers.emplace_back("Allow", "OPTIONS, GET, HEAD, POST");
-		result->headers.emplace_back("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+		result->headers.emplace_back("Allow", "OPTIONS, GET, HEAD, POST, PUT, DELETE");
+		result->headers.emplace_back("Access-Control-Allow-Methods", "DELETE, PUT, POST, GET, OPTIONS");
 		result->headers.emplace_back("Access-Control-Allow-Headers", "Content-Type");
 		result->headers.emplace_back("Access-Control-Max-Age", "86400");
 		reply(state, result);
@@ -235,7 +235,9 @@ void HttpServer::reply(	request_state_t* state,
 		response = MHD_create_response_from_buffer(result->payload.size(), (void*)result->payload.data(), MHD_RESPMEM_PERSISTENT);
 	}
 	MHD_add_response_header(response, "Server", "vnx.addons.HttpServer");
-	MHD_add_response_header(response, "Access-Control-Allow-Origin", "*");
+	if(!access_control_allow_origin.empty()) {
+		MHD_add_response_header(response, "Access-Control-Allow-Origin", access_control_allow_origin.c_str());
+	}
 	if(!result->content_type.empty()) {
 		MHD_add_response_header(response, "Content-Type", result->content_type.c_str());
 	}
