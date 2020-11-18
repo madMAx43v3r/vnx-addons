@@ -10,6 +10,9 @@ class HttpResponse {
 	
 	vnx.Buffer payload;
 	
+	bool is_chunked;				// if response is split into chunks
+	long chunked_total_size;		// total size of the response if it is chunked, -1 if unknown [bytes]
+	
 	
 	static HttpResponse* from_status(int status);
 	

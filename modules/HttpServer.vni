@@ -17,6 +17,8 @@ module HttpServer implements HttpComponent {
 	
 	long max_payload_size = -1;				// -1 = unlimited [bytes]
 	
+	ulong chunk_size = 1048576;				// maximum chunk size for chunked transfer encoding [bytes]
+	
 	map<string, string> components;			// [url path => module name]
 	
 }

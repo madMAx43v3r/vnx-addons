@@ -14,6 +14,8 @@ module FileServer implements HttpComponent {
 	
 	bool read_only = true;
 	
+	ulong limit_no_chunk = 1048576;				// maximum file size to send without splitting into chunks [bytes]
+	
 	
 	vnx.Buffer read_file(string path) const;
 	

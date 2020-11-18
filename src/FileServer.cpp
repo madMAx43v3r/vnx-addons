@@ -172,11 +172,46 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 									const std::string& sub_path,
 									const vnx::request_id_t& request_id) const
 {
-	auto file_path = sub_path;
+	auto response = HttpResponse::create();
+	std::string file_path;
+	if(!http_request_boilerplate(request, response, sub_path, file_path)){
+		auto file_size = vnx::File(www_root + file_path).file_size();
+		if(file_size > limit_no_chunk){
+			// leave payload empty and signal chunked transfer to caller
+			response->is_chunked = true;
+			response->chunked_total_size = file_size;
+		}else{
+			response->payload = read_file(file_path);
+			response->is_chunked = false;
+		}
+		response->content_type = detect_mime_type(file_path);
+	}
+	http_request_async_return(request_id, response);
+}
+
+void FileServer::http_request_chunk_async(std::shared_ptr<const HttpRequest> request,
+							const std::string& sub_path,
+							const int64_t& offset,
+							const int64_t& max_bytes,
+							const vnx::request_id_t& _request_id) const
+{
+	auto response = HttpResponse::create();
+	std::string file_path;
+	if(!http_request_boilerplate(request, response, sub_path, file_path)){
+		response->payload = read_file_range(file_path, offset, max_bytes);
+		response->content_type = detect_mime_type(file_path);
+		response->is_chunked = true;
+	}
+	http_request_chunk_async_return(_request_id, response);
+}
+
+bool FileServer::http_request_boilerplate(std::shared_ptr<const HttpRequest> request, std::shared_ptr<HttpResponse> response, const std::string &sub_path, std::string &file_path) const{
+	bool result = true;
+
+	file_path = sub_path;
 	if(file_path.empty()) {
 		file_path = "/";
 	}
-	auto response = HttpResponse::create();
 	if(request->method == "GET") {
 		try {
 			if(file_path.back() == '/') {
@@ -214,8 +249,8 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 					response->content_type = "text/html";
 				}
 			} else {
-				response->payload = read_file(file_path);
-				response->content_type = detect_mime_type(file_path);
+				// actual work must be done by caller
+				result = false;
 			}
 			response->status = 200;
 		}
@@ -240,7 +275,8 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		response->payload = "invalid method: " + request->method;
 		response->content_type = "text/plain";
 	}
-	http_request_async_return(request_id, response);
+
+	return result;
 }
 
 

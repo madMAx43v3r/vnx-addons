@@ -8,6 +8,7 @@
 #include <vnx/addons/HttpServer.h>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
+#include <vnx/addons/HttpComponentClient.hxx>
 #include <vnx/addons/HttpComponentAsyncClient.hxx>
 #include <vnx/vnx.h>
 
@@ -33,6 +34,8 @@ protected:
 		MHD_Connection* connection = nullptr;
 		std::shared_ptr<HttpRequest> request;
 		std::shared_ptr<const HttpResponse> response;
+		std::shared_ptr<HttpComponentClient> httpclient;
+		std::string sub_path;
 	};
 
 	void init() override;
@@ -42,6 +45,12 @@ protected:
 	void http_request_async(std::shared_ptr<const HttpRequest> request,
 							const std::string& sub_path,
 							const vnx::request_id_t& request_id) const override;
+
+	void http_request_chunk_async(std::shared_ptr<const HttpRequest> request,
+							const std::string& sub_path,
+							const int64_t& offset,
+							const int64_t& max_bytes,
+							const vnx::request_id_t& _request_id) const override;
 
 private:
 	void process(request_state_t* state);
@@ -74,11 +83,17 @@ private:
 								void** con_cls,
 								MHD_RequestTerminationCode term_code);
 
+	static ssize_t chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length);
+
 private:
+	struct HttpClients{
+		std::shared_ptr<HttpComponentClient> sync_client;
+		std::shared_ptr<HttpComponentAsyncClient> async_client;
+	};
 	MHD_Daemon* m_daemon = nullptr;
 	std::atomic<uint64_t> m_next_id {1};
 
-	std::map<std::string, std::shared_ptr<HttpComponentAsyncClient>> m_client_map;
+	std::map<std::string, HttpClients> m_client_map;
 
 };
 
@@ -121,10 +136,12 @@ void HttpServer::main()
 			log(ERROR) << "Path needs to end with a '/': '" << path << "'";
 			continue;
 		}
-		auto client = std::make_shared<HttpComponentAsyncClient>(module);
-		client->vnx_set_non_blocking(non_blocking);
-		m_client_map[path] = client;
-		add_async_client(client);
+		auto async_client = std::make_shared<HttpComponentAsyncClient>(module);
+		async_client->vnx_set_non_blocking(non_blocking);
+		add_async_client(async_client);
+		auto sync_client = std::make_shared<HttpComponentClient>(module);
+		m_client_map[path].sync_client = sync_client;
+		m_client_map[path].async_client = async_client;
 		log(INFO) << "Got component '" << module << "' for path '" << path << "'";
 	}
 
@@ -138,6 +155,15 @@ void HttpServer::main()
 void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 									const std::string& sub_path,
 									const vnx::request_id_t& request_id) const
+{
+	throw std::logic_error("not implemented");
+}
+
+void HttpServer::http_request_chunk_async(std::shared_ptr<const HttpRequest> request,
+									const std::string& sub_path,
+									const int64_t& offset,
+									const int64_t& max_bytes,
+									const vnx::request_id_t& _request_id) const
 {
 	throw std::logic_error("not implemented");
 }
@@ -163,7 +189,7 @@ void HttpServer::process(request_state_t* state)
 	std::string prefix;
 	std::string sub_path;
 	size_t best_match_length = 0;
-	std::shared_ptr<HttpComponentAsyncClient> client;
+	HttpClients clients;
 	for(const auto& entry : m_client_map) {
 		const auto entry_size = entry.first.size();
 		if(path.size() >= entry_size
@@ -173,15 +199,17 @@ void HttpServer::process(request_state_t* state)
 			prefix = entry.first;
 			sub_path = "/" + path.substr(entry_size);
 			best_match_length = entry_size;
-			client = entry.second;
+			clients = entry.second;
 		}
 	}
-	if(client) {
+	if(clients.async_client) {
 		if(show_info) {
 			log(INFO) << state->request->method << " '" << state->request->path
 					<< "' => '" << components[prefix] << sub_path << "'";
 		}
-		client->http_request(state->request, sub_path,
+		state->sub_path = sub_path;
+		state->httpclient = clients.sync_client;
+		clients.async_client->http_request(state->request, sub_path,
 				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, state, std::placeholders::_1));
 	} else {
@@ -199,7 +227,13 @@ void HttpServer::reply(	request_state_t* state,
 		publish(result, output_response);
 	}
 	state->response = result;
-	MHD_Response* response = MHD_create_response_from_buffer(result->payload.size(), (void*)result->payload.data(), MHD_RESPMEM_PERSISTENT);
+
+	MHD_Response *response;
+	if(result->is_chunked){
+		response = MHD_create_response_from_callback(result->chunked_total_size, chunk_size, chunked_transfer_callback, state, NULL);
+	}else{
+		response = MHD_create_response_from_buffer(result->payload.size(), (void*)result->payload.data(), MHD_RESPMEM_PERSISTENT);
+	}
 	MHD_add_response_header(response, "Server", "vnx.addons.HttpServer");
 	MHD_add_response_header(response, "Access-Control-Allow-Origin", "*");
 	if(!result->content_type.empty()) {
@@ -310,6 +344,17 @@ void HttpServer::request_completed_callback(void* cls,
 	}
 }
 
+ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length){
+	request_state_t *state = (request_state_t *)userdata;
+	std::shared_ptr<const HttpResponse> response = state->httpclient->http_request_chunk(state->request, state->sub_path, offset, length);
+	size_t size = response->payload.size();
+	if(size == 0){
+		return MHD_CONTENT_READER_END_OF_STREAM;
+	}
+
+	::memcpy(dest, response->payload.data(), size);
+	return size;
+}
 
 HttpServerBase* new_HttpServer(const std::string& name) {
 	return new HttpServer(name);
