@@ -10,6 +10,7 @@
 #include <vnx/addons/HttpResponse.hxx>
 #include <vnx/addons/HttpComponentClient.hxx>
 #include <vnx/addons/HttpComponentAsyncClient.hxx>
+#include <vnx/OverflowException.hxx>
 #include <vnx/vnx.h>
 
 #include <atomic>
@@ -59,7 +60,7 @@ private:
 				std::shared_ptr<const HttpResponse> result);
 
 	void reply_error(	request_state_t* state,
-						const std::exception& ex);
+						const vnx::exception& ex);
 
 	static MHD_Result
 	access_handler_callback(void* cls,
@@ -253,12 +254,16 @@ void HttpServer::reply(	request_state_t* state,
 }
 
 void HttpServer::reply_error(	request_state_t* state,
-								const std::exception& ex)
+								const vnx::exception& ex)
 {
 	if(show_warnings) {
 		log(WARN) << state->request->method << " '" << state->request->path << "' failed with: " << ex.what();
 	}
-	reply(state, HttpResponse::from_status(500));
+	int status = 500;
+	if(std::dynamic_pointer_cast<const OverflowException>(ex.value())) {
+		status = 503;
+	}
+	reply(state, HttpResponse::from_status(status));
 }
 
 MHD_Result HttpServer::access_handler_callback(	void* cls,
