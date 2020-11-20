@@ -19,7 +19,7 @@ FileServer::FileServer(const std::string& _vnx_name)
 
 void FileServer::init()
 {
-	vnx::open_pipe(vnx_name, this, UNLIMITED, 100);
+	vnx::open_pipe(vnx_name, this, UNLIMITED, max_queue_size);
 }
 
 void FileServer::main()

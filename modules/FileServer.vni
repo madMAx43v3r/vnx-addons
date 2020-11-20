@@ -14,6 +14,8 @@ module FileServer implements HttpComponent {
 	
 	bool read_only = true;
 	
+	int max_queue_size = 100;
+	
 	ulong limit_no_chunk = 1048576;				// maximum file size to send without splitting into chunks [bytes]
 	
 	
