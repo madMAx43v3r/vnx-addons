@@ -11,6 +11,7 @@
 #include <vnx/addons/HttpComponentClient.hxx>
 #include <vnx/addons/HttpComponentAsyncClient.hxx>
 #include <vnx/OverflowException.hxx>
+#include <vnx/PermissionDenied.hxx>
 #include <vnx/vnx.h>
 
 #include <atomic>
@@ -350,6 +351,8 @@ void HttpServer::reply_error(	request_state_t* state,
 	auto response = HttpResponse::create();
 	if(std::dynamic_pointer_cast<const OverflowException>(ex.value())) {
 		response->status = 503;
+	} else if(std::dynamic_pointer_cast<const PermissionDenied>(ex.value())) {
+		response->status = 403;
 	} else {
 		response->status = 500;
 	}
