@@ -66,6 +66,8 @@ private:
 
 	void add_session(std::shared_ptr<HttpSession> session) const;
 
+	std::string get_session_cookie(std::shared_ptr<const HttpSession> session) const;
+
 	static MHD_Result
 	access_handler_callback(void* cls,
 							MHD_Connection* connection,
@@ -215,7 +217,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 
 		auto response = HttpResponse::create();
 		response->status = 200;
-		response->headers.emplace_back("Set-Cookie", session_coookie_name + "=" + session->http_session_id);
+		response->headers.emplace_back("Set-Cookie", get_session_cookie(session));
 
 		auto redirect = request->query_params.find("redirect");
 		if(redirect != request->query_params.end()) {
@@ -332,7 +334,7 @@ void HttpServer::reply(	request_state_t* state,
 		auto session = create_session();
 		session->vnx_session_id = m_default_session->vnx_session_id;
 		add_session(session);
-		MHD_add_response_header(response, "Set-Cookie", (session_coookie_name + "=" + session->http_session_id).c_str());
+		MHD_add_response_header(response, "Set-Cookie", get_session_cookie(session).c_str());
 	}
 	const auto ret = MHD_queue_response(state->connection, result->status, response);
 	if(ret != MHD_YES) {
@@ -372,6 +374,11 @@ void HttpServer::add_session(std::shared_ptr<HttpSession> session) const
 		m_session_timeout_queue.emplace(session->login_time + session_expire, session->http_session_id);
 	}
 	m_session_map[session->http_session_id] = session;
+}
+
+std::string HttpServer::get_session_cookie(std::shared_ptr<const HttpSession> session) const
+{
+	return session_coookie_name + "=" + session->http_session_id + "; SameSite=" + cookie_policy;
 }
 
 MHD_Result HttpServer::access_handler_callback(	void* cls,

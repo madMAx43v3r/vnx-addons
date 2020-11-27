@@ -31,6 +31,8 @@ module HttpServer implements HttpComponent {
 	
 	string session_coookie_name = "hsid";
 	
+	string cookie_policy = "Strict";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+	
 	string default_group = "nobody";		// default permissions for anonymous clients
 	
 	vnx.access_level_e default_access = UNAUTHENTICATED;
