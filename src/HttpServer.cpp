@@ -62,6 +62,10 @@ private:
 	void reply_error(	request_state_t* state,
 						const vnx::exception& ex);
 
+	std::shared_ptr<HttpSession> create_session() const;
+
+	void add_session(std::shared_ptr<HttpSession> session) const;
+
 	static MHD_Result
 	access_handler_callback(void* cls,
 							MHD_Connection* connection,
@@ -76,6 +80,9 @@ private:
 	http_header_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
 
 	static MHD_Result
+	cookie_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
+
+	static MHD_Result
 	query_params_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
 
 	static void
@@ -87,14 +94,18 @@ private:
 	static ssize_t chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length);
 
 private:
-	struct HttpClients{
+	struct http_clients_t {
 		std::shared_ptr<HttpComponentClient> sync_client;
 		std::shared_ptr<HttpComponentAsyncClient> async_client;
 	};
 	MHD_Daemon* m_daemon = nullptr;
 	std::atomic<uint64_t> m_next_id {1};
 
-	std::map<std::string, HttpClients> m_client_map;
+	std::map<std::string, http_clients_t> m_client_map;									// [url path => clients]
+	std::shared_ptr<const HttpSession> m_default_session;
+
+	mutable std::unordered_map<std::string, std::shared_ptr<const HttpSession>> m_session_map;	// [http session id => session]
+	mutable std::multimap<int64_t, std::string> m_session_timeout_queue;						// [deadline => http session id]
 
 };
 
@@ -115,7 +126,11 @@ void HttpServer::main()
 	if(show_info) {
 		show_warnings = true;
 	}
-
+	{
+		auto session = HttpSession::create();
+		session->vnx_session_id = vnx::get_auth_server()->login_anonymous(default_access)->id;	// TODO: use default_group here
+		m_default_session = session;
+	}
 	m_daemon = MHD_start_daemon(
 			MHD_USE_SELECT_INTERNALLY | MHD_USE_SUSPEND_RESUME | (use_epoll ? MHD_USE_EPOLL_LINUX_ONLY : MHD_USE_POLL),
 			port, NULL, NULL,
@@ -137,12 +152,17 @@ void HttpServer::main()
 			log(ERROR) << "Path needs to end with a '/': '" << path << "'";
 			continue;
 		}
-		auto async_client = std::make_shared<HttpComponentAsyncClient>(module);
-		async_client->vnx_set_non_blocking(non_blocking);
-		add_async_client(async_client);
-		auto sync_client = std::make_shared<HttpComponentClient>(module);
-		m_client_map[path].sync_client = sync_client;
-		m_client_map[path].async_client = async_client;
+		const bool is_ourself = module == vnx_name;
+		{
+			auto async_client = std::make_shared<HttpComponentAsyncClient>(module);
+			async_client->vnx_set_non_blocking(is_ourself ? true : non_blocking);
+			add_async_client(async_client);
+			m_client_map[path].async_client = async_client;
+		}
+		if(!is_ourself) {
+			auto sync_client = std::make_shared<HttpComponentClient>(module);
+			m_client_map[path].sync_client = sync_client;
+		}
 		log(INFO) << "Got component '" << module << "' for path '" << path << "'";
 	}
 
@@ -157,24 +177,88 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 									const std::string& sub_path,
 									const vnx::request_id_t& request_id) const
 {
-	throw std::logic_error("not implemented");
+	if(sub_path == login_path)
+	{
+		auto session = create_session();
+
+		auto user = request->query_params.find("user");
+		if(user != request->query_params.end())
+		{
+			auto passwd_hex = request->query_params.find("passwd_hex");
+			auto passwd_plain = request->query_params.find("passwd_plain");
+
+			if(passwd_hex != request->query_params.end())
+			{
+				throw std::logic_error("not implemented yet");
+			}
+			else if(passwd_plain != request->query_params.end())
+			{
+				auto vnx_session = vnx::get_auth_server()->login(user->second, passwd_plain->second);
+				if(!vnx_session || vnx_session->user != user->second) {
+					// login failed
+					http_request_async_return(request_id, HttpResponse::from_status(403));
+					return;
+				}
+				session->user = user->second;
+				session->vnx_session_id = vnx_session->id;
+			}
+			else {
+				// no password = no bueno
+				http_request_async_return(request_id, HttpResponse::from_status(403));
+				return;
+			}
+		} else {
+			// anonymous login
+			session->vnx_session_id = m_default_session->vnx_session_id;
+		}
+		add_session(session);
+
+		auto response = HttpResponse::create();
+		response->status = 200;
+		response->headers.emplace_back("Set-Cookie", session_coookie_name + "=" + session->http_session_id);
+
+		auto redirect = request->query_params.find("redirect");
+		if(redirect != request->query_params.end()) {
+			response->status = 303;
+			response->headers.emplace_back("Location", redirect->second);
+		}
+		http_request_async_return(request_id, response);
+	}
+	else if(sub_path == logout_path)
+	{
+		// TODO
+	}
+	else {
+		throw std::logic_error("invalid request");
+	}
 }
 
-void HttpServer::http_request_chunk_async(std::shared_ptr<const HttpRequest> request,
-									const std::string& sub_path,
-									const int64_t& offset,
-									const int64_t& max_bytes,
-									const vnx::request_id_t& _request_id) const
+void HttpServer::http_request_chunk_async(	std::shared_ptr<const HttpRequest> request,
+											const std::string& sub_path,
+											const int64_t& offset,
+											const int64_t& max_bytes,
+											const vnx::request_id_t& _request_id) const
 {
-	throw std::logic_error("not implemented");
+	throw std::logic_error("invalid request");
 }
 
 void HttpServer::process(request_state_t* state)
 {
-	if(output_request) {
-		publish(state->request, output_request);
+	auto request = state->request;
+	request->session = m_default_session;
+	{
+		auto cookie = request->cookies.find(session_coookie_name);
+		if(cookie != request->cookies.end()) {
+			auto iter = m_session_map.find(cookie->second);
+			if(iter != m_session_map.end()) {
+				request->session = iter->second;
+			}
+		}
 	}
-	if(state->request->method == "OPTIONS")
+	if(output_request) {
+		publish(request, output_request);
+	}
+	if(request->method == "OPTIONS")
 	{
 		auto result = HttpResponse::create();
 		result->status = 204;
@@ -185,38 +269,34 @@ void HttpServer::process(request_state_t* state)
 		reply(state, result);
 		return;
 	}
-	const auto& path = state->request->path;
-
 	std::string prefix;
 	std::string sub_path;
 	size_t best_match_length = 0;
-	HttpClients clients;
-	for(const auto& entry : m_client_map) {
+	http_clients_t clients;
+	for(const auto& entry : m_client_map)
+	{
 		const auto entry_size = entry.first.size();
-		if(path.size() >= entry_size
+		if(request->path.size() >= entry_size
 			&& entry_size > best_match_length
-			&& path.substr(0, entry_size) == entry.first)
+			&& request->path.substr(0, entry_size) == entry.first)
 		{
 			prefix = entry.first;
-			sub_path = "/" + path.substr(entry_size);
+			sub_path = "/" + request->path.substr(entry_size);
 			best_match_length = entry_size;
 			clients = entry.second;
 		}
 	}
 	if(clients.async_client) {
 		if(show_info) {
-			log(INFO) << state->request->method << " '" << state->request->path
+			log(INFO) << request->method << " '" << request->path
 					<< "' => '" << components[prefix] << sub_path << "'";
 		}
 		state->sub_path = sub_path;
 		state->httpclient = clients.sync_client;
-		clients.async_client->http_request(state->request, sub_path,
+		clients.async_client->http_request(request, sub_path,
 				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, state, std::placeholders::_1));
 	} else {
-		if(show_warnings) {
-			log(WARN) << state->request->method << " '" << state->request->path << "' failed with: 404 (not found)";
-		}
 		reply(state, HttpResponse::from_status(404));
 	}
 }
@@ -224,9 +304,11 @@ void HttpServer::process(request_state_t* state)
 void HttpServer::reply(	request_state_t* state,
 						std::shared_ptr<const HttpResponse> result)
 {
-	if(output_response) {
-		publish(result, output_response);
+	auto request = state->request;
+	if(show_warnings && result->status >= 400) {
+		log(WARN) << request->method << " '" << request->path << "' failed with: HTTP " << result->status << " (" << result->error_text << ")";
 	}
+	publish(result, output_response);
 	state->response = result;
 
 	MHD_Response *response;
@@ -245,6 +327,13 @@ void HttpServer::reply(	request_state_t* state,
 	for(const auto& entry : result->headers) {
 		MHD_add_response_header(response, entry.first.c_str(), entry.second.c_str());
 	}
+	if(auto_session && request->session == m_default_session)
+	{
+		auto session = create_session();
+		session->vnx_session_id = m_default_session->vnx_session_id;
+		add_session(session);
+		MHD_add_response_header(response, "Set-Cookie", (session_coookie_name + "=" + session->http_session_id).c_str());
+	}
 	const auto ret = MHD_queue_response(state->connection, result->status, response);
 	if(ret != MHD_YES) {
 		log(WARN) << "Failed to queue MHD response!";
@@ -256,14 +345,33 @@ void HttpServer::reply(	request_state_t* state,
 void HttpServer::reply_error(	request_state_t* state,
 								const vnx::exception& ex)
 {
-	if(show_warnings) {
-		log(WARN) << state->request->method << " '" << state->request->path << "' failed with: " << ex.what();
-	}
-	int status = 500;
+	auto response = HttpResponse::create();
 	if(std::dynamic_pointer_cast<const OverflowException>(ex.value())) {
-		status = 503;
+		response->status = 503;
+	} else {
+		response->status = 500;
 	}
-	reply(state, HttpResponse::from_status(status));
+	response->error_text = ex.what();
+	reply(state, response);
+}
+
+std::shared_ptr<HttpSession> HttpServer::create_session() const
+{
+	auto session = HttpSession::create();
+	session->login_time = vnx::get_time_seconds();
+	for(int i = 0; i < session_size; ++i) {
+		if(i) { session->http_session_id += "-"; }
+		session->http_session_id += vnx::to_hex_string(vnx::rand64());
+	}
+	return session;
+}
+
+void HttpServer::add_session(std::shared_ptr<HttpSession> session) const
+{
+	if(!m_session_map.count(session->http_session_id)) {
+		m_session_timeout_queue.emplace(session->login_time + session_expire, session->http_session_id);
+	}
+	m_session_map[session->http_session_id] = session;
 }
 
 MHD_Result HttpServer::access_handler_callback(	void* cls,
@@ -307,6 +415,7 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 		*upload_data_size = 0;
 	} else {
 		MHD_get_connection_values(connection, MHD_HEADER_KIND, &HttpServer::http_header_callback, state);
+		MHD_get_connection_values(connection, MHD_COOKIE_KIND, &HttpServer::cookie_callback, state);
 		MHD_get_connection_values(connection, MHD_ValueKind(MHD_POSTDATA_KIND | MHD_GET_ARGUMENT_KIND), &HttpServer::query_params_callback, state);
 
 		if(self->add_task(std::bind(&HttpServer::process, self, state))) {
@@ -321,12 +430,22 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 MHD_Result HttpServer::http_header_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value)
 {
 	request_state_t* state = (request_state_t*)cls;
+	auto request = state->request;
 	if(key && value) {
 		const auto key_ = ascii_tolower(std::string(key));
 		if(key_ == "content-type") {
-			state->request->content_type = ascii_tolower(std::string(value));
+			request->content_type = ascii_tolower(std::string(value));
 		}
-		state->request->headers.emplace_back(key_, std::string(value));
+		request->headers.emplace_back(key_, std::string(value));
+	}
+	return MHD_YES;
+}
+
+MHD_Result HttpServer::cookie_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value)
+{
+	request_state_t* state = (request_state_t*)cls;
+	if(key && value) {
+		state->request->cookies.emplace(std::string(key), std::string(value));
 	}
 	return MHD_YES;
 }
@@ -351,14 +470,17 @@ void HttpServer::request_completed_callback(void* cls,
 	}
 }
 
-ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length){
+ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length)
+{
 	request_state_t *state = (request_state_t *)userdata;
+	if(!state->httpclient) {
+		return MHD_CONTENT_READER_END_OF_STREAM;
+	}
 	std::shared_ptr<const HttpResponse> response = state->httpclient->http_request_chunk(state->request, state->sub_path, offset, length);
-	size_t size = response->payload.size();
+	const size_t size = response->payload.size();
 	if(size == 0){
 		return MHD_CONTENT_READER_END_OF_STREAM;
 	}
-
 	::memcpy(dest, response->payload.data(), size);
 	return size;
 }
