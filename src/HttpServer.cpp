@@ -194,8 +194,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 									const std::string& sub_path,
 									const vnx::request_id_t& request_id) const
 {
-	auto response = HttpResponse::create();
-	response->status = 500;
+	std::shared_ptr<HttpResponse> response;
 
 	if(sub_path == login_path)
 	{
@@ -233,7 +232,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		}
 		add_session(session);
 
-		response->status = 200;
+		response = vnx::clone(HttpResponse::from_value_json(session));
 		response->headers.emplace_back("Set-Cookie", get_session_cookie(session));
 
 		log(INFO) << "User '" << user->second << "' logged in successfully.";
@@ -248,6 +247,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 				log(INFO) << "User '" << session->user << "' logged out.";
 			}
 		}
+		response = HttpResponse::create();
 		response->status = 200;
 		response->headers.emplace_back("Set-Cookie", session_coookie_name + "=null; Path=/; " + cookie_policy);
 	}
@@ -260,12 +260,14 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		throw std::logic_error("invalid request");
 	}
 
-	auto redirect = request->query_params.find("redirect");
-	if(redirect != request->query_params.end()) {
-		response->status = 303;
-		response->headers.emplace_back("Location", redirect->second);
+	if(response) {
+		auto redirect = request->query_params.find("redirect");
+		if(redirect != request->query_params.end()) {
+			response->status = 303;
+			response->headers.emplace_back("Location", redirect->second);
+		}
+		http_request_async_return(request_id, response);
 	}
-	http_request_async_return(request_id, response);
 }
 
 void HttpServer::http_request_chunk_async(	std::shared_ptr<const HttpRequest> request,
