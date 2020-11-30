@@ -35,9 +35,7 @@ module HttpServer implements HttpComponent {
 	
 	string session_coookie_name = "hsid";
 	
-	string default_group = "observer";		// default permissions for anonymous clients
-	
-	vnx.access_level_e default_access = UNAUTHENTICATED;
+	string default_access = "VIEWER";		// default access role for anonymous clients
 	
 	
 	/* Possible GET/POST parameters:
