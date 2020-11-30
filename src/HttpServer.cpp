@@ -251,7 +251,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		response->status = 200;
 		response->headers.emplace_back("Set-Cookie", session_coookie_name + "=null; Path=/; " + cookie_policy);
 	}
-	else if(sub_path == user_path)
+	else if(sub_path == session_path)
 	{
 		http_request_async_return(request_id, HttpResponse::from_value_json(request->session));
 		return;

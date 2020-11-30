@@ -48,6 +48,6 @@ module HttpServer implements HttpComponent {
 	
 	string logout_path = "/logout";
 	
-	string user_path = "/user";
+	string session_path = "/session";
 	
 }
