@@ -19,7 +19,7 @@ module HttpServer implements HttpComponent {
 	
 	int session_size = 3;					// number of 64-bit values for session ids
 	
-	long session_expire = 86400;			// [sec]
+	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
 	
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]
 	
@@ -29,11 +29,13 @@ module HttpServer implements HttpComponent {
 	
 	string access_control_allow_origin = "*";		// "Access-Control-Allow-Origin" HTTP header
 	
+	string content_security_policy = "";			// "Content-Security-Policy" HTTP header
+	
+	string cookie_policy = "SameSite=Strict;";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/
+	
 	string session_coookie_name = "hsid";
 	
-	string cookie_policy = "Strict";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-	
-	string default_group = "nobody";		// default permissions for anonymous clients
+	string default_group = "observer";		// default permissions for anonymous clients
 	
 	vnx.access_level_e default_access = UNAUTHENTICATED;
 	

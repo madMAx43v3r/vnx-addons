@@ -348,6 +348,9 @@ void HttpServer::reply(	request_state_t* state,
 	if(!access_control_allow_origin.empty()) {
 		MHD_add_response_header(response, "Access-Control-Allow-Origin", access_control_allow_origin.c_str());
 	}
+	if(!content_security_policy.empty()) {
+		MHD_add_response_header(response, "Content-Security-Policy", content_security_policy.c_str());
+	}
 	if(!result->content_type.empty()) {
 		MHD_add_response_header(response, "Content-Type", result->content_type.c_str());
 	}
@@ -404,7 +407,9 @@ void HttpServer::add_session(std::shared_ptr<HttpSession> session) const
 		throw std::logic_error("login_time == 0");
 	}
 	if(m_session_map.emplace(session->http_session_id, session).second) {
-		m_session_timeout_queue.emplace(session->login_time + session_expire, session->http_session_id);
+		if(session_timeout >= 0) {
+			m_session_timeout_queue.emplace(session->login_time + session_timeout, session->http_session_id);
+		}
 	}
 }
 
@@ -421,7 +426,8 @@ void HttpServer::remove_session(const std::string& http_sid) const
 
 std::string HttpServer::get_session_cookie(std::shared_ptr<const HttpSession> session) const
 {
-	return session_coookie_name + "=" + session->http_session_id + "; SameSite=" + cookie_policy;
+	return session_coookie_name + "=" + session->http_session_id + "; "
+			+ (session_timeout >= 0 ? "Max-Age=" + std::to_string(session_timeout) + "; " : "") + cookie_policy;
 }
 
 void HttpServer::update()
