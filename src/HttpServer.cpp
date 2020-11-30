@@ -67,7 +67,11 @@ private:
 
 	void add_session(std::shared_ptr<HttpSession> session) const;
 
+	void remove_session(const std::string& http_sid) const;
+
 	std::string get_session_cookie(std::shared_ptr<const HttpSession> session) const;
+
+	void update();
 
 	static MHD_Result
 	access_handler_callback(void* cls,
@@ -109,6 +113,10 @@ private:
 
 	mutable std::unordered_map<std::string, std::shared_ptr<const HttpSession>> m_session_map;	// [http session id => session]
 	mutable std::multimap<int64_t, std::string> m_session_timeout_queue;						// [deadline => http session id]
+
+	mutable size_t m_error_counter = 0;
+	mutable size_t m_request_counter = 0;
+	mutable std::map<int, size_t> m_error_map;
 
 };
 
@@ -169,6 +177,8 @@ void HttpServer::main()
 		log(INFO) << "Got component '" << module << "' for path '" << path << "'";
 	}
 
+	set_timer_millis(10 * 1000, std::bind(&HttpServer::update, this));
+
 	Super::main();
 
 	if(m_daemon) {
@@ -226,10 +236,19 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 			response->headers.emplace_back("Location", redirect->second);
 		}
 		http_request_async_return(request_id, response);
+		log(INFO) << "User '" << user->second << "' logged in successfully.";
 	}
 	else if(sub_path == logout_path)
 	{
-		// TODO
+		if(auto session = request->session) {
+			vnx::get_auth_server()->logout(session->vnx_session_id);
+			remove_session(session->http_session_id);
+			if(session->user.empty()) {
+				log(INFO) << "Anonymous user logged out.";
+			} else {
+				log(INFO) << "User '" << session->user << "' logged out.";
+			}
+		}
 	}
 	else {
 		throw std::logic_error("invalid request");
@@ -247,6 +266,7 @@ void HttpServer::http_request_chunk_async(	std::shared_ptr<const HttpRequest> re
 
 void HttpServer::process(request_state_t* state)
 {
+	m_request_counter++;
 	auto request = state->request;
 	request->session = m_default_session;
 	{
@@ -308,8 +328,12 @@ void HttpServer::reply(	request_state_t* state,
 						std::shared_ptr<const HttpResponse> result)
 {
 	auto request = state->request;
-	if(show_warnings && result->status >= 400) {
-		log(WARN) << request->method << " '" << request->path << "' failed with: HTTP " << result->status << " (" << result->error_text << ")";
+	if(result->status >= 400) {
+		m_error_counter++;
+		m_error_map[result->status]++;
+		if(show_warnings) {
+			log(WARN) << request->method << " '" << request->path << "' failed with: HTTP " << result->status << " (" << result->error_text << ")";
+		}
 	}
 	publish(result, output_response);
 	state->response = result;
@@ -373,15 +397,48 @@ std::shared_ptr<HttpSession> HttpServer::create_session() const
 
 void HttpServer::add_session(std::shared_ptr<HttpSession> session) const
 {
-	if(!m_session_map.count(session->http_session_id)) {
+	if(session->http_session_id.empty()) {
+		throw std::logic_error("http_session_id.empty()");
+	}
+	if(!session->login_time) {
+		throw std::logic_error("login_time == 0");
+	}
+	if(m_session_map.emplace(session->http_session_id, session).second) {
 		m_session_timeout_queue.emplace(session->login_time + session_expire, session->http_session_id);
 	}
-	m_session_map[session->http_session_id] = session;
+}
+
+void HttpServer::remove_session(const std::string& http_sid) const
+{
+	m_session_map.erase(http_sid);
+	for(auto iter = m_session_timeout_queue.begin(); iter != m_session_timeout_queue.end(); ++iter) {
+		if(iter->second == http_sid) {
+			m_session_timeout_queue.erase(iter);
+			break;
+		}
+	}
 }
 
 std::string HttpServer::get_session_cookie(std::shared_ptr<const HttpSession> session) const
 {
 	return session_coookie_name + "=" + session->http_session_id + "; SameSite=" + cookie_policy;
+}
+
+void HttpServer::update()
+{
+	const auto now = vnx::get_time_seconds();
+	while(!m_session_timeout_queue.empty()) {
+		const auto iter = m_session_timeout_queue.begin();
+		if(now > iter->first) {
+			remove_session(iter->second);
+			m_session_timeout_queue.erase(iter);
+			log(INFO) << "Session '" << iter->second << "' timed out.";
+		} else {
+			break;
+		}
+	}
+	log(INFO) << m_request_counter << " requests, " << m_error_counter << " failed, "
+			<< m_session_map.size() << " sessions, errors=" << vnx::to_string(m_error_map);
 }
 
 MHD_Result HttpServer::access_handler_callback(	void* cls,
