@@ -15,6 +15,12 @@ module HttpServer implements HttpComponent {
 	
 	bool show_warnings = false;				// if to show access failures
 	
+	bool auto_session = false;				// if to create sessions automatically
+	
+	int session_size = 3;					// number of 64-bit values for session ids
+	
+	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
+	
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]
 	
 	ulong chunk_size = 1048576;				// maximum chunk size for chunked transfer encoding [bytes]
@@ -22,5 +28,26 @@ module HttpServer implements HttpComponent {
 	map<string, string> components;			// [url path => module name]
 	
 	string access_control_allow_origin = "*";		// "Access-Control-Allow-Origin" HTTP header
+	
+	string content_security_policy = "";			// "Content-Security-Policy" HTTP header
+	
+	string cookie_policy = "SameSite=Strict;";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/
+	
+	string session_coookie_name = "hsid";
+	
+	string default_access = "VIEWER";		// default access role for anonymous clients
+	
+	
+	/* Possible GET/POST parameters:
+	 * - user (user name)
+	 * - passwd_hex (SHA256 hex string password)
+	 * - passwd_plain (plaintext password)
+	 * - redirect (redirect url)
+	 */
+	string login_path = "/login";
+	
+	string logout_path = "/logout";
+	
+	string session_path = "/session";
 	
 }

@@ -1,0 +1,13 @@
+package vnx.addons;
+
+class HttpSession {
+	
+	string user;						// empty for anonymous
+	
+	string http_session_id;				// external session id
+	
+	vnx.Hash64 vnx_session_id;			// internal session id
+	
+	long login_time;					// posix [sec]
+	
+}

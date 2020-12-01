@@ -12,11 +12,15 @@ class HttpRequest {
 	
 	string content_type;						// MIME type of payload (lower case)
 	
+	map<string, string> cookies;				// cookies (if any)
+	
 	map<string, string> query_params;			// query params (if any)
 	
 	vector<pair<string, string>> headers;		// http headers (keys are lower case)
 	
 	vnx.Buffer payload;
+	
+	HttpSession* session;						// (optional)
 	
 	
 	string get_header_value(string key) const;		// throws exception if not found
