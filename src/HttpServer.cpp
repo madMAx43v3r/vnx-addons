@@ -226,9 +226,11 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 			}
 			session->user = user->second;
 			session->vsid = vnx_session->id;
+			log(INFO) << "User '" << user->second << "' logged in successfully.";
 		} else {
 			// anonymous login
 			session->vsid = m_default_session->vsid;
+			log(INFO) << "Anonymous user logged in successfully.";
 		}
 		add_session(session);
 
@@ -238,8 +240,6 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		}
 		response = vnx::clone(HttpResponse::from_object_json(result));
 		response->headers.emplace_back("Set-Cookie", get_session_cookie(session));
-
-		log(INFO) << "User '" << user->second << "' logged in successfully.";
 	}
 	else if(sub_path == logout_path)
 	{
