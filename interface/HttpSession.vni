@@ -4,9 +4,9 @@ class HttpSession {
 	
 	string user;						// empty for anonymous
 	
-	string http_session_id;				// external session id
+	string hsid;						// http session id
 	
-	vnx.Hash64 vnx_session_id;			// internal session id
+	vnx.Hash64 vsid;					// internal session
 	
 	long login_time;					// posix [sec]
 	

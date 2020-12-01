@@ -140,7 +140,7 @@ void HttpServer::main()
 	}
 	{
 		auto session = HttpSession::create();
-		session->vnx_session_id = vnx::get_auth_server()->login_anonymous(default_access)->id;	// TODO: use default_group here
+		session->vsid = vnx::get_auth_server()->login_anonymous(default_access)->id;
 		m_default_session = session;
 	}
 	m_daemon = MHD_start_daemon(
@@ -186,7 +186,7 @@ void HttpServer::main()
 		MHD_stop_daemon(m_daemon);
 	}
 	if(m_default_session) {
-		vnx::get_auth_server()->logout(m_default_session->vnx_session_id);
+		vnx::get_auth_server()->logout(m_default_session->vsid);
 	}
 }
 
@@ -225,14 +225,18 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 				return;
 			}
 			session->user = user->second;
-			session->vnx_session_id = vnx_session->id;
+			session->vsid = vnx_session->id;
 		} else {
 			// anonymous login
-			session->vnx_session_id = m_default_session->vnx_session_id;
+			session->vsid = m_default_session->vsid;
 		}
 		add_session(session);
 
-		response = vnx::clone(HttpResponse::from_value_json(session));
+		vnx::Object result = session->to_object();
+		if(auto vnx_session = vnx::get_session(session->vsid)) {
+			result["permissions"] = vnx_session->permissions;
+		}
+		response = vnx::clone(HttpResponse::from_object_json(result));
 		response->headers.emplace_back("Set-Cookie", get_session_cookie(session));
 
 		log(INFO) << "User '" << user->second << "' logged in successfully.";
@@ -240,7 +244,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 	else if(sub_path == logout_path)
 	{
 		if(auto session = request->session) {
-			remove_session(session->http_session_id);
+			remove_session(session->hsid);
 			if(session->user.empty()) {
 				log(INFO) << "Anonymous user logged out.";
 			} else {
@@ -253,7 +257,11 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 	}
 	else if(sub_path == session_path)
 	{
-		http_request_async_return(request_id, HttpResponse::from_value_json(request->session));
+		vnx::Object result = request->session->to_object();
+		if(auto vnx_session = vnx::get_session(request->session->vsid)) {
+			result["permissions"] = vnx_session->permissions;
+		}
+		http_request_async_return(request_id, HttpResponse::from_object_json(result));
 		return;
 	}
 	else {
@@ -375,7 +383,7 @@ void HttpServer::reply(	request_state_t* state,
 	if(auto_session && request->session == m_default_session)
 	{
 		auto session = create_session();
-		session->vnx_session_id = m_default_session->vnx_session_id;
+		session->vsid = m_default_session->vsid;
 		add_session(session);
 		MHD_add_response_header(response, "Set-Cookie", get_session_cookie(session).c_str());
 	}
@@ -407,23 +415,23 @@ std::shared_ptr<HttpSession> HttpServer::create_session() const
 	auto session = HttpSession::create();
 	session->login_time = vnx::get_time_seconds();
 	for(int i = 0; i < session_size; ++i) {
-		if(i) { session->http_session_id += "-"; }
-		session->http_session_id += vnx::to_hex_string(vnx::rand64());
+		if(i) { session->hsid += "-"; }
+		session->hsid += vnx::to_hex_string(vnx::rand64());
 	}
 	return session;
 }
 
 void HttpServer::add_session(std::shared_ptr<HttpSession> session) const
 {
-	if(session->http_session_id.empty()) {
+	if(session->hsid.empty()) {
 		throw std::logic_error("http_session_id.empty()");
 	}
 	if(!session->login_time) {
 		throw std::logic_error("login_time == 0");
 	}
-	if(m_session_map.emplace(session->http_session_id, session).second) {
+	if(m_session_map.emplace(session->hsid, session).second) {
 		if(session_timeout >= 0) {
-			m_session_timeout_queue.emplace(session->login_time + session_timeout, session->http_session_id);
+			m_session_timeout_queue.emplace(session->login_time + session_timeout, session->hsid);
 		}
 	} else {
 		throw std::logic_error("session already exists");
@@ -437,7 +445,7 @@ void HttpServer::remove_session(const std::string& http_sid) const
 		return;
 	}
 	if(auto session = iter->second) {
-		vnx::get_auth_server()->logout(session->vnx_session_id);
+		vnx::get_auth_server()->logout(session->vsid);
 	}
 	for(auto iter = m_session_timeout_queue.begin(); iter != m_session_timeout_queue.end(); ++iter) {
 		if(iter->second == http_sid) {
@@ -450,7 +458,7 @@ void HttpServer::remove_session(const std::string& http_sid) const
 
 std::string HttpServer::get_session_cookie(std::shared_ptr<const HttpSession> session) const
 {
-	return session_coookie_name + "=" + session->http_session_id + "; Path=/; "
+	return session_coookie_name + "=" + session->hsid + "; Path=/; "
 			+ (session_timeout >= 0 ? "Max-Age=" + std::to_string(session_timeout) + "; " : "") + cookie_policy;
 }
 
