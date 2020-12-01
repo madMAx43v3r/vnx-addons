@@ -407,6 +407,10 @@ void HttpServer::reply_error(	request_state_t* state,
 		response->status = 500;
 	}
 	response->error_text = ex.what();
+	if(error_payload) {
+		response->content_type = "text/plain; charset=utf-8";
+		response->payload = response->error_text;
+	}
 	reply(state, response);
 }
 

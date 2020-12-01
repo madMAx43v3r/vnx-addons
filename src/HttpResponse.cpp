@@ -30,6 +30,9 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_string_ex(const std::stri
 	result->status = status;
 	result->content_type = mime_type;
 	result->payload = content;
+	if(status >= 400) {
+		result->error_text = content;
+	}
 	return result;
 }
 

@@ -15,6 +15,8 @@ module HttpServer implements HttpComponent {
 	
 	bool show_warnings = false;				// if to show access failures
 	
+	bool error_payload = true;				// if to enable error message replies (text/plain)
+	
 	bool auto_session = false;				// if to create sessions automatically
 	
 	int session_size = 3;					// number of 64-bit values for session ids
