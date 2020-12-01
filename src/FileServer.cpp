@@ -6,11 +6,24 @@
  */
 
 #include <vnx/addons/FileServer.h>
+#include <vnx/addons/permission_e.hxx>
 #include <vnx/vnx.h>
 
 
 namespace vnx {
 namespace addons {
+
+template<typename T>
+void check_permission(std::shared_ptr<const HttpRequest> request, const T& perm)
+{
+	if(!request->session) {
+		throw std::logic_error("session not set");
+	}
+	if(!vnx::is_allowed(request->session->vsid, perm)) {
+		throw vnx::permission_denied(perm);
+	}
+}
+
 
 FileServer::FileServer(const std::string& _vnx_name)
 	:	FileServerBase(_vnx_name)
@@ -205,7 +218,11 @@ void FileServer::http_request_chunk_async(std::shared_ptr<const HttpRequest> req
 	http_request_chunk_async_return(_request_id, response);
 }
 
-bool FileServer::http_request_boilerplate(std::shared_ptr<const HttpRequest> request, std::shared_ptr<HttpResponse> response, const std::string &sub_path, std::string &file_path) const{
+bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> request,
+											std::shared_ptr<HttpResponse> response,
+											const std::string &sub_path,
+											std::string &file_path) const
+{
 	bool result = true;
 
 	file_path = sub_path;
@@ -227,6 +244,7 @@ bool FileServer::http_request_boilerplate(std::shared_ptr<const HttpRequest> req
 				file_path = redirect_not_found;
 			}
 			if(file_path.back() == '/') {
+				check_permission(request, permission_e::READ_DIRECTORY);
 				const auto list = read_directory(file_path);
 				auto format = request->query_params.find("format");
 				if(format != request->query_params.end() && format->second == "json") {
@@ -262,6 +280,7 @@ bool FileServer::http_request_boilerplate(std::shared_ptr<const HttpRequest> req
 			if(file_path.back() == '/') {
 				throw std::logic_error("cannot write a directory");
 			}
+			check_permission(request, permission_e::FILE_UPLOAD);
 			write_file_internal(file_path, request->payload);
 			response->status = 200;
 		}
@@ -275,7 +294,6 @@ bool FileServer::http_request_boilerplate(std::shared_ptr<const HttpRequest> req
 		response->payload = "invalid method: " + request->method;
 		response->content_type = "text/plain";
 	}
-
 	return result;
 }
 

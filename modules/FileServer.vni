@@ -19,14 +19,18 @@ module FileServer implements HttpComponent {
 	ulong limit_no_chunk = 1048576;				// maximum file size to send without splitting into chunks [bytes]
 	
 	
+	@Permission(permission_e.FILE_DOWNLOAD)
 	vnx.Buffer read_file(string path) const;
 	
+	@Permission(permission_e.FILE_DOWNLOAD)
 	vnx.Buffer read_file_range(string path, long offset, long length) const;
 	
 	file_info_t get_file_info(string path) const;
 	
+	@Permission(permission_e.READ_DIRECTORY)
 	vector<file_info_t> read_directory(string path) const;
 	
+	@Permission(permission_e.FILE_UPLOAD)
 	void write_file(string path, vnx.Buffer data);
 	
 }
