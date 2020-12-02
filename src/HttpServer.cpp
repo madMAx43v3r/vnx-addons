@@ -35,6 +35,7 @@ public:
 protected:
 	struct request_state_t {
 		MHD_Connection* connection = nullptr;
+		MHD_PostProcessor* post_processor = nullptr;
 		std::shared_ptr<HttpRequest> request;
 		std::shared_ptr<const HttpResponse> response;
 		std::shared_ptr<HttpComponentClient> httpclient;
@@ -92,6 +93,10 @@ private:
 
 	static MHD_Result
 	query_params_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
+
+	static MHD_Result
+	post_data_iterator(	void* cls, MHD_ValueKind kind, const char* key, const char* filename, const char* content_type,
+						const char* transfer_encoding, const char* data, uint64_t off, size_t size);
 
 	static void
 	request_completed_callback(	void* cls,
@@ -509,12 +514,22 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 		}
 		state->request = request;
 		*con_cls = state;
+		MHD_get_connection_values(connection, MHD_HEADER_KIND, &HttpServer::http_header_callback, state);
+		MHD_get_connection_values(connection, MHD_COOKIE_KIND, &HttpServer::cookie_callback, state);
+		MHD_get_connection_values(connection, MHD_ValueKind(MHD_POSTDATA_KIND | MHD_GET_ARGUMENT_KIND), &HttpServer::query_params_callback, state);
 		return MHD_YES;
 	}
-	const size_t length = *upload_data_size;
+	const auto request = state->request;
 
-	if(length) {
-		auto& payload = state->request->payload;
+	if(const auto length = *upload_data_size)
+	{
+		if(state->post_processor || request->content_type == "application/x-www-form-urlencoded") {
+			if(!state->post_processor) {
+				state->post_processor = MHD_create_post_processor(connection, 65536, &HttpServer::post_data_iterator, state);
+			}
+			MHD_post_process(state->post_processor, upload_data, length);
+		}
+		auto& payload = request->payload;
 		const size_t offset = payload.size();
 		if(self->max_payload_size >= 0 && offset + length > self->max_payload_size) {
 			return MHD_NO;
@@ -523,10 +538,6 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 		::memcpy(payload.data(offset), upload_data, length);
 		*upload_data_size = 0;
 	} else {
-		MHD_get_connection_values(connection, MHD_HEADER_KIND, &HttpServer::http_header_callback, state);
-		MHD_get_connection_values(connection, MHD_COOKIE_KIND, &HttpServer::cookie_callback, state);
-		MHD_get_connection_values(connection, MHD_ValueKind(MHD_POSTDATA_KIND | MHD_GET_ARGUMENT_KIND), &HttpServer::query_params_callback, state);
-
 		if(self->add_task(std::bind(&HttpServer::process, self, state))) {
 			MHD_suspend_connection(connection);
 		} else {
@@ -568,6 +579,17 @@ MHD_Result HttpServer::query_params_callback(void* cls, MHD_ValueKind kind, cons
 	return MHD_YES;
 }
 
+MHD_Result
+HttpServer::post_data_iterator(	void* cls, MHD_ValueKind kind, const char* key, const char* filename, const char* content_type,
+								const char* transfer_encoding, const char* data, uint64_t off, size_t size)
+{
+	request_state_t* state = (request_state_t*)cls;
+	if(key && data && off == 0) {
+		state->request->query_params[std::string(key)] = std::string(data, size);
+	}
+	return MHD_YES;
+}
+
 void HttpServer::request_completed_callback(void* cls,
 											MHD_Connection* connection,
 											void** con_cls,
@@ -575,6 +597,9 @@ void HttpServer::request_completed_callback(void* cls,
 {
 	request_state_t* state = (request_state_t*)(*con_cls);
 	if(state) {
+		if(state->post_processor) {
+			MHD_destroy_post_processor(state->post_processor);
+		}
 		delete state;
 	}
 }
