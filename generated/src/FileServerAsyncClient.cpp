@@ -5,12 +5,12 @@
 #include <vnx/addons/FileServerAsyncClient.hxx>
 #include <vnx/Buffer.hpp>
 #include <vnx/Module.h>
-#include <vnx/ModuleInterface_vnx_close.hxx>
-#include <vnx/ModuleInterface_vnx_close_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_config.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_object.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_object_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_return.hxx>
+#include <vnx/ModuleInterface_vnx_get_module_info.hxx>
+#include <vnx/ModuleInterface_vnx_get_module_info_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code_return.hxx>
 #include <vnx/ModuleInterface_vnx_restart.hxx>
@@ -19,12 +19,25 @@
 #include <vnx/ModuleInterface_vnx_set_config_object.hxx>
 #include <vnx/ModuleInterface_vnx_set_config_object_return.hxx>
 #include <vnx/ModuleInterface_vnx_set_config_return.hxx>
+#include <vnx/ModuleInterface_vnx_stop.hxx>
+#include <vnx/ModuleInterface_vnx_stop_return.hxx>
+#include <vnx/addons/FileServer_get_file_info.hxx>
+#include <vnx/addons/FileServer_get_file_info_return.hxx>
+#include <vnx/addons/FileServer_read_directory.hxx>
+#include <vnx/addons/FileServer_read_directory_return.hxx>
 #include <vnx/addons/FileServer_read_file.hxx>
+#include <vnx/addons/FileServer_read_file_range.hxx>
+#include <vnx/addons/FileServer_read_file_range_return.hxx>
 #include <vnx/addons/FileServer_read_file_return.hxx>
+#include <vnx/addons/FileServer_write_file.hxx>
+#include <vnx/addons/FileServer_write_file_return.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk_return.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
+#include <vnx/addons/file_info_t.hxx>
 
 #include <vnx/vnx.h>
 
@@ -106,6 +119,18 @@ uint64_t FileServerAsyncClient::vnx_get_type_code(const std::function<void(const
 	return _request_id;
 }
 
+uint64_t FileServerAsyncClient::vnx_get_module_info(const std::function<void(std::shared_ptr<const ::vnx::ModuleInfo>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::ModuleInterface_vnx_get_module_info::create();
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_vnx_get_module_info[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
 uint64_t FileServerAsyncClient::vnx_restart(const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::ModuleInterface_vnx_restart::create();
 	const auto _request_id = ++vnx_next_id;
@@ -118,12 +143,12 @@ uint64_t FileServerAsyncClient::vnx_restart(const std::function<void()>& _callba
 	return _request_id;
 }
 
-uint64_t FileServerAsyncClient::vnx_close(const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
-	auto _method = ::vnx::ModuleInterface_vnx_close::create();
+uint64_t FileServerAsyncClient::vnx_stop(const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::ModuleInterface_vnx_stop::create();
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_queue_vnx_close[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_queue_vnx_stop[_request_id] = std::make_pair(_callback, _error_callback);
 		vnx_num_pending++;
 	}
 	vnx_request(_method, _request_id);
@@ -143,6 +168,61 @@ uint64_t FileServerAsyncClient::read_file(const std::string& path, const std::fu
 	return _request_id;
 }
 
+uint64_t FileServerAsyncClient::read_file_range(const std::string& path, const int64_t& offset, const int64_t& length, const std::function<void(const ::vnx::Buffer&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::FileServer_read_file_range::create();
+	_method->path = path;
+	_method->offset = offset;
+	_method->length = length;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_read_file_range[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
+uint64_t FileServerAsyncClient::get_file_info(const std::string& path, const std::function<void(const ::vnx::addons::file_info_t&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::FileServer_get_file_info::create();
+	_method->path = path;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_get_file_info[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
+uint64_t FileServerAsyncClient::read_directory(const std::string& path, const std::function<void(const std::vector<::vnx::addons::file_info_t>&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::FileServer_read_directory::create();
+	_method->path = path;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_read_directory[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
+uint64_t FileServerAsyncClient::write_file(const std::string& path, const ::vnx::Buffer& data, const std::function<void()>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::FileServer_write_file::create();
+	_method->path = path;
+	_method->data = data;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_write_file[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
 uint64_t FileServerAsyncClient::http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::addons::HttpComponent_http_request::create();
 	_method->request = request;
@@ -151,6 +231,22 @@ uint64_t FileServerAsyncClient::http_request(std::shared_ptr<const ::vnx::addons
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
 		vnx_queue_http_request[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
+uint64_t FileServerAsyncClient::http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::HttpComponent_http_request_chunk::create();
+	_method->request = request;
+	_method->sub_path = sub_path;
+	_method->offset = offset;
+	_method->max_bytes = max_bytes;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_http_request_chunk[_request_id] = std::make_pair(_callback, _error_callback);
 		vnx_num_pending++;
 	}
 	vnx_request(_method, _request_id);
@@ -175,16 +271,34 @@ std::vector<uint64_t> FileServerAsyncClient::vnx_get_pending_ids() const {
 	for(const auto& entry : vnx_queue_vnx_get_type_code) {
 		_list.push_back(entry.first);
 	}
+	for(const auto& entry : vnx_queue_vnx_get_module_info) {
+		_list.push_back(entry.first);
+	}
 	for(const auto& entry : vnx_queue_vnx_restart) {
 		_list.push_back(entry.first);
 	}
-	for(const auto& entry : vnx_queue_vnx_close) {
+	for(const auto& entry : vnx_queue_vnx_stop) {
 		_list.push_back(entry.first);
 	}
 	for(const auto& entry : vnx_queue_read_file) {
 		_list.push_back(entry.first);
 	}
+	for(const auto& entry : vnx_queue_read_file_range) {
+		_list.push_back(entry.first);
+	}
+	for(const auto& entry : vnx_queue_get_file_info) {
+		_list.push_back(entry.first);
+	}
+	for(const auto& entry : vnx_queue_read_directory) {
+		_list.push_back(entry.first);
+	}
+	for(const auto& entry : vnx_queue_write_file) {
+		_list.push_back(entry.first);
+	}
 	for(const auto& entry : vnx_queue_http_request) {
+		_list.push_back(entry.first);
+	}
+	for(const auto& entry : vnx_queue_http_request_chunk) {
 		_list.push_back(entry.first);
 	}
 	return _list;
@@ -258,6 +372,19 @@ void FileServerAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx::e
 		}
 	}
 	{
+		const auto _iter = vnx_queue_vnx_get_module_info.find(_request_id);
+		if(_iter != vnx_queue_vnx_get_module_info.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_vnx_get_module_info.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
 		const auto _iter = vnx_queue_vnx_restart.find(_request_id);
 		if(_iter != vnx_queue_vnx_restart.end()) {
 			const auto _callback = std::move(_iter->second.second);
@@ -271,10 +398,10 @@ void FileServerAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx::e
 		}
 	}
 	{
-		const auto _iter = vnx_queue_vnx_close.find(_request_id);
-		if(_iter != vnx_queue_vnx_close.end()) {
+		const auto _iter = vnx_queue_vnx_stop.find(_request_id);
+		if(_iter != vnx_queue_vnx_stop.end()) {
 			const auto _callback = std::move(_iter->second.second);
-			vnx_queue_vnx_close.erase(_iter);
+			vnx_queue_vnx_stop.erase(_iter);
 			vnx_num_pending--;
 			_lock.unlock();
 			if(_callback) {
@@ -297,10 +424,75 @@ void FileServerAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx::e
 		}
 	}
 	{
+		const auto _iter = vnx_queue_read_file_range.find(_request_id);
+		if(_iter != vnx_queue_read_file_range.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_read_file_range.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
+		const auto _iter = vnx_queue_get_file_info.find(_request_id);
+		if(_iter != vnx_queue_get_file_info.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_get_file_info.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
+		const auto _iter = vnx_queue_read_directory.find(_request_id);
+		if(_iter != vnx_queue_read_directory.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_read_directory.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
+		const auto _iter = vnx_queue_write_file.find(_request_id);
+		if(_iter != vnx_queue_write_file.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_write_file.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
 		const auto _iter = vnx_queue_http_request.find(_request_id);
 		if(_iter != vnx_queue_http_request.end()) {
 			const auto _callback = std::move(_iter->second.second);
 			vnx_queue_http_request.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
+		const auto _iter = vnx_queue_http_request_chunk.find(_request_id);
+		if(_iter != vnx_queue_http_request_chunk.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_http_request_chunk.erase(_iter);
 			vnx_num_pending--;
 			_lock.unlock();
 			if(_callback) {
@@ -396,6 +588,24 @@ void FileServerAsyncClient::vnx_callback_switch(uint64_t _request_id, std::share
 			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
 		}
 	}
+	else if(_type_hash == vnx::Hash64(0xfa24b8a5a75620cfull)) {
+		auto _result = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_module_info_return>(_value);
+		if(!_result) {
+			throw std::logic_error("FileServerAsyncClient: !_result");
+		}
+		const auto _iter = vnx_queue_vnx_get_module_info.find(_request_id);
+		if(_iter != vnx_queue_vnx_get_module_info.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_vnx_get_module_info.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_result->_ret_0);
+			}
+		} else {
+			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
+		}
+	}
 	else if(_type_hash == vnx::Hash64(0x2133a6eee0102018ull)) {
 		const auto _iter = vnx_queue_vnx_restart.find(_request_id);
 		if(_iter != vnx_queue_vnx_restart.end()) {
@@ -410,11 +620,11 @@ void FileServerAsyncClient::vnx_callback_switch(uint64_t _request_id, std::share
 			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
 		}
 	}
-	else if(_type_hash == vnx::Hash64(0x88dc702251f03a54ull)) {
-		const auto _iter = vnx_queue_vnx_close.find(_request_id);
-		if(_iter != vnx_queue_vnx_close.end()) {
+	else if(_type_hash == vnx::Hash64(0xfc3b62878a8d924ull)) {
+		const auto _iter = vnx_queue_vnx_stop.find(_request_id);
+		if(_iter != vnx_queue_vnx_stop.end()) {
 			const auto _callback = std::move(_iter->second.first);
-			vnx_queue_vnx_close.erase(_iter);
+			vnx_queue_vnx_stop.erase(_iter);
 			vnx_num_pending--;
 			_lock.unlock();
 			if(_callback) {
@@ -442,6 +652,74 @@ void FileServerAsyncClient::vnx_callback_switch(uint64_t _request_id, std::share
 			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
 		}
 	}
+	else if(_type_hash == vnx::Hash64(0x19b4b9347295c6eaull)) {
+		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::FileServer_read_file_range_return>(_value);
+		if(!_result) {
+			throw std::logic_error("FileServerAsyncClient: !_result");
+		}
+		const auto _iter = vnx_queue_read_file_range.find(_request_id);
+		if(_iter != vnx_queue_read_file_range.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_read_file_range.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_result->_ret_0);
+			}
+		} else {
+			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
+		}
+	}
+	else if(_type_hash == vnx::Hash64(0x7474b955a2e57c37ull)) {
+		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::FileServer_get_file_info_return>(_value);
+		if(!_result) {
+			throw std::logic_error("FileServerAsyncClient: !_result");
+		}
+		const auto _iter = vnx_queue_get_file_info.find(_request_id);
+		if(_iter != vnx_queue_get_file_info.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_get_file_info.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_result->_ret_0);
+			}
+		} else {
+			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
+		}
+	}
+	else if(_type_hash == vnx::Hash64(0xbbc77a6b51623776ull)) {
+		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::FileServer_read_directory_return>(_value);
+		if(!_result) {
+			throw std::logic_error("FileServerAsyncClient: !_result");
+		}
+		const auto _iter = vnx_queue_read_directory.find(_request_id);
+		if(_iter != vnx_queue_read_directory.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_read_directory.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_result->_ret_0);
+			}
+		} else {
+			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
+		}
+	}
+	else if(_type_hash == vnx::Hash64(0x88bc45fec5f73d30ull)) {
+		const auto _iter = vnx_queue_write_file.find(_request_id);
+		if(_iter != vnx_queue_write_file.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_write_file.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback();
+			}
+		} else {
+			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
+		}
+	}
 	else if(_type_hash == vnx::Hash64(0x767ca843058ef233ull)) {
 		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_value);
 		if(!_result) {
@@ -451,6 +729,24 @@ void FileServerAsyncClient::vnx_callback_switch(uint64_t _request_id, std::share
 		if(_iter != vnx_queue_http_request.end()) {
 			const auto _callback = std::move(_iter->second.first);
 			vnx_queue_http_request.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_result->_ret_0);
+			}
+		} else {
+			throw std::runtime_error("FileServerAsyncClient: received unknown return request_id");
+		}
+	}
+	else if(_type_hash == vnx::Hash64(0x658054b78953521aull)) {
+		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_chunk_return>(_value);
+		if(!_result) {
+			throw std::logic_error("FileServerAsyncClient: !_result");
+		}
+		const auto _iter = vnx_queue_http_request_chunk.find(_request_id);
+		if(_iter != vnx_queue_http_request_chunk.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_http_request_chunk.erase(_iter);
 			vnx_num_pending--;
 			_lock.unlock();
 			if(_callback) {

@@ -5,6 +5,7 @@
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/Buffer.hpp>
 #include <vnx/Value.h>
+#include <vnx/addons/HttpSession.hxx>
 
 #include <vnx/vnx.h>
 
@@ -14,13 +15,13 @@ namespace addons {
 
 
 const vnx::Hash64 HttpRequest::VNX_TYPE_HASH(0x60c4b7b39fc56fd5ull);
-const vnx::Hash64 HttpRequest::VNX_CODE_HASH(0x5d87f60d21de647ull);
+const vnx::Hash64 HttpRequest::VNX_CODE_HASH(0x71ec132ebac9beacull);
 
 vnx::Hash64 HttpRequest::get_type_hash() const {
 	return VNX_TYPE_HASH;
 }
 
-const char* HttpRequest::get_type_name() const {
+std::string HttpRequest::get_type_name() const {
 	return "vnx.addons.HttpRequest";
 }
 
@@ -52,9 +53,11 @@ void HttpRequest::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[2], 2); vnx::accept(_visitor, path);
 	_visitor.type_field(_type_code->fields[3], 3); vnx::accept(_visitor, method);
 	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, content_type);
-	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, query_params);
-	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, headers);
-	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, payload);
+	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, cookies);
+	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, query_params);
+	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, headers);
+	_visitor.type_field(_type_code->fields[8], 8); vnx::accept(_visitor, payload);
+	_visitor.type_field(_type_code->fields[9], 9); vnx::accept(_visitor, session);
 	_visitor.type_end(*_type_code);
 }
 
@@ -65,9 +68,11 @@ void HttpRequest::write(std::ostream& _out) const {
 	_out << ", \"path\": "; vnx::write(_out, path);
 	_out << ", \"method\": "; vnx::write(_out, method);
 	_out << ", \"content_type\": "; vnx::write(_out, content_type);
+	_out << ", \"cookies\": "; vnx::write(_out, cookies);
 	_out << ", \"query_params\": "; vnx::write(_out, query_params);
 	_out << ", \"headers\": "; vnx::write(_out, headers);
 	_out << ", \"payload\": "; vnx::write(_out, payload);
+	_out << ", \"session\": "; vnx::write(_out, session);
 	_out << "}";
 }
 
@@ -77,6 +82,8 @@ void HttpRequest::read(std::istream& _in) {
 	for(const auto& _entry : _object) {
 		if(_entry.first == "content_type") {
 			vnx::from_string(_entry.second, content_type);
+		} else if(_entry.first == "cookies") {
+			vnx::from_string(_entry.second, cookies);
 		} else if(_entry.first == "headers") {
 			vnx::from_string(_entry.second, headers);
 		} else if(_entry.first == "id") {
@@ -89,6 +96,8 @@ void HttpRequest::read(std::istream& _in) {
 			vnx::from_string(_entry.second, payload);
 		} else if(_entry.first == "query_params") {
 			vnx::from_string(_entry.second, query_params);
+		} else if(_entry.first == "session") {
+			vnx::from_string(_entry.second, session);
 		} else if(_entry.first == "url") {
 			vnx::from_string(_entry.second, url);
 		}
@@ -103,9 +112,11 @@ vnx::Object HttpRequest::to_object() const {
 	_object["path"] = path;
 	_object["method"] = method;
 	_object["content_type"] = content_type;
+	_object["cookies"] = cookies;
 	_object["query_params"] = query_params;
 	_object["headers"] = headers;
 	_object["payload"] = payload;
+	_object["session"] = session;
 	return _object;
 }
 
@@ -113,6 +124,8 @@ void HttpRequest::from_object(const vnx::Object& _object) {
 	for(const auto& _entry : _object.field) {
 		if(_entry.first == "content_type") {
 			_entry.second.to(content_type);
+		} else if(_entry.first == "cookies") {
+			_entry.second.to(cookies);
 		} else if(_entry.first == "headers") {
 			_entry.second.to(headers);
 		} else if(_entry.first == "id") {
@@ -125,6 +138,8 @@ void HttpRequest::from_object(const vnx::Object& _object) {
 			_entry.second.to(payload);
 		} else if(_entry.first == "query_params") {
 			_entry.second.to(query_params);
+		} else if(_entry.first == "session") {
+			_entry.second.to(session);
 		} else if(_entry.first == "url") {
 			_entry.second.to(url);
 		}
@@ -147,6 +162,9 @@ vnx::Variant HttpRequest::get_field(const std::string& _name) const {
 	if(_name == "content_type") {
 		return vnx::Variant(content_type);
 	}
+	if(_name == "cookies") {
+		return vnx::Variant(cookies);
+	}
 	if(_name == "query_params") {
 		return vnx::Variant(query_params);
 	}
@@ -155,6 +173,9 @@ vnx::Variant HttpRequest::get_field(const std::string& _name) const {
 	}
 	if(_name == "payload") {
 		return vnx::Variant(payload);
+	}
+	if(_name == "session") {
+		return vnx::Variant(session);
 	}
 	return vnx::Variant();
 }
@@ -170,12 +191,16 @@ void HttpRequest::set_field(const std::string& _name, const vnx::Variant& _value
 		_value.to(method);
 	} else if(_name == "content_type") {
 		_value.to(content_type);
+	} else if(_name == "cookies") {
+		_value.to(cookies);
 	} else if(_name == "query_params") {
 		_value.to(query_params);
 	} else if(_name == "headers") {
 		_value.to(headers);
 	} else if(_name == "payload") {
 		_value.to(payload);
+	} else if(_name == "session") {
+		_value.to(session);
 	} else {
 		throw std::logic_error("no such field: '" + _name + "'");
 	}
@@ -205,11 +230,11 @@ std::shared_ptr<vnx::TypeCode> HttpRequest::static_create_type_code() {
 	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpRequest";
 	type_code->type_hash = vnx::Hash64(0x60c4b7b39fc56fd5ull);
-	type_code->code_hash = vnx::Hash64(0x5d87f60d21de647ull);
+	type_code->code_hash = vnx::Hash64(0x71ec132ebac9beacull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpRequest>(); };
-	type_code->fields.resize(8);
+	type_code->fields.resize(10);
 	{
 		vnx::TypeField& field = type_code->fields[0];
 		field.name = "id";
@@ -242,20 +267,32 @@ std::shared_ptr<vnx::TypeCode> HttpRequest::static_create_type_code() {
 	{
 		vnx::TypeField& field = type_code->fields[5];
 		field.is_extended = true;
-		field.name = "query_params";
+		field.name = "cookies";
 		field.code = {13, 3, 32, 32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[6];
 		field.is_extended = true;
-		field.name = "headers";
-		field.code = {12, 23, 2, 4, 5, 32, 32};
+		field.name = "query_params";
+		field.code = {13, 3, 32, 32};
 	}
 	{
 		vnx::TypeField& field = type_code->fields[7];
 		field.is_extended = true;
+		field.name = "headers";
+		field.code = {12, 23, 2, 4, 5, 32, 32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[8];
+		field.is_extended = true;
 		field.name = "payload";
 		field.code = {12, 1};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[9];
+		field.is_extended = true;
+		field.name = "session";
+		field.code = {16};
 	}
 	type_code->build();
 	return type_code;
@@ -285,13 +322,17 @@ void read(TypeInput& in, ::vnx::addons::HttpRequest& value, const TypeCode* type
 		}
 	}
 	if(!type_code) {
-		throw std::logic_error("read(): type_code == 0");
+		vnx::skip(in, type_code, code);
+		return;
 	}
 	if(code) {
 		switch(code[0]) {
 			case CODE_STRUCT: type_code = type_code->depends[code[1]]; break;
 			case CODE_ALT_STRUCT: type_code = type_code->depends[vnx::flip_bytes(code[1])]; break;
-			default: vnx::skip(in, type_code, code); return;
+			default: {
+				vnx::skip(in, type_code, code);
+				return;
+			}
 		}
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
@@ -309,9 +350,11 @@ void read(TypeInput& in, ::vnx::addons::HttpRequest& value, const TypeCode* type
 			case 2: vnx::read(in, value.path, type_code, _field->code.data()); break;
 			case 3: vnx::read(in, value.method, type_code, _field->code.data()); break;
 			case 4: vnx::read(in, value.content_type, type_code, _field->code.data()); break;
-			case 5: vnx::read(in, value.query_params, type_code, _field->code.data()); break;
-			case 6: vnx::read(in, value.headers, type_code, _field->code.data()); break;
-			case 7: vnx::read(in, value.payload, type_code, _field->code.data()); break;
+			case 5: vnx::read(in, value.cookies, type_code, _field->code.data()); break;
+			case 6: vnx::read(in, value.query_params, type_code, _field->code.data()); break;
+			case 7: vnx::read(in, value.headers, type_code, _field->code.data()); break;
+			case 8: vnx::read(in, value.payload, type_code, _field->code.data()); break;
+			case 9: vnx::read(in, value.session, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
 	}
@@ -336,9 +379,11 @@ void write(TypeOutput& out, const ::vnx::addons::HttpRequest& value, const TypeC
 	vnx::write(out, value.path, type_code, type_code->fields[2].code.data());
 	vnx::write(out, value.method, type_code, type_code->fields[3].code.data());
 	vnx::write(out, value.content_type, type_code, type_code->fields[4].code.data());
-	vnx::write(out, value.query_params, type_code, type_code->fields[5].code.data());
-	vnx::write(out, value.headers, type_code, type_code->fields[6].code.data());
-	vnx::write(out, value.payload, type_code, type_code->fields[7].code.data());
+	vnx::write(out, value.cookies, type_code, type_code->fields[5].code.data());
+	vnx::write(out, value.query_params, type_code, type_code->fields[6].code.data());
+	vnx::write(out, value.headers, type_code, type_code->fields[7].code.data());
+	vnx::write(out, value.payload, type_code, type_code->fields[8].code.data());
+	vnx::write(out, value.session, type_code, type_code->fields[9].code.data());
 }
 
 void read(std::istream& in, ::vnx::addons::HttpRequest& value) {

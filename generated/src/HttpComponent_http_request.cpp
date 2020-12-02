@@ -21,7 +21,7 @@ vnx::Hash64 HttpComponent_http_request::get_type_hash() const {
 	return VNX_TYPE_HASH;
 }
 
-const char* HttpComponent_http_request::get_type_name() const {
+std::string HttpComponent_http_request::get_type_name() const {
 	return "vnx.addons.HttpComponent.http_request";
 }
 
@@ -139,6 +139,8 @@ std::shared_ptr<vnx::TypeCode> HttpComponent_http_request::static_create_type_co
 	type_code->is_class = true;
 	type_code->is_method = true;
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpComponent_http_request>(); };
+	type_code->is_const = true;
+	type_code->is_async = true;
 	type_code->return_type = ::vnx::addons::HttpComponent_http_request_return::static_get_type_code();
 	type_code->fields.resize(2);
 	{
@@ -181,13 +183,17 @@ void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request& value, const
 		}
 	}
 	if(!type_code) {
-		throw std::logic_error("read(): type_code == 0");
+		vnx::skip(in, type_code, code);
+		return;
 	}
 	if(code) {
 		switch(code[0]) {
 			case CODE_STRUCT: type_code = type_code->depends[code[1]]; break;
 			case CODE_ALT_STRUCT: type_code = type_code->depends[vnx::flip_bytes(code[1])]; break;
-			default: vnx::skip(in, type_code, code); return;
+			default: {
+				vnx::skip(in, type_code, code);
+				return;
+			}
 		}
 	}
 	if(type_code->is_matched) {

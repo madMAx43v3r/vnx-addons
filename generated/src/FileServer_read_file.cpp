@@ -20,7 +20,7 @@ vnx::Hash64 FileServer_read_file::get_type_hash() const {
 	return VNX_TYPE_HASH;
 }
 
-const char* FileServer_read_file::get_type_name() const {
+std::string FileServer_read_file::get_type_name() const {
 	return "vnx.addons.FileServer.read_file";
 }
 
@@ -126,6 +126,7 @@ std::shared_ptr<vnx::TypeCode> FileServer_read_file::static_create_type_code() {
 	type_code->is_class = true;
 	type_code->is_method = true;
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<FileServer_read_file>(); };
+	type_code->is_const = true;
 	type_code->return_type = ::vnx::addons::FileServer_read_file_return::static_get_type_code();
 	type_code->fields.resize(1);
 	{
@@ -134,6 +135,7 @@ std::shared_ptr<vnx::TypeCode> FileServer_read_file::static_create_type_code() {
 		field.name = "path";
 		field.code = {32};
 	}
+	type_code->permission = "vnx.addons.permission_e.FILE_DOWNLOAD";
 	type_code->build();
 	return type_code;
 }
@@ -162,13 +164,17 @@ void read(TypeInput& in, ::vnx::addons::FileServer_read_file& value, const TypeC
 		}
 	}
 	if(!type_code) {
-		throw std::logic_error("read(): type_code == 0");
+		vnx::skip(in, type_code, code);
+		return;
 	}
 	if(code) {
 		switch(code[0]) {
 			case CODE_STRUCT: type_code = type_code->depends[code[1]]; break;
 			case CODE_ALT_STRUCT: type_code = type_code->depends[vnx::flip_bytes(code[1])]; break;
-			default: vnx::skip(in, type_code, code); return;
+			default: {
+				vnx::skip(in, type_code, code);
+				return;
+			}
 		}
 	}
 	if(type_code->is_matched) {

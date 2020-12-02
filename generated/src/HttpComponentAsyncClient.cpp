@@ -4,6 +4,8 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpComponentAsyncClient.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk_return.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
@@ -38,10 +40,29 @@ uint64_t HttpComponentAsyncClient::http_request(std::shared_ptr<const ::vnx::add
 	return _request_id;
 }
 
+uint64_t HttpComponentAsyncClient::http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::HttpComponent_http_request_chunk::create();
+	_method->request = request;
+	_method->sub_path = sub_path;
+	_method->offset = offset;
+	_method->max_bytes = max_bytes;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_queue_http_request_chunk[_request_id] = std::make_pair(_callback, _error_callback);
+		vnx_num_pending++;
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
 std::vector<uint64_t> HttpComponentAsyncClient::vnx_get_pending_ids() const {
 	std::lock_guard<std::mutex> _lock(vnx_mutex);
 	std::vector<uint64_t> _list;
 	for(const auto& entry : vnx_queue_http_request) {
+		_list.push_back(entry.first);
+	}
+	for(const auto& entry : vnx_queue_http_request_chunk) {
 		_list.push_back(entry.first);
 	}
 	return _list;
@@ -54,6 +75,19 @@ void HttpComponentAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 		if(_iter != vnx_queue_http_request.end()) {
 			const auto _callback = std::move(_iter->second.second);
 			vnx_queue_http_request.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_ex);
+			}
+			return;
+		}
+	}
+	{
+		const auto _iter = vnx_queue_http_request_chunk.find(_request_id);
+		if(_iter != vnx_queue_http_request_chunk.end()) {
+			const auto _callback = std::move(_iter->second.second);
+			vnx_queue_http_request_chunk.erase(_iter);
 			vnx_num_pending--;
 			_lock.unlock();
 			if(_callback) {
@@ -76,6 +110,24 @@ void HttpComponentAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 		if(_iter != vnx_queue_http_request.end()) {
 			const auto _callback = std::move(_iter->second.first);
 			vnx_queue_http_request.erase(_iter);
+			vnx_num_pending--;
+			_lock.unlock();
+			if(_callback) {
+				_callback(_result->_ret_0);
+			}
+		} else {
+			throw std::runtime_error("HttpComponentAsyncClient: received unknown return request_id");
+		}
+	}
+	else if(_type_hash == vnx::Hash64(0x658054b78953521aull)) {
+		auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_chunk_return>(_value);
+		if(!_result) {
+			throw std::logic_error("HttpComponentAsyncClient: !_result");
+		}
+		const auto _iter = vnx_queue_http_request_chunk.find(_request_id);
+		if(_iter != vnx_queue_http_request_chunk.end()) {
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_http_request_chunk.erase(_iter);
 			vnx_num_pending--;
 			_lock.unlock();
 			if(_callback) {

@@ -4,12 +4,12 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpServerClient.hxx>
 #include <vnx/Module.h>
-#include <vnx/ModuleInterface_vnx_close.hxx>
-#include <vnx/ModuleInterface_vnx_close_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_config.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_object.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_object_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_return.hxx>
+#include <vnx/ModuleInterface_vnx_get_module_info.hxx>
+#include <vnx/ModuleInterface_vnx_get_module_info_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code_return.hxx>
 #include <vnx/ModuleInterface_vnx_restart.hxx>
@@ -18,8 +18,12 @@
 #include <vnx/ModuleInterface_vnx_set_config_object.hxx>
 #include <vnx/ModuleInterface_vnx_set_config_object_return.hxx>
 #include <vnx/ModuleInterface_vnx_set_config_return.hxx>
+#include <vnx/ModuleInterface_vnx_stop.hxx>
+#include <vnx/ModuleInterface_vnx_stop_return.hxx>
 #include <vnx/TopicPtr.hpp>
 #include <vnx/addons/HttpComponent_http_request.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk_return.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
@@ -97,6 +101,16 @@ void HttpServerClient::vnx_set_config_async(const std::string& name, const ::vnx
 	return _result->_ret_0;
 }
 
+std::shared_ptr<const ::vnx::ModuleInfo> HttpServerClient::vnx_get_module_info() {
+	auto _method = ::vnx::ModuleInterface_vnx_get_module_info::create();
+	auto _return_value = vnx_request(_method, false);
+	auto _result = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_module_info_return>(_return_value);
+	if(!_result) {
+		throw std::logic_error("HttpServerClient: !_result");
+	}
+	return _result->_ret_0;
+}
+
 void HttpServerClient::vnx_restart() {
 	auto _method = ::vnx::ModuleInterface_vnx_restart::create();
 	vnx_request(_method, false);
@@ -107,13 +121,13 @@ void HttpServerClient::vnx_restart_async() {
 	vnx_request(_method, true);
 }
 
-void HttpServerClient::vnx_close() {
-	auto _method = ::vnx::ModuleInterface_vnx_close::create();
+void HttpServerClient::vnx_stop() {
+	auto _method = ::vnx::ModuleInterface_vnx_stop::create();
 	vnx_request(_method, false);
 }
 
-void HttpServerClient::vnx_close_async() {
-	auto _method = ::vnx::ModuleInterface_vnx_close::create();
+void HttpServerClient::vnx_stop_async() {
+	auto _method = ::vnx::ModuleInterface_vnx_stop::create();
 	vnx_request(_method, true);
 }
 
@@ -123,6 +137,20 @@ std::shared_ptr<const ::vnx::addons::HttpResponse> HttpServerClient::http_reques
 	_method->sub_path = sub_path;
 	auto _return_value = vnx_request(_method, false);
 	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_return_value);
+	if(!_result) {
+		throw std::logic_error("HttpServerClient: !_result");
+	}
+	return _result->_ret_0;
+}
+
+std::shared_ptr<const ::vnx::addons::HttpResponse> HttpServerClient::http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes) {
+	auto _method = ::vnx::addons::HttpComponent_http_request_chunk::create();
+	_method->request = request;
+	_method->sub_path = sub_path;
+	_method->offset = offset;
+	_method->max_bytes = max_bytes;
+	auto _return_value = vnx_request(_method, false);
+	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_chunk_return>(_return_value);
 	if(!_result) {
 		throw std::logic_error("HttpServerClient: !_result");
 	}

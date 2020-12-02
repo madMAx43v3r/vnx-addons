@@ -7,6 +7,7 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/Buffer.hpp>
 #include <vnx/Value.h>
+#include <vnx/addons/HttpSession.hxx>
 
 
 namespace vnx {
@@ -20,9 +21,11 @@ public:
 	std::string path;
 	std::string method;
 	std::string content_type;
+	std::map<std::string, std::string> cookies;
 	std::map<std::string, std::string> query_params;
 	std::vector<std::pair<std::string, std::string>> headers;
 	::vnx::Buffer payload;
+	std::shared_ptr<const ::vnx::addons::HttpSession> session;
 	
 	typedef ::vnx::Value Super;
 	
@@ -30,7 +33,7 @@ public:
 	static const vnx::Hash64 VNX_CODE_HASH;
 	
 	vnx::Hash64 get_type_hash() const override;
-	const char* get_type_name() const override;
+	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
 	
 	virtual std::string get_header_value(const std::string& key) const;

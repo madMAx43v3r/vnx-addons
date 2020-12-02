@@ -20,6 +20,9 @@ public:
 	std::string content_type;
 	std::vector<std::pair<std::string, std::string>> headers;
 	::vnx::Buffer payload;
+	vnx::bool_t is_chunked = 0;
+	int64_t chunked_total_size = 0;
+	std::string error_text;
 	
 	typedef ::vnx::Value Super;
 	
@@ -27,7 +30,7 @@ public:
 	static const vnx::Hash64 VNX_CODE_HASH;
 	
 	vnx::Hash64 get_type_hash() const override;
-	const char* get_type_name() const override;
+	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
 	
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_status(const int32_t& status);

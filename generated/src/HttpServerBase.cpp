@@ -5,12 +5,12 @@
 #include <vnx/addons/HttpServerBase.hxx>
 #include <vnx/NoSuchMethod.hxx>
 #include <vnx/Module.h>
-#include <vnx/ModuleInterface_vnx_close.hxx>
-#include <vnx/ModuleInterface_vnx_close_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_config.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_object.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_object_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_config_return.hxx>
+#include <vnx/ModuleInterface_vnx_get_module_info.hxx>
+#include <vnx/ModuleInterface_vnx_get_module_info_return.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code.hxx>
 #include <vnx/ModuleInterface_vnx_get_type_code_return.hxx>
 #include <vnx/ModuleInterface_vnx_restart.hxx>
@@ -19,8 +19,12 @@
 #include <vnx/ModuleInterface_vnx_set_config_object.hxx>
 #include <vnx/ModuleInterface_vnx_set_config_object_return.hxx>
 #include <vnx/ModuleInterface_vnx_set_config_return.hxx>
+#include <vnx/ModuleInterface_vnx_stop.hxx>
+#include <vnx/ModuleInterface_vnx_stop_return.hxx>
 #include <vnx/TopicPtr.hpp>
 #include <vnx/addons/HttpComponent_http_request.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk.hxx>
+#include <vnx/addons/HttpComponent_http_request_chunk_return.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
@@ -33,16 +37,30 @@ namespace addons {
 
 
 const vnx::Hash64 HttpServerBase::VNX_TYPE_HASH(0xf05b2d0ac45a8a7bull);
-const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0x72833dad80654362ull);
+const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0xd573c0184ff1fb42ull);
 
 HttpServerBase::HttpServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
 {
+	vnx::read_config(vnx_name + ".access_control_allow_origin", access_control_allow_origin);
+	vnx::read_config(vnx_name + ".auto_session", auto_session);
+	vnx::read_config(vnx_name + ".chunk_size", chunk_size);
 	vnx::read_config(vnx_name + ".components", components);
+	vnx::read_config(vnx_name + ".content_security_policy", content_security_policy);
+	vnx::read_config(vnx_name + ".cookie_policy", cookie_policy);
+	vnx::read_config(vnx_name + ".default_access", default_access);
+	vnx::read_config(vnx_name + ".error_payload", error_payload);
+	vnx::read_config(vnx_name + ".login_path", login_path);
+	vnx::read_config(vnx_name + ".logout_path", logout_path);
 	vnx::read_config(vnx_name + ".max_payload_size", max_payload_size);
+	vnx::read_config(vnx_name + ".non_blocking", non_blocking);
 	vnx::read_config(vnx_name + ".output_request", output_request);
 	vnx::read_config(vnx_name + ".output_response", output_response);
 	vnx::read_config(vnx_name + ".port", port);
+	vnx::read_config(vnx_name + ".session_coookie_name", session_coookie_name);
+	vnx::read_config(vnx_name + ".session_path", session_path);
+	vnx::read_config(vnx_name + ".session_size", session_size);
+	vnx::read_config(vnx_name + ".session_timeout", session_timeout);
 	vnx::read_config(vnx_name + ".show_info", show_info);
 	vnx::read_config(vnx_name + ".show_warnings", show_warnings);
 	vnx::read_config(vnx_name + ".use_epoll", use_epoll);
@@ -52,7 +70,7 @@ vnx::Hash64 HttpServerBase::get_type_hash() const {
 	return VNX_TYPE_HASH;
 }
 
-const char* HttpServerBase::get_type_name() const {
+std::string HttpServerBase::get_type_name() const {
 	return "vnx.addons.HttpServer";
 }
 
@@ -67,10 +85,24 @@ void HttpServerBase::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[1], 1); vnx::accept(_visitor, output_response);
 	_visitor.type_field(_type_code->fields[2], 2); vnx::accept(_visitor, port);
 	_visitor.type_field(_type_code->fields[3], 3); vnx::accept(_visitor, use_epoll);
-	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, show_info);
-	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, show_warnings);
-	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, max_payload_size);
-	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, components);
+	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, non_blocking);
+	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, show_info);
+	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, show_warnings);
+	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, error_payload);
+	_visitor.type_field(_type_code->fields[8], 8); vnx::accept(_visitor, auto_session);
+	_visitor.type_field(_type_code->fields[9], 9); vnx::accept(_visitor, session_size);
+	_visitor.type_field(_type_code->fields[10], 10); vnx::accept(_visitor, session_timeout);
+	_visitor.type_field(_type_code->fields[11], 11); vnx::accept(_visitor, max_payload_size);
+	_visitor.type_field(_type_code->fields[12], 12); vnx::accept(_visitor, chunk_size);
+	_visitor.type_field(_type_code->fields[13], 13); vnx::accept(_visitor, components);
+	_visitor.type_field(_type_code->fields[14], 14); vnx::accept(_visitor, access_control_allow_origin);
+	_visitor.type_field(_type_code->fields[15], 15); vnx::accept(_visitor, content_security_policy);
+	_visitor.type_field(_type_code->fields[16], 16); vnx::accept(_visitor, cookie_policy);
+	_visitor.type_field(_type_code->fields[17], 17); vnx::accept(_visitor, session_coookie_name);
+	_visitor.type_field(_type_code->fields[18], 18); vnx::accept(_visitor, default_access);
+	_visitor.type_field(_type_code->fields[19], 19); vnx::accept(_visitor, login_path);
+	_visitor.type_field(_type_code->fields[20], 20); vnx::accept(_visitor, logout_path);
+	_visitor.type_field(_type_code->fields[21], 21); vnx::accept(_visitor, session_path);
 	_visitor.type_end(*_type_code);
 }
 
@@ -80,10 +112,24 @@ void HttpServerBase::write(std::ostream& _out) const {
 	_out << ", \"output_response\": "; vnx::write(_out, output_response);
 	_out << ", \"port\": "; vnx::write(_out, port);
 	_out << ", \"use_epoll\": "; vnx::write(_out, use_epoll);
+	_out << ", \"non_blocking\": "; vnx::write(_out, non_blocking);
 	_out << ", \"show_info\": "; vnx::write(_out, show_info);
 	_out << ", \"show_warnings\": "; vnx::write(_out, show_warnings);
+	_out << ", \"error_payload\": "; vnx::write(_out, error_payload);
+	_out << ", \"auto_session\": "; vnx::write(_out, auto_session);
+	_out << ", \"session_size\": "; vnx::write(_out, session_size);
+	_out << ", \"session_timeout\": "; vnx::write(_out, session_timeout);
 	_out << ", \"max_payload_size\": "; vnx::write(_out, max_payload_size);
+	_out << ", \"chunk_size\": "; vnx::write(_out, chunk_size);
 	_out << ", \"components\": "; vnx::write(_out, components);
+	_out << ", \"access_control_allow_origin\": "; vnx::write(_out, access_control_allow_origin);
+	_out << ", \"content_security_policy\": "; vnx::write(_out, content_security_policy);
+	_out << ", \"cookie_policy\": "; vnx::write(_out, cookie_policy);
+	_out << ", \"session_coookie_name\": "; vnx::write(_out, session_coookie_name);
+	_out << ", \"default_access\": "; vnx::write(_out, default_access);
+	_out << ", \"login_path\": "; vnx::write(_out, login_path);
+	_out << ", \"logout_path\": "; vnx::write(_out, logout_path);
+	_out << ", \"session_path\": "; vnx::write(_out, session_path);
 	_out << "}";
 }
 
@@ -91,16 +137,44 @@ void HttpServerBase::read(std::istream& _in) {
 	std::map<std::string, std::string> _object;
 	vnx::read_object(_in, _object);
 	for(const auto& _entry : _object) {
-		if(_entry.first == "components") {
+		if(_entry.first == "access_control_allow_origin") {
+			vnx::from_string(_entry.second, access_control_allow_origin);
+		} else if(_entry.first == "auto_session") {
+			vnx::from_string(_entry.second, auto_session);
+		} else if(_entry.first == "chunk_size") {
+			vnx::from_string(_entry.second, chunk_size);
+		} else if(_entry.first == "components") {
 			vnx::from_string(_entry.second, components);
+		} else if(_entry.first == "content_security_policy") {
+			vnx::from_string(_entry.second, content_security_policy);
+		} else if(_entry.first == "cookie_policy") {
+			vnx::from_string(_entry.second, cookie_policy);
+		} else if(_entry.first == "default_access") {
+			vnx::from_string(_entry.second, default_access);
+		} else if(_entry.first == "error_payload") {
+			vnx::from_string(_entry.second, error_payload);
+		} else if(_entry.first == "login_path") {
+			vnx::from_string(_entry.second, login_path);
+		} else if(_entry.first == "logout_path") {
+			vnx::from_string(_entry.second, logout_path);
 		} else if(_entry.first == "max_payload_size") {
 			vnx::from_string(_entry.second, max_payload_size);
+		} else if(_entry.first == "non_blocking") {
+			vnx::from_string(_entry.second, non_blocking);
 		} else if(_entry.first == "output_request") {
 			vnx::from_string(_entry.second, output_request);
 		} else if(_entry.first == "output_response") {
 			vnx::from_string(_entry.second, output_response);
 		} else if(_entry.first == "port") {
 			vnx::from_string(_entry.second, port);
+		} else if(_entry.first == "session_coookie_name") {
+			vnx::from_string(_entry.second, session_coookie_name);
+		} else if(_entry.first == "session_path") {
+			vnx::from_string(_entry.second, session_path);
+		} else if(_entry.first == "session_size") {
+			vnx::from_string(_entry.second, session_size);
+		} else if(_entry.first == "session_timeout") {
+			vnx::from_string(_entry.second, session_timeout);
 		} else if(_entry.first == "show_info") {
 			vnx::from_string(_entry.second, show_info);
 		} else if(_entry.first == "show_warnings") {
@@ -113,29 +187,72 @@ void HttpServerBase::read(std::istream& _in) {
 
 vnx::Object HttpServerBase::to_object() const {
 	vnx::Object _object;
+	_object["__type"] = "vnx.addons.HttpServer";
 	_object["output_request"] = output_request;
 	_object["output_response"] = output_response;
 	_object["port"] = port;
 	_object["use_epoll"] = use_epoll;
+	_object["non_blocking"] = non_blocking;
 	_object["show_info"] = show_info;
 	_object["show_warnings"] = show_warnings;
+	_object["error_payload"] = error_payload;
+	_object["auto_session"] = auto_session;
+	_object["session_size"] = session_size;
+	_object["session_timeout"] = session_timeout;
 	_object["max_payload_size"] = max_payload_size;
+	_object["chunk_size"] = chunk_size;
 	_object["components"] = components;
+	_object["access_control_allow_origin"] = access_control_allow_origin;
+	_object["content_security_policy"] = content_security_policy;
+	_object["cookie_policy"] = cookie_policy;
+	_object["session_coookie_name"] = session_coookie_name;
+	_object["default_access"] = default_access;
+	_object["login_path"] = login_path;
+	_object["logout_path"] = logout_path;
+	_object["session_path"] = session_path;
 	return _object;
 }
 
 void HttpServerBase::from_object(const vnx::Object& _object) {
 	for(const auto& _entry : _object.field) {
-		if(_entry.first == "components") {
+		if(_entry.first == "access_control_allow_origin") {
+			_entry.second.to(access_control_allow_origin);
+		} else if(_entry.first == "auto_session") {
+			_entry.second.to(auto_session);
+		} else if(_entry.first == "chunk_size") {
+			_entry.second.to(chunk_size);
+		} else if(_entry.first == "components") {
 			_entry.second.to(components);
+		} else if(_entry.first == "content_security_policy") {
+			_entry.second.to(content_security_policy);
+		} else if(_entry.first == "cookie_policy") {
+			_entry.second.to(cookie_policy);
+		} else if(_entry.first == "default_access") {
+			_entry.second.to(default_access);
+		} else if(_entry.first == "error_payload") {
+			_entry.second.to(error_payload);
+		} else if(_entry.first == "login_path") {
+			_entry.second.to(login_path);
+		} else if(_entry.first == "logout_path") {
+			_entry.second.to(logout_path);
 		} else if(_entry.first == "max_payload_size") {
 			_entry.second.to(max_payload_size);
+		} else if(_entry.first == "non_blocking") {
+			_entry.second.to(non_blocking);
 		} else if(_entry.first == "output_request") {
 			_entry.second.to(output_request);
 		} else if(_entry.first == "output_response") {
 			_entry.second.to(output_response);
 		} else if(_entry.first == "port") {
 			_entry.second.to(port);
+		} else if(_entry.first == "session_coookie_name") {
+			_entry.second.to(session_coookie_name);
+		} else if(_entry.first == "session_path") {
+			_entry.second.to(session_path);
+		} else if(_entry.first == "session_size") {
+			_entry.second.to(session_size);
+		} else if(_entry.first == "session_timeout") {
+			_entry.second.to(session_timeout);
 		} else if(_entry.first == "show_info") {
 			_entry.second.to(show_info);
 		} else if(_entry.first == "show_warnings") {
@@ -159,17 +276,59 @@ vnx::Variant HttpServerBase::get_field(const std::string& _name) const {
 	if(_name == "use_epoll") {
 		return vnx::Variant(use_epoll);
 	}
+	if(_name == "non_blocking") {
+		return vnx::Variant(non_blocking);
+	}
 	if(_name == "show_info") {
 		return vnx::Variant(show_info);
 	}
 	if(_name == "show_warnings") {
 		return vnx::Variant(show_warnings);
 	}
+	if(_name == "error_payload") {
+		return vnx::Variant(error_payload);
+	}
+	if(_name == "auto_session") {
+		return vnx::Variant(auto_session);
+	}
+	if(_name == "session_size") {
+		return vnx::Variant(session_size);
+	}
+	if(_name == "session_timeout") {
+		return vnx::Variant(session_timeout);
+	}
 	if(_name == "max_payload_size") {
 		return vnx::Variant(max_payload_size);
 	}
+	if(_name == "chunk_size") {
+		return vnx::Variant(chunk_size);
+	}
 	if(_name == "components") {
 		return vnx::Variant(components);
+	}
+	if(_name == "access_control_allow_origin") {
+		return vnx::Variant(access_control_allow_origin);
+	}
+	if(_name == "content_security_policy") {
+		return vnx::Variant(content_security_policy);
+	}
+	if(_name == "cookie_policy") {
+		return vnx::Variant(cookie_policy);
+	}
+	if(_name == "session_coookie_name") {
+		return vnx::Variant(session_coookie_name);
+	}
+	if(_name == "default_access") {
+		return vnx::Variant(default_access);
+	}
+	if(_name == "login_path") {
+		return vnx::Variant(login_path);
+	}
+	if(_name == "logout_path") {
+		return vnx::Variant(logout_path);
+	}
+	if(_name == "session_path") {
+		return vnx::Variant(session_path);
 	}
 	return vnx::Variant();
 }
@@ -183,14 +342,42 @@ void HttpServerBase::set_field(const std::string& _name, const vnx::Variant& _va
 		_value.to(port);
 	} else if(_name == "use_epoll") {
 		_value.to(use_epoll);
+	} else if(_name == "non_blocking") {
+		_value.to(non_blocking);
 	} else if(_name == "show_info") {
 		_value.to(show_info);
 	} else if(_name == "show_warnings") {
 		_value.to(show_warnings);
+	} else if(_name == "error_payload") {
+		_value.to(error_payload);
+	} else if(_name == "auto_session") {
+		_value.to(auto_session);
+	} else if(_name == "session_size") {
+		_value.to(session_size);
+	} else if(_name == "session_timeout") {
+		_value.to(session_timeout);
 	} else if(_name == "max_payload_size") {
 		_value.to(max_payload_size);
+	} else if(_name == "chunk_size") {
+		_value.to(chunk_size);
 	} else if(_name == "components") {
 		_value.to(components);
+	} else if(_name == "access_control_allow_origin") {
+		_value.to(access_control_allow_origin);
+	} else if(_name == "content_security_policy") {
+		_value.to(content_security_policy);
+	} else if(_name == "cookie_policy") {
+		_value.to(cookie_policy);
+	} else if(_name == "session_coookie_name") {
+		_value.to(session_coookie_name);
+	} else if(_name == "default_access") {
+		_value.to(default_access);
+	} else if(_name == "login_path") {
+		_value.to(login_path);
+	} else if(_name == "logout_path") {
+		_value.to(logout_path);
+	} else if(_name == "session_path") {
+		_value.to(session_path);
 	} else {
 		throw std::logic_error("no such field: '" + _name + "'");
 	}
@@ -220,18 +407,20 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpServer";
 	type_code->type_hash = vnx::Hash64(0xf05b2d0ac45a8a7bull);
-	type_code->code_hash = vnx::Hash64(0x72833dad80654362ull);
+	type_code->code_hash = vnx::Hash64(0xd573c0184ff1fb42ull);
 	type_code->is_native = true;
-	type_code->methods.resize(8);
+	type_code->methods.resize(10);
 	type_code->methods[0] = ::vnx::ModuleInterface_vnx_get_config_object::static_get_type_code();
 	type_code->methods[1] = ::vnx::ModuleInterface_vnx_get_config::static_get_type_code();
 	type_code->methods[2] = ::vnx::ModuleInterface_vnx_set_config_object::static_get_type_code();
 	type_code->methods[3] = ::vnx::ModuleInterface_vnx_set_config::static_get_type_code();
 	type_code->methods[4] = ::vnx::ModuleInterface_vnx_get_type_code::static_get_type_code();
-	type_code->methods[5] = ::vnx::ModuleInterface_vnx_restart::static_get_type_code();
-	type_code->methods[6] = ::vnx::ModuleInterface_vnx_close::static_get_type_code();
-	type_code->methods[7] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
-	type_code->fields.resize(8);
+	type_code->methods[5] = ::vnx::ModuleInterface_vnx_get_module_info::static_get_type_code();
+	type_code->methods[6] = ::vnx::ModuleInterface_vnx_restart::static_get_type_code();
+	type_code->methods[7] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
+	type_code->methods[8] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
+	type_code->methods[9] = ::vnx::addons::HttpComponent_http_request_chunk::static_get_type_code();
+	type_code->fields.resize(22);
 	{
 		vnx::TypeField& field = type_code->fields[0];
 		field.is_extended = true;
@@ -258,27 +447,119 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	}
 	{
 		vnx::TypeField& field = type_code->fields[4];
+		field.name = "non_blocking";
+		field.value = vnx::to_string(true);
+		field.code = {31};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[5];
 		field.name = "show_info";
 		field.value = vnx::to_string(false);
 		field.code = {31};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[5];
+		vnx::TypeField& field = type_code->fields[6];
 		field.name = "show_warnings";
 		field.value = vnx::to_string(false);
 		field.code = {31};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[6];
-		field.name = "max_payload_size";
-		field.value = vnx::to_string(-1);
+		vnx::TypeField& field = type_code->fields[7];
+		field.name = "error_payload";
+		field.value = vnx::to_string(true);
+		field.code = {31};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[8];
+		field.name = "auto_session";
+		field.value = vnx::to_string(false);
+		field.code = {31};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[9];
+		field.name = "session_size";
+		field.value = vnx::to_string(3);
+		field.code = {7};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[10];
+		field.name = "session_timeout";
+		field.value = vnx::to_string(86400);
 		field.code = {8};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[7];
+		vnx::TypeField& field = type_code->fields[11];
+		field.name = "max_payload_size";
+		field.value = vnx::to_string(16777216);
+		field.code = {8};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[12];
+		field.name = "chunk_size";
+		field.value = vnx::to_string(1048576);
+		field.code = {4};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[13];
 		field.is_extended = true;
 		field.name = "components";
 		field.code = {13, 3, 32, 32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[14];
+		field.is_extended = true;
+		field.name = "access_control_allow_origin";
+		field.value = vnx::to_string("*");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[15];
+		field.is_extended = true;
+		field.name = "content_security_policy";
+		field.value = vnx::to_string("");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[16];
+		field.is_extended = true;
+		field.name = "cookie_policy";
+		field.value = vnx::to_string("SameSite=Strict;");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[17];
+		field.is_extended = true;
+		field.name = "session_coookie_name";
+		field.value = vnx::to_string("hsid");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[18];
+		field.is_extended = true;
+		field.name = "default_access";
+		field.value = vnx::to_string("VIEWER");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[19];
+		field.is_extended = true;
+		field.name = "login_path";
+		field.value = vnx::to_string("/login");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[20];
+		field.is_extended = true;
+		field.name = "logout_path";
+		field.value = vnx::to_string("/logout");
+		field.code = {32};
+	}
+	{
+		vnx::TypeField& field = type_code->fields[21];
+		field.is_extended = true;
+		field.name = "session_path";
+		field.value = vnx::to_string("/session");
+		field.code = {32};
 	}
 	type_code->build();
 	return type_code;
@@ -329,6 +610,14 @@ std::shared_ptr<vnx::Value> HttpServerBase::vnx_call_switch(std::shared_ptr<cons
 		auto _return_value = ::vnx::ModuleInterface_vnx_get_type_code_return::create();
 		_return_value->_ret_0 = vnx_get_type_code();
 		return _return_value;
+	} else if(_type_hash == vnx::Hash64(0xf6d82bdf66d034a1ull)) {
+		auto _args = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_get_module_info>(_method);
+		if(!_args) {
+			throw std::logic_error("vnx_call_switch(): !_args");
+		}
+		auto _return_value = ::vnx::ModuleInterface_vnx_get_module_info_return::create();
+		_return_value->_ret_0 = vnx_get_module_info();
+		return _return_value;
 	} else if(_type_hash == vnx::Hash64(0x9e95dc280cecca1bull)) {
 		auto _args = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_restart>(_method);
 		if(!_args) {
@@ -337,13 +626,13 @@ std::shared_ptr<vnx::Value> HttpServerBase::vnx_call_switch(std::shared_ptr<cons
 		auto _return_value = ::vnx::ModuleInterface_vnx_restart_return::create();
 		vnx_restart();
 		return _return_value;
-	} else if(_type_hash == vnx::Hash64(0x9e165e2b50bad84bull)) {
-		auto _args = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_close>(_method);
+	} else if(_type_hash == vnx::Hash64(0x7ab49ce3d1bfc0d2ull)) {
+		auto _args = std::dynamic_pointer_cast<const ::vnx::ModuleInterface_vnx_stop>(_method);
 		if(!_args) {
 			throw std::logic_error("vnx_call_switch(): !_args");
 		}
-		auto _return_value = ::vnx::ModuleInterface_vnx_close_return::create();
-		vnx_close();
+		auto _return_value = ::vnx::ModuleInterface_vnx_stop_return::create();
+		vnx_stop();
 		return _return_value;
 	} else if(_type_hash == vnx::Hash64(0xe0b6c38f619bad92ull)) {
 		auto _args = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request>(_method);
@@ -352,15 +641,28 @@ std::shared_ptr<vnx::Value> HttpServerBase::vnx_call_switch(std::shared_ptr<cons
 		}
 		http_request_async(_args->request, _args->sub_path, _request_id);
 		return 0;
+	} else if(_type_hash == vnx::Hash64(0x97e79d08440406d5ull)) {
+		auto _args = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_chunk>(_method);
+		if(!_args) {
+			throw std::logic_error("vnx_call_switch(): !_args");
+		}
+		http_request_chunk_async(_args->request, _args->sub_path, _args->offset, _args->max_bytes, _request_id);
+		return 0;
 	}
 	auto _ex = vnx::NoSuchMethod::create();
-	_ex->dst_mac = vnx_request ? vnx_request->dst_mac : 0;
+	_ex->dst_mac = vnx_request ? vnx_request->dst_mac : vnx::Hash64();
 	_ex->method = _method->get_type_name();
 	return _ex;
 }
 
 void HttpServerBase::http_request_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const {
 	auto _return_value = ::vnx::addons::HttpComponent_http_request_return::create();
+	_return_value->_ret_0 = _ret_0;
+	vnx_async_return(_request_id, _return_value);
+}
+
+void HttpServerBase::http_request_chunk_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const {
+	auto _return_value = ::vnx::addons::HttpComponent_http_request_chunk_return::create();
 	_return_value->_ret_0 = _ret_0;
 	vnx_async_return(_request_id, _return_value);
 }
@@ -389,13 +691,17 @@ void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* t
 		}
 	}
 	if(!type_code) {
-		throw std::logic_error("read(): type_code == 0");
+		vnx::skip(in, type_code, code);
+		return;
 	}
 	if(code) {
 		switch(code[0]) {
 			case CODE_STRUCT: type_code = type_code->depends[code[1]]; break;
 			case CODE_ALT_STRUCT: type_code = type_code->depends[vnx::flip_bytes(code[1])]; break;
-			default: vnx::skip(in, type_code, code); return;
+			default: {
+				vnx::skip(in, type_code, code);
+				return;
+			}
 		}
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
@@ -415,19 +721,55 @@ void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* t
 		{
 			const vnx::TypeField* const _field = type_code->field_map[4];
 			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.show_info, _field->code.data());
+				vnx::read_value(_buf + _field->offset, value.non_blocking, _field->code.data());
 			}
 		}
 		{
 			const vnx::TypeField* const _field = type_code->field_map[5];
 			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.show_warnings, _field->code.data());
+				vnx::read_value(_buf + _field->offset, value.show_info, _field->code.data());
 			}
 		}
 		{
 			const vnx::TypeField* const _field = type_code->field_map[6];
 			if(_field) {
+				vnx::read_value(_buf + _field->offset, value.show_warnings, _field->code.data());
+			}
+		}
+		{
+			const vnx::TypeField* const _field = type_code->field_map[7];
+			if(_field) {
+				vnx::read_value(_buf + _field->offset, value.error_payload, _field->code.data());
+			}
+		}
+		{
+			const vnx::TypeField* const _field = type_code->field_map[8];
+			if(_field) {
+				vnx::read_value(_buf + _field->offset, value.auto_session, _field->code.data());
+			}
+		}
+		{
+			const vnx::TypeField* const _field = type_code->field_map[9];
+			if(_field) {
+				vnx::read_value(_buf + _field->offset, value.session_size, _field->code.data());
+			}
+		}
+		{
+			const vnx::TypeField* const _field = type_code->field_map[10];
+			if(_field) {
+				vnx::read_value(_buf + _field->offset, value.session_timeout, _field->code.data());
+			}
+		}
+		{
+			const vnx::TypeField* const _field = type_code->field_map[11];
+			if(_field) {
 				vnx::read_value(_buf + _field->offset, value.max_payload_size, _field->code.data());
+			}
+		}
+		{
+			const vnx::TypeField* const _field = type_code->field_map[12];
+			if(_field) {
+				vnx::read_value(_buf + _field->offset, value.chunk_size, _field->code.data());
 			}
 		}
 	}
@@ -435,7 +777,15 @@ void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* t
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.output_request, type_code, _field->code.data()); break;
 			case 1: vnx::read(in, value.output_response, type_code, _field->code.data()); break;
-			case 7: vnx::read(in, value.components, type_code, _field->code.data()); break;
+			case 13: vnx::read(in, value.components, type_code, _field->code.data()); break;
+			case 14: vnx::read(in, value.access_control_allow_origin, type_code, _field->code.data()); break;
+			case 15: vnx::read(in, value.content_security_policy, type_code, _field->code.data()); break;
+			case 16: vnx::read(in, value.cookie_policy, type_code, _field->code.data()); break;
+			case 17: vnx::read(in, value.session_coookie_name, type_code, _field->code.data()); break;
+			case 18: vnx::read(in, value.default_access, type_code, _field->code.data()); break;
+			case 19: vnx::read(in, value.login_path, type_code, _field->code.data()); break;
+			case 20: vnx::read(in, value.logout_path, type_code, _field->code.data()); break;
+			case 21: vnx::read(in, value.session_path, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
 	}
@@ -454,15 +804,29 @@ void write(TypeOutput& out, const ::vnx::addons::HttpServerBase& value, const Ty
 	if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(15);
+	char* const _buf = out.write(38);
 	vnx::write_value(_buf + 0, value.port);
 	vnx::write_value(_buf + 4, value.use_epoll);
-	vnx::write_value(_buf + 5, value.show_info);
-	vnx::write_value(_buf + 6, value.show_warnings);
-	vnx::write_value(_buf + 7, value.max_payload_size);
+	vnx::write_value(_buf + 5, value.non_blocking);
+	vnx::write_value(_buf + 6, value.show_info);
+	vnx::write_value(_buf + 7, value.show_warnings);
+	vnx::write_value(_buf + 8, value.error_payload);
+	vnx::write_value(_buf + 9, value.auto_session);
+	vnx::write_value(_buf + 10, value.session_size);
+	vnx::write_value(_buf + 14, value.session_timeout);
+	vnx::write_value(_buf + 22, value.max_payload_size);
+	vnx::write_value(_buf + 30, value.chunk_size);
 	vnx::write(out, value.output_request, type_code, type_code->fields[0].code.data());
 	vnx::write(out, value.output_response, type_code, type_code->fields[1].code.data());
-	vnx::write(out, value.components, type_code, type_code->fields[7].code.data());
+	vnx::write(out, value.components, type_code, type_code->fields[13].code.data());
+	vnx::write(out, value.access_control_allow_origin, type_code, type_code->fields[14].code.data());
+	vnx::write(out, value.content_security_policy, type_code, type_code->fields[15].code.data());
+	vnx::write(out, value.cookie_policy, type_code, type_code->fields[16].code.data());
+	vnx::write(out, value.session_coookie_name, type_code, type_code->fields[17].code.data());
+	vnx::write(out, value.default_access, type_code, type_code->fields[18].code.data());
+	vnx::write(out, value.login_path, type_code, type_code->fields[19].code.data());
+	vnx::write(out, value.logout_path, type_code, type_code->fields[20].code.data());
+	vnx::write(out, value.session_path, type_code, type_code->fields[21].code.data());
 }
 
 void read(std::istream& in, ::vnx::addons::HttpServerBase& value) {
