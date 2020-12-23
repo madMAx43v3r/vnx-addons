@@ -11,10 +11,10 @@ module FileServer implements HttpComponent {
 	string redirect_not_found;					// optional redirect target for missing files
 	
 	bool allow_directory_list;					// if to allow directory listings
-	
 	bool read_only = true;
 	
-	int max_queue_size = 100;
+	int max_queue_ms = 1000;					// [ms]
+	int max_queue_size = 1000;					// number of requests [1]
 	
 	ulong limit_no_chunk = 1048576;				// maximum file size to send without splitting into chunks [bytes]
 	

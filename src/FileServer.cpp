@@ -28,22 +28,6 @@ void check_permission(std::shared_ptr<const HttpRequest> request, const T& perm)
 FileServer::FileServer(const std::string& _vnx_name)
 	:	FileServerBase(_vnx_name)
 {
-}
-
-void FileServer::init()
-{
-	vnx::open_pipe(vnx_name, this, UNLIMITED, max_queue_size);
-}
-
-void FileServer::main()
-{
-	if(www_root.empty()) {
-		throw std::logic_error("www_root not set");
-	}
-	if(www_root.back() != '/') {
-		www_root.push_back('/');
-	}
-
 	mime_type_map[".html"] = "text/html";
 	mime_type_map[".css"] = "text/css";
 	mime_type_map[".js"] = "application/javascript";
@@ -70,7 +54,21 @@ void FileServer::main()
 	mime_type_map[".lua"] = "text/x-lua";
 	mime_type_map[".sh"] = "text/x-shellscript";
 	mime_type_map[".pdf"] = "application/pdf";
+}
 
+void FileServer::init()
+{
+	vnx::open_pipe(vnx_name, this, max_queue_ms, max_queue_size);
+}
+
+void FileServer::main()
+{
+	if(www_root.empty()) {
+		throw std::logic_error("www_root not set");
+	}
+	if(www_root.back() != '/') {
+		www_root.push_back('/');
+	}
 	log(INFO) << "Running on '" << www_root << "'";
 
 	Super::main();
@@ -202,16 +200,31 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 	auto response = HttpResponse::create();
 	std::string file_path;
 	if(!http_request_boilerplate(request, response, sub_path, file_path)){
-		auto file_size = vnx::File(www_root + file_path).file_size();
-		if(file_size > limit_no_chunk){
-			// leave payload empty and signal chunked transfer to caller
-			response->is_chunked = true;
-			response->chunked_total_size = file_size;
-		}else{
-			response->payload = read_file(file_path);
-			response->is_chunked = false;
+		try {
+			const vnx::File file(www_root + file_path);
+			if(!file.exists()) {
+				throw std::runtime_error("no such file");
+			}
+			if(!file.is_regular()) {
+				throw std::runtime_error("not a regular file");
+			}
+			const auto file_size = file.file_size();
+			if(file_size > limit_no_chunk){
+				// leave payload empty and signal chunked transfer to caller
+				response->is_chunked = true;
+				response->chunked_total_size = file_size;
+			}else{
+				response->is_chunked = false;
+				response->payload = read_file(file_path);
+			}
+			response->content_type = detect_mime_type(file_path);
 		}
-		response->content_type = detect_mime_type(file_path);
+		catch(const std::exception& ex) {
+			response->status = 404;
+			response->payload = ex.what();
+			response->error_text = ex.what();
+			response->content_type = "text/plain";
+		}
 	}
 	http_request_async_return(request_id, response);
 }
@@ -243,8 +256,8 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 	if(file_path.empty()) {
 		file_path = "/";
 	}
-	if(request->method == "GET") {
-		try {
+	try {
+		if(request->method == "GET") {
 			if(file_path.back() == '/') {
 				for(const auto& file_name : directory_files) {
 					const vnx::File file(www_root + file_path + file_name);
@@ -286,11 +299,7 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 			}
 			response->status = 200;
 		}
-		catch(const std::exception& ex) {
-			response->status = 404;
-		}
-	} else if(request->method == "PUT") {
-		try {
+		else if(request->method == "PUT") {
 			if(file_path.back() == '/') {
 				throw std::logic_error("cannot write a directory");
 			}
@@ -298,14 +307,22 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 			write_file_internal(file_path, request->payload);
 			response->status = 200;
 		}
-		catch(const std::exception& ex) {
-			response->status = 403;
-			response->payload = ex.what();
-			response->content_type = "text/plain";
+		else if(request->method == "DELETE") {
+			if(file_path.back() == '/') {
+				throw std::logic_error("cannot delete a directory");
+			}
+			check_permission(request, permission_e::FILE_DELETE);
+			delete_file_internal(file_path);
+			response->status = 200;
 		}
-	} else {
-		response->status = 500;
-		response->payload = "invalid method: " + request->method;
+		else {
+			throw std::runtime_error("invalid method: " + request->method);
+		}
+	}
+	catch(const vnx::permission_denied& ex) {
+		response->status = 403;
+		response->payload = ex.what();
+		response->error_text = ex.what();
 		response->content_type = "text/plain";
 	}
 	return result;
