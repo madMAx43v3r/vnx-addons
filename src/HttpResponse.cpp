@@ -19,6 +19,16 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_status(const int32_t& sta
 	return result;
 }
 
+std::shared_ptr<const HttpResponse> HttpResponse::from_text(const std::string& content)
+{
+	return from_text_ex(content, 200);
+}
+
+std::shared_ptr<const HttpResponse> HttpResponse::from_text_ex(const std::string& content, const int32_t& status)
+{
+	return from_string_ex(content, "text/plain", status);
+}
+
 std::shared_ptr<const HttpResponse> HttpResponse::from_string(const std::string& content, const std::string& mime_type)
 {
 	return from_string_ex(content, mime_type, 200);
@@ -45,7 +55,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_string_json_ex(const std:
 {
 	auto result = HttpResponse::create();
 	result->status = status;
-	result->content_type = "application/json; charset=utf-8";
+	result->content_type = "application/json";
 	result->payload = content;
 	return result;
 }
@@ -59,7 +69,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_object_json_ex(const vnx:
 {
 	auto result = HttpResponse::create();
 	result->status = status;
-	result->content_type = "application/json; charset=utf-8";
+	result->content_type = "application/json";
 	result->payload = vnx::to_string(value);
 	return result;
 }
@@ -73,7 +83,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_value_json_ex(std::shared
 {
 	auto result = HttpResponse::create();
 	result->status = status;
-	result->content_type = "application/json; charset=utf-8";
+	result->content_type = "application/json";
 	result->payload = vnx::to_string(value);
 	return result;
 }

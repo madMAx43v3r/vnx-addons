@@ -131,6 +131,15 @@ HttpServer::HttpServer(const std::string& _vnx_name)
 	:	HttpServerBase(_vnx_name)
 {
 	vnx_clean_exit = true;		// process remaining requests on exit
+
+	charset.emplace("text/html", "utf-8");
+	charset.emplace("text/css", "utf-8");
+	charset.emplace("text/plain", "utf-8");
+	charset.emplace("text/x-tex", "utf-8");
+	charset.emplace("text/x-lua", "utf-8");
+	charset.emplace("text/x-shellscript", "utf-8");
+	charset.emplace("application/json", "utf-8");
+	charset.emplace("application/javascript", "utf-8");
 }
 
 void HttpServer::init()
@@ -380,7 +389,14 @@ void HttpServer::reply(	request_state_t* state,
 		MHD_add_response_header(response, "Content-Security-Policy", content_security_policy.c_str());
 	}
 	if(!result->content_type.empty()) {
-		MHD_add_response_header(response, "Content-Type", result->content_type.c_str());
+		auto content_type = result->content_type;
+		if(content_type.find("charset=") == std::string::npos) {
+			auto iter = charset.find(content_type);
+			if(iter != charset.end()) {
+				content_type += "; charset=" + iter->second;
+			}
+		}
+		MHD_add_response_header(response, "Content-Type", content_type.c_str());
 	}
 	for(const auto& entry : result->headers) {
 		MHD_add_response_header(response, entry.first.c_str(), entry.second.c_str());

@@ -17,6 +17,9 @@ class HttpResponse {
 	
 	
 	static HttpResponse* from_status(int status);
+
+	static HttpResponse* from_text(string content);
+	static HttpResponse* from_text_ex(string content, int status);
 	
 	static HttpResponse* from_string(string content, string mime_type);
 	static HttpResponse* from_string_ex(string content, string mime_type, int status);

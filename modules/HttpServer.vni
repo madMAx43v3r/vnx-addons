@@ -29,6 +29,8 @@ module HttpServer implements HttpComponent {
 	
 	map<string, string> components;			// [url path => module name]
 	
+	map<string, string> charset;			// [mime type => default charset]
+	
 	string access_control_allow_origin = "*";		// "Access-Control-Allow-Origin" HTTP header
 	
 	string content_security_policy = "";			// "Content-Security-Policy" HTTP header
