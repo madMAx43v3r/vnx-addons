@@ -33,4 +33,7 @@ module FileServer implements HttpComponent {
 	@Permission(permission_e.FILE_UPLOAD)
 	void write_file(string path, vnx.Buffer data);
 	
+	@Permission(permission_e.FILE_DELETE)
+	void delete_file(string path);
+	
 }

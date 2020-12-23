@@ -33,6 +33,8 @@ protected:
 
 	void write_file(const std::string& path, const vnx::Buffer& data) override;
 
+	void delete_file(const std::string& path) override;
+
 	void http_request_async(std::shared_ptr<const HttpRequest> request,
 							const std::string& sub_path,
 							const vnx::request_id_t& request_id) const override;
@@ -45,6 +47,8 @@ protected:
 
 private:
 	void write_file_internal(const std::string& path, const vnx::Buffer& data) const;
+
+	void delete_file_internal(const std::string& path) const;
 
 	std::string detect_mime_type(const std::string& path) const;
 

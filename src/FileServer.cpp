@@ -168,6 +168,20 @@ void FileServer::write_file_internal(const std::string& path, const vnx::Buffer&
 	file.close();
 }
 
+void FileServer::delete_file(const std::string& path)
+{
+	delete_file_internal(path);
+}
+
+void FileServer::delete_file_internal(const std::string& path) const
+{
+	if(read_only) {
+		throw std::runtime_error("permission denied (read only)");
+	}
+	vnx::File file(www_root + path);
+	file.remove();
+}
+
 std::string FileServer::detect_mime_type(const std::string& path) const
 {
 	if(!path.empty() && path.back() == '/') {
