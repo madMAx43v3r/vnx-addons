@@ -13,16 +13,19 @@ namespace addons {
 
 struct permission_e {
 	
-	enum enum_t {
+	enum enum_t : uint32_t {
+		FILE_DELETE = 2726888155l,
 		FILE_DOWNLOAD = 1118995787l,
 		FILE_UPLOAD = 1788941922l,
 		READ_DIRECTORY = 1875457109l,
 	};
 	
-	enum_t value = ::vnx::addons::permission_e::enum_t(0);
+	::vnx::addons::permission_e::enum_t value = ::vnx::addons::permission_e::enum_t(0);
 	
 	static const vnx::Hash64 VNX_TYPE_HASH;
 	static const vnx::Hash64 VNX_CODE_HASH;
+	
+	static constexpr uint64_t VNX_TYPE_ID = 0x50d90a32b3efd091ull;
 	
 	permission_e() {}
 	permission_e(const enum_t& _value) { value = _value; }
@@ -96,6 +99,11 @@ std::string to_string_value(const ::vnx::addons::permission_e::enum_t& _value); 
 
 template<>
 std::string to_string_value_full(const ::vnx::addons::permission_e::enum_t& _value); ///< \private
+
+template<>
+struct is_equivalent<::vnx::addons::permission_e> {
+	bool operator()(const uint16_t* code, const TypeCode* type_code);
+};
 
 } // vnx
 

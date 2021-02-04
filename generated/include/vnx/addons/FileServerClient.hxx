@@ -45,6 +45,8 @@ public:
 	
 	void vnx_stop_async();
 	
+	vnx::bool_t vnx_self_test();
+	
 	::vnx::Buffer read_file(const std::string& path);
 	
 	::vnx::Buffer read_file_range(const std::string& path, const int64_t& offset, const int64_t& length);
@@ -56,6 +58,10 @@ public:
 	void write_file(const std::string& path, const ::vnx::Buffer& data);
 	
 	void write_file_async(const std::string& path, const ::vnx::Buffer& data);
+	
+	void delete_file(const std::string& path);
+	
+	void delete_file_async(const std::string& path);
 	
 	std::shared_ptr<const ::vnx::addons::HttpResponse> http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path);
 	

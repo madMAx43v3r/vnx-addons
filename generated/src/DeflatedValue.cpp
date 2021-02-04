@@ -59,12 +59,8 @@ void DeflatedValue::write(std::ostream& _out) const {
 }
 
 void DeflatedValue::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "data") {
-			vnx::from_string(_entry.second, data);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -119,18 +115,19 @@ const vnx::TypeCode* DeflatedValue::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> DeflatedValue::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.DeflatedValue";
 	type_code->type_hash = vnx::Hash64(0xe3d58522f6fb225dull);
 	type_code->code_hash = vnx::Hash64(0x7d9cbb130f072f8aull);
 	type_code->is_native = true;
 	type_code->is_class = true;
+	type_code->native_size = sizeof(::vnx::addons::DeflatedValue);
 	type_code->parents.resize(1);
 	type_code->parents[0] = ::vnx::addons::CompressedValue::static_get_type_code();
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<DeflatedValue>(); };
 	type_code->fields.resize(1);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "data";
 		field.code = {12, 1};
@@ -178,7 +175,7 @@ void read(TypeInput& in, ::vnx::addons::DeflatedValue& value, const TypeCode* ty
 	}
 	if(type_code->is_matched) {
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.data, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
@@ -196,7 +193,7 @@ void write(TypeOutput& out, const ::vnx::addons::DeflatedValue& value, const Typ
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::DeflatedValue>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	vnx::write(out, value.data, type_code, type_code->fields[0].code.data());

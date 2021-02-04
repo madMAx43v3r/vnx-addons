@@ -58,12 +58,8 @@ void FileServer_get_file_info::write(std::ostream& _out) const {
 }
 
 void FileServer_get_file_info::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "path") {
-			vnx::from_string(_entry.second, path);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -118,19 +114,20 @@ const vnx::TypeCode* FileServer_get_file_info::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> FileServer_get_file_info::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.FileServer.get_file_info";
 	type_code->type_hash = vnx::Hash64(0xd0dde082f276b7f1ull);
 	type_code->code_hash = vnx::Hash64(0x56f1c0245432d2d1ull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->is_method = true;
+	type_code->native_size = sizeof(::vnx::addons::FileServer_get_file_info);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<FileServer_get_file_info>(); };
 	type_code->is_const = true;
 	type_code->return_type = ::vnx::addons::FileServer_get_file_info_return::static_get_type_code();
 	type_code->fields.resize(1);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "path";
 		field.code = {32};
@@ -178,7 +175,7 @@ void read(TypeInput& in, ::vnx::addons::FileServer_get_file_info& value, const T
 	}
 	if(type_code->is_matched) {
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.path, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
@@ -196,7 +193,7 @@ void write(TypeOutput& out, const ::vnx::addons::FileServer_get_file_info& value
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::FileServer_get_file_info>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	vnx::write(out, value.path, type_code, type_code->fields[0].code.data());

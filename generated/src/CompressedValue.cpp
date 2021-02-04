@@ -55,8 +55,9 @@ void CompressedValue::write(std::ostream& _out) const {
 }
 
 void CompressedValue::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
+	}
 }
 
 vnx::Object CompressedValue::to_object() const {
@@ -97,12 +98,13 @@ const vnx::TypeCode* CompressedValue::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> CompressedValue::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.CompressedValue";
 	type_code->type_hash = vnx::Hash64(0x50c46e244bd9765dull);
 	type_code->code_hash = vnx::Hash64(0x83f41ad21fe492c6ull);
 	type_code->is_native = true;
 	type_code->is_class = true;
+	type_code->native_size = sizeof(::vnx::addons::CompressedValue);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<CompressedValue>(); };
 	type_code->build();
 	return type_code;
@@ -147,7 +149,7 @@ void read(TypeInput& in, ::vnx::addons::CompressedValue& value, const TypeCode* 
 	}
 	if(type_code->is_matched) {
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
@@ -164,7 +166,7 @@ void write(TypeOutput& out, const ::vnx::addons::CompressedValue& value, const T
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::CompressedValue>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 }

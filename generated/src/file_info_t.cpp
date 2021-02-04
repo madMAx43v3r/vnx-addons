@@ -64,20 +64,8 @@ void file_info_t::write(std::ostream& _out) const {
 }
 
 void file_info_t::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "is_directory") {
-			vnx::from_string(_entry.second, is_directory);
-		} else if(_entry.first == "last_modified") {
-			vnx::from_string(_entry.second, last_modified);
-		} else if(_entry.first == "mime_type") {
-			vnx::from_string(_entry.second, mime_type);
-		} else if(_entry.first == "name") {
-			vnx::from_string(_entry.second, name);
-		} else if(_entry.first == "size") {
-			vnx::from_string(_entry.second, size);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -164,37 +152,41 @@ const vnx::TypeCode* file_info_t::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> file_info_t::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.file_info_t";
 	type_code->type_hash = vnx::Hash64(0x7a1208fc71e8e919ull);
 	type_code->code_hash = vnx::Hash64(0x2d88c73b68266d87ull);
 	type_code->is_native = true;
+	type_code->native_size = sizeof(::vnx::addons::file_info_t);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<vnx::Struct<file_info_t>>(); };
 	type_code->fields.resize(5);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "name";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[1];
+		auto& field = type_code->fields[1];
 		field.is_extended = true;
 		field.name = "mime_type";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[2];
+		auto& field = type_code->fields[2];
+		field.data_size = 8;
 		field.name = "size";
 		field.code = {8};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[3];
+		auto& field = type_code->fields[3];
+		field.data_size = 8;
 		field.name = "last_modified";
 		field.code = {8};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[4];
+		auto& field = type_code->fields[4];
+		field.data_size = 1;
 		field.name = "is_directory";
 		field.code = {31};
 	}
@@ -241,26 +233,17 @@ void read(TypeInput& in, ::vnx::addons::file_info_t& value, const TypeCode* type
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
-		{
-			const vnx::TypeField* const _field = type_code->field_map[2];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.size, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[2]) {
+			vnx::read_value(_buf + _field->offset, value.size, _field->code.data());
 		}
-		{
-			const vnx::TypeField* const _field = type_code->field_map[3];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.last_modified, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[3]) {
+			vnx::read_value(_buf + _field->offset, value.last_modified, _field->code.data());
 		}
-		{
-			const vnx::TypeField* const _field = type_code->field_map[4];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.is_directory, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[4]) {
+			vnx::read_value(_buf + _field->offset, value.is_directory, _field->code.data());
 		}
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.name, type_code, _field->code.data()); break;
 			case 1: vnx::read(in, value.mime_type, type_code, _field->code.data()); break;
@@ -279,7 +262,7 @@ void write(TypeOutput& out, const ::vnx::addons::file_info_t& value, const TypeC
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::file_info_t>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	char* const _buf = out.write(17);
@@ -300,6 +283,14 @@ void write(std::ostream& out, const ::vnx::addons::file_info_t& value) {
 
 void accept(Visitor& visitor, const ::vnx::addons::file_info_t& value) {
 	value.accept(visitor);
+}
+
+bool is_equivalent<::vnx::addons::file_info_t>::operator()(const uint16_t* code, const TypeCode* type_code) {
+	if(code[0] != CODE_STRUCT || !type_code) {
+		return false;
+	}
+	type_code = type_code->depends[code[1]];
+	return type_code->type_hash == ::vnx::addons::file_info_t::VNX_TYPE_HASH && type_code->is_equivalent;
 }
 
 } // vnx

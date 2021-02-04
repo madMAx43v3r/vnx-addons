@@ -16,6 +16,8 @@ namespace addons {
 class CompressedValue;
 class DeflatedValue;
 class FileServerBase;
+class FileServer_delete_file;
+class FileServer_delete_file_return;
 class FileServer_get_file_info;
 class FileServer_get_file_info_return;
 class FileServer_read_directory;
@@ -41,6 +43,8 @@ class permission_e;
 extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_FileServerBase; ///< \private
+extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file; ///< \private
+extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file_return; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info_return; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_directory; ///< \private
@@ -71,6 +75,8 @@ namespace vnx {
 void read(TypeInput& in, ::vnx::addons::CompressedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::DeflatedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::FileServer_delete_file& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::FileServer_delete_file_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_get_file_info& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_get_file_info_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_read_directory& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -96,6 +102,8 @@ void read(TypeInput& in, ::vnx::addons::permission_e& value, const TypeCode* typ
 void write(TypeOutput& out, const ::vnx::addons::CompressedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::DeflatedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::FileServer_delete_file& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::FileServer_delete_file_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_get_file_info& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_get_file_info_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_read_directory& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -121,6 +129,8 @@ void write(TypeOutput& out, const ::vnx::addons::permission_e& value, const Type
 void read(std::istream& in, ::vnx::addons::CompressedValue& value); ///< \private
 void read(std::istream& in, ::vnx::addons::DeflatedValue& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServerBase& value); ///< \private
+void read(std::istream& in, ::vnx::addons::FileServer_delete_file& value); ///< \private
+void read(std::istream& in, ::vnx::addons::FileServer_delete_file_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_get_file_info& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_get_file_info_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_read_directory& value); ///< \private
@@ -146,6 +156,8 @@ void read(std::istream& in, ::vnx::addons::permission_e& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::CompressedValue& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::DeflatedValue& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServerBase& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::FileServer_delete_file& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::FileServer_delete_file_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_get_file_info& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_get_file_info_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_read_directory& value); ///< \private
@@ -171,6 +183,8 @@ void write(std::ostream& out, const ::vnx::addons::permission_e& value); ///< \p
 void accept(Visitor& visitor, const ::vnx::addons::CompressedValue& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServerBase& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_get_file_info& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_get_file_info_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_directory& value); ///< \private
@@ -258,6 +272,54 @@ struct type<::vnx::addons::FileServerBase> {
 	}
 	void accept(Visitor& visitor, const ::vnx::addons::FileServerBase& value) {
 		vnx::accept(visitor, value);
+	}
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::FileServer_delete_file> {
+	void read(TypeInput& in, ::vnx::addons::FileServer_delete_file& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::FileServer_delete_file& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::FileServer_delete_file& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::FileServer_delete_file& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file& value) {
+		vnx::accept(visitor, value);
+	}
+	void create_dynamic_code(std::vector<uint16_t>& code);
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file& value, bool special = false) {
+		code.push_back(CODE_OBJECT);
+	}
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::FileServer_delete_file_return> {
+	void read(TypeInput& in, ::vnx::addons::FileServer_delete_file_return& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::FileServer_delete_file_return& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::FileServer_delete_file_return& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::FileServer_delete_file_return& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file_return& value) {
+		vnx::accept(visitor, value);
+	}
+	void create_dynamic_code(std::vector<uint16_t>& code);
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file_return& value, bool special = false) {
+		code.push_back(CODE_OBJECT);
 	}
 };
 

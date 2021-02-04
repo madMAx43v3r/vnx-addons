@@ -4,6 +4,8 @@
 #include <vnx/addons/CompressedValue.hxx>
 #include <vnx/addons/DeflatedValue.hxx>
 #include <vnx/addons/FileServerBase.hxx>
+#include <vnx/addons/FileServer_delete_file.hxx>
+#include <vnx/addons/FileServer_delete_file_return.hxx>
 #include <vnx/addons/FileServer_get_file_info.hxx>
 #include <vnx/addons/FileServer_get_file_info_return.hxx>
 #include <vnx/addons/FileServer_read_directory.hxx>
@@ -38,6 +40,14 @@ void type<::vnx::addons::CompressedValue>::create_dynamic_code(std::vector<uint1
 
 void type<::vnx::addons::DeflatedValue>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::DeflatedValue());
+}
+
+void type<::vnx::addons::FileServer_delete_file>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::FileServer_delete_file());
+}
+
+void type<::vnx::addons::FileServer_delete_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::FileServer_delete_file_return());
 }
 
 void type<::vnx::addons::FileServer_get_file_info>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -128,6 +138,8 @@ static void register_all_types() {
 	vnx::register_type_code(::vnx::addons::CompressedValue::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::DeflatedValue::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::FileServerBase::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::FileServer_delete_file::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::FileServer_delete_file_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::FileServer_get_file_info::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::FileServer_get_file_info_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::FileServer_read_directory::static_create_type_code());
@@ -159,6 +171,8 @@ static struct vnx_static_init {
 const vnx::TypeCode* const vnx_native_type_code_CompressedValue = vnx::get_type_code(vnx::Hash64(0x50c46e244bd9765dull));
 const vnx::TypeCode* const vnx_native_type_code_DeflatedValue = vnx::get_type_code(vnx::Hash64(0xe3d58522f6fb225dull));
 const vnx::TypeCode* const vnx_native_type_code_FileServerBase = vnx::get_type_code(vnx::Hash64(0xcf578d3ac2b39852ull));
+const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file = vnx::get_type_code(vnx::Hash64(0x5e72c602475397dull));
+const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file_return = vnx::get_type_code(vnx::Hash64(0x9b416f881a10c735ull));
 const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info = vnx::get_type_code(vnx::Hash64(0xd0dde082f276b7f1ull));
 const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info_return = vnx::get_type_code(vnx::Hash64(0x7474b955a2e57c37ull));
 const vnx::TypeCode* const vnx_native_type_code_FileServer_read_directory = vnx::get_type_code(vnx::Hash64(0xa5cb89d5e0389183ull));

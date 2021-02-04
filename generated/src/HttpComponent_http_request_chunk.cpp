@@ -65,18 +65,8 @@ void HttpComponent_http_request_chunk::write(std::ostream& _out) const {
 }
 
 void HttpComponent_http_request_chunk::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "max_bytes") {
-			vnx::from_string(_entry.second, max_bytes);
-		} else if(_entry.first == "offset") {
-			vnx::from_string(_entry.second, offset);
-		} else if(_entry.first == "request") {
-			vnx::from_string(_entry.second, request);
-		} else if(_entry.first == "sub_path") {
-			vnx::from_string(_entry.second, sub_path);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -155,37 +145,40 @@ const vnx::TypeCode* HttpComponent_http_request_chunk::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> HttpComponent_http_request_chunk::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpComponent.http_request_chunk";
 	type_code->type_hash = vnx::Hash64(0x97e79d08440406d5ull);
 	type_code->code_hash = vnx::Hash64(0xdf14ce32016fd45aull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->is_method = true;
+	type_code->native_size = sizeof(::vnx::addons::HttpComponent_http_request_chunk);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpComponent_http_request_chunk>(); };
 	type_code->is_const = true;
 	type_code->is_async = true;
 	type_code->return_type = ::vnx::addons::HttpComponent_http_request_chunk_return::static_get_type_code();
 	type_code->fields.resize(4);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "request";
 		field.code = {16};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[1];
+		auto& field = type_code->fields[1];
 		field.is_extended = true;
 		field.name = "sub_path";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[2];
+		auto& field = type_code->fields[2];
+		field.data_size = 8;
 		field.name = "offset";
 		field.code = {8};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[3];
+		auto& field = type_code->fields[3];
+		field.data_size = 8;
 		field.name = "max_bytes";
 		field.code = {8};
 	}
@@ -232,20 +225,14 @@ void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request_chunk& value,
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
-		{
-			const vnx::TypeField* const _field = type_code->field_map[2];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.offset, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[2]) {
+			vnx::read_value(_buf + _field->offset, value.offset, _field->code.data());
 		}
-		{
-			const vnx::TypeField* const _field = type_code->field_map[3];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.max_bytes, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[3]) {
+			vnx::read_value(_buf + _field->offset, value.max_bytes, _field->code.data());
 		}
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.request, type_code, _field->code.data()); break;
 			case 1: vnx::read(in, value.sub_path, type_code, _field->code.data()); break;
@@ -264,7 +251,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpComponent_http_request_chun
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::HttpComponent_http_request_chunk>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	char* const _buf = out.write(16);
