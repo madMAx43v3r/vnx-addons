@@ -491,11 +491,11 @@ void HttpServer::update()
 {
 	const auto now = vnx::get_time_seconds();
 	while(!m_session_timeout_queue.empty()) {
-		const auto iter = m_session_timeout_queue.begin();
+		auto iter = m_session_timeout_queue.begin();
 		if(now > iter->first) {
-			remove_session(iter->second);
-			m_session_timeout_queue.erase(iter);
-			log(INFO) << "Session '" << iter->second << "' timed out.";
+			const auto http_sid = iter->second;
+			log(INFO) << "Session '" << http_sid << "' timed out.";
+			remove_session(http_sid);
 		} else {
 			break;
 		}
