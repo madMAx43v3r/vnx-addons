@@ -144,6 +144,15 @@ std::vector<file_info_t> FileServer::read_directory(const std::string& path) con
 		info.last_modified = file->last_write_time();
 		files.push_back(info);
 	}
+	if(!show_hidden) {
+		std::vector<file_info_t> tmp;
+		for(const auto& file : files) {
+			if(!file.name.empty() && file.name[0] != '.') {
+				tmp.push_back(file);
+			}
+		}
+		files = tmp;
+	}
 	std::sort(files.begin(), files.end(), [](const file_info_t& lhs, const file_info_t& rhs) -> bool {
 		return lhs.name < rhs.name;
 	});

@@ -12,6 +12,7 @@ module FileServer implements HttpComponent {
 	
 	bool allow_directory_list;					// if to allow directory listings
 	bool read_only = true;
+	bool show_hidden = false;					// if to show hidden files
 	
 	int max_queue_ms = 1000;					// [ms]
 	int max_queue_size = 1000;					// number of requests [1]
