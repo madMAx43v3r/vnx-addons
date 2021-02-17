@@ -58,12 +58,8 @@ void FileServer_read_file_range_return::write(std::ostream& _out) const {
 }
 
 void FileServer_read_file_range_return::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "_ret_0") {
-			vnx::from_string(_entry.second, _ret_0);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -118,17 +114,18 @@ const vnx::TypeCode* FileServer_read_file_range_return::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> FileServer_read_file_range_return::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.FileServer.read_file_range.return";
 	type_code->type_hash = vnx::Hash64(0x19b4b9347295c6eaull);
 	type_code->code_hash = vnx::Hash64(0xe5d570bb7ce11935ull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->is_return = true;
+	type_code->native_size = sizeof(::vnx::addons::FileServer_read_file_range_return);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<FileServer_read_file_range_return>(); };
 	type_code->fields.resize(1);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "_ret_0";
 		field.code = {12, 1};
@@ -176,7 +173,7 @@ void read(TypeInput& in, ::vnx::addons::FileServer_read_file_range_return& value
 	}
 	if(type_code->is_matched) {
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value._ret_0, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
@@ -194,7 +191,7 @@ void write(TypeOutput& out, const ::vnx::addons::FileServer_read_file_range_retu
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::FileServer_read_file_range_return>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	vnx::write(out, value._ret_0, type_code, type_code->fields[0].code.data());

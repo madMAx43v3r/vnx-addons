@@ -77,30 +77,8 @@ void HttpRequest::write(std::ostream& _out) const {
 }
 
 void HttpRequest::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "content_type") {
-			vnx::from_string(_entry.second, content_type);
-		} else if(_entry.first == "cookies") {
-			vnx::from_string(_entry.second, cookies);
-		} else if(_entry.first == "headers") {
-			vnx::from_string(_entry.second, headers);
-		} else if(_entry.first == "id") {
-			vnx::from_string(_entry.second, id);
-		} else if(_entry.first == "method") {
-			vnx::from_string(_entry.second, method);
-		} else if(_entry.first == "path") {
-			vnx::from_string(_entry.second, path);
-		} else if(_entry.first == "payload") {
-			vnx::from_string(_entry.second, payload);
-		} else if(_entry.first == "query_params") {
-			vnx::from_string(_entry.second, query_params);
-		} else if(_entry.first == "session") {
-			vnx::from_string(_entry.second, session);
-		} else if(_entry.first == "url") {
-			vnx::from_string(_entry.second, url);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -227,69 +205,71 @@ const vnx::TypeCode* HttpRequest::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> HttpRequest::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpRequest";
 	type_code->type_hash = vnx::Hash64(0x60c4b7b39fc56fd5ull);
 	type_code->code_hash = vnx::Hash64(0x71ec132ebac9beacull);
 	type_code->is_native = true;
 	type_code->is_class = true;
+	type_code->native_size = sizeof(::vnx::addons::HttpRequest);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpRequest>(); };
 	type_code->fields.resize(10);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
+		field.data_size = 8;
 		field.name = "id";
 		field.code = {4};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[1];
+		auto& field = type_code->fields[1];
 		field.is_extended = true;
 		field.name = "url";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[2];
+		auto& field = type_code->fields[2];
 		field.is_extended = true;
 		field.name = "path";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[3];
+		auto& field = type_code->fields[3];
 		field.is_extended = true;
 		field.name = "method";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[4];
+		auto& field = type_code->fields[4];
 		field.is_extended = true;
 		field.name = "content_type";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[5];
+		auto& field = type_code->fields[5];
 		field.is_extended = true;
 		field.name = "cookies";
 		field.code = {13, 3, 32, 32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[6];
+		auto& field = type_code->fields[6];
 		field.is_extended = true;
 		field.name = "query_params";
 		field.code = {13, 3, 32, 32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[7];
+		auto& field = type_code->fields[7];
 		field.is_extended = true;
 		field.name = "headers";
 		field.code = {12, 23, 2, 4, 5, 32, 32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[8];
+		auto& field = type_code->fields[8];
 		field.is_extended = true;
 		field.name = "payload";
 		field.code = {12, 1};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[9];
+		auto& field = type_code->fields[9];
 		field.is_extended = true;
 		field.name = "session";
 		field.code = {16};
@@ -337,14 +317,11 @@ void read(TypeInput& in, ::vnx::addons::HttpRequest& value, const TypeCode* type
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
-		{
-			const vnx::TypeField* const _field = type_code->field_map[0];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.id, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[0]) {
+			vnx::read_value(_buf + _field->offset, value.id, _field->code.data());
 		}
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 1: vnx::read(in, value.url, type_code, _field->code.data()); break;
 			case 2: vnx::read(in, value.path, type_code, _field->code.data()); break;
@@ -370,7 +347,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpRequest& value, const TypeC
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::HttpRequest>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	char* const _buf = out.write(8);

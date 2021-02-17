@@ -20,10 +20,17 @@ struct HttpComponent {
 	static const vnx::Hash64 VNX_TYPE_HASH;
 	static const vnx::Hash64 VNX_CODE_HASH;
 	
+	static constexpr uint64_t VNX_TYPE_ID = 0x6ddcddab3925b2efull;
+	
 };
 
 
 } // namespace vnx
 } // namespace addons
+
+
+namespace vnx {
+
+} // vnx
 
 #endif // INCLUDE_vnx_addons_HttpComponent_HXX_

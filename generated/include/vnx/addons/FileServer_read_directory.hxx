@@ -21,6 +21,8 @@ public:
 	static const vnx::Hash64 VNX_TYPE_HASH;
 	static const vnx::Hash64 VNX_CODE_HASH;
 	
+	static constexpr uint64_t VNX_TYPE_ID = 0xa5cb89d5e0389183ull;
+	
 	vnx::Hash64 get_type_hash() const override;
 	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
@@ -53,5 +55,10 @@ public:
 
 } // namespace vnx
 } // namespace addons
+
+
+namespace vnx {
+
+} // vnx
 
 #endif // INCLUDE_vnx_addons_FileServer_read_directory_HXX_

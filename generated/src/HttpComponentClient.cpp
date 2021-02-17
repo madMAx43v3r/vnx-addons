@@ -4,12 +4,13 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpComponentClient.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
+#include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpComponent_http_request_chunk.hxx>
 #include <vnx/addons/HttpComponent_http_request_chunk_return.hxx>
-#include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
 
+#include <vnx/Generic.hxx>
 #include <vnx/vnx.h>
 
 
@@ -31,11 +32,13 @@ std::shared_ptr<const ::vnx::addons::HttpResponse> HttpComponentClient::http_req
 	_method->request = request;
 	_method->sub_path = sub_path;
 	auto _return_value = vnx_request(_method, false);
-	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_return_value);
-	if(!_result) {
-		throw std::logic_error("HttpComponentClient: !_result");
+	if(auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_return>(_return_value)) {
+		return _result->_ret_0;
+	} else if(_return_value && !_return_value->is_void()) {
+		return _return_value->get_field_by_index(0).to<std::shared_ptr<const ::vnx::addons::HttpResponse>>();
+	} else {
+		throw std::logic_error("HttpComponentClient: invalid return value");
 	}
-	return _result->_ret_0;
 }
 
 std::shared_ptr<const ::vnx::addons::HttpResponse> HttpComponentClient::http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes) {
@@ -45,11 +48,13 @@ std::shared_ptr<const ::vnx::addons::HttpResponse> HttpComponentClient::http_req
 	_method->offset = offset;
 	_method->max_bytes = max_bytes;
 	auto _return_value = vnx_request(_method, false);
-	auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_chunk_return>(_return_value);
-	if(!_result) {
-		throw std::logic_error("HttpComponentClient: !_result");
+	if(auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpComponent_http_request_chunk_return>(_return_value)) {
+		return _result->_ret_0;
+	} else if(_return_value && !_return_value->is_void()) {
+		return _return_value->get_field_by_index(0).to<std::shared_ptr<const ::vnx::addons::HttpResponse>>();
+	} else {
+		throw std::logic_error("HttpComponentClient: invalid return value");
 	}
-	return _result->_ret_0;
 }
 
 

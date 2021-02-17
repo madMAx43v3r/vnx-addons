@@ -31,6 +31,7 @@ public:
 	int64_t max_payload_size = 16777216;
 	uint64_t chunk_size = 1048576;
 	std::map<std::string, std::string> components;
+	std::map<std::string, std::string> charset;
 	std::string access_control_allow_origin = "*";
 	std::string content_security_policy = "";
 	std::string cookie_policy = "SameSite=Strict;";
@@ -44,6 +45,8 @@ public:
 	
 	static const vnx::Hash64 VNX_TYPE_HASH;
 	static const vnx::Hash64 VNX_CODE_HASH;
+	
+	static constexpr uint64_t VNX_TYPE_ID = 0xf05b2d0ac45a8a7bull;
 	
 	HttpServerBase(const std::string& _vnx_name);
 	
@@ -69,12 +72,14 @@ public:
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 protected:
+	using Super::handle;
+	
 	virtual void http_request_async(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const vnx::request_id_t& _request_id) const = 0;
 	void http_request_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
 	virtual void http_request_chunk_async(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes, const vnx::request_id_t& _request_id) const = 0;
 	void http_request_chunk_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
 	
-	void vnx_handle_switch(std::shared_ptr<const vnx::Sample> _sample) override;
+	void vnx_handle_switch(std::shared_ptr<const vnx::Value> _value) override;
 	std::shared_ptr<vnx::Value> vnx_call_switch(std::shared_ptr<const vnx::Value> _method, const vnx::request_id_t& _request_id) override;
 	
 };
@@ -82,5 +87,10 @@ protected:
 
 } // namespace vnx
 } // namespace addons
+
+
+namespace vnx {
+
+} // vnx
 
 #endif // INCLUDE_vnx_addons_HttpServerBase_HXX_

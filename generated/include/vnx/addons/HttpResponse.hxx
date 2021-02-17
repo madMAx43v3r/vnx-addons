@@ -29,11 +29,15 @@ public:
 	static const vnx::Hash64 VNX_TYPE_HASH;
 	static const vnx::Hash64 VNX_CODE_HASH;
 	
+	static constexpr uint64_t VNX_TYPE_ID = 0xb907701490f0e0feull;
+	
 	vnx::Hash64 get_type_hash() const override;
 	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
 	
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_status(const int32_t& status);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_text(const std::string& content);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_text_ex(const std::string& content, const int32_t& status);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string(const std::string& content, const std::string& mime_type);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string_ex(const std::string& content, const std::string& mime_type, const int32_t& status);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string_json(const std::string& content);
@@ -73,5 +77,10 @@ public:
 
 } // namespace vnx
 } // namespace addons
+
+
+namespace vnx {
+
+} // vnx
 
 #endif // INCLUDE_vnx_addons_HttpResponse_HXX_

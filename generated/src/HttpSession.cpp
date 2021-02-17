@@ -64,18 +64,8 @@ void HttpSession::write(std::ostream& _out) const {
 }
 
 void HttpSession::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
-	for(const auto& _entry : _object) {
-		if(_entry.first == "hsid") {
-			vnx::from_string(_entry.second, hsid);
-		} else if(_entry.first == "login_time") {
-			vnx::from_string(_entry.second, login_time);
-		} else if(_entry.first == "user") {
-			vnx::from_string(_entry.second, user);
-		} else if(_entry.first == "vsid") {
-			vnx::from_string(_entry.second, vsid);
-		}
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
 	}
 }
 
@@ -154,34 +144,36 @@ const vnx::TypeCode* HttpSession::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> HttpSession::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpSession";
 	type_code->type_hash = vnx::Hash64(0xaf1b568d83351450ull);
 	type_code->code_hash = vnx::Hash64(0xa4d9cfb097479643ull);
 	type_code->is_native = true;
 	type_code->is_class = true;
+	type_code->native_size = sizeof(::vnx::addons::HttpSession);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpSession>(); };
 	type_code->fields.resize(4);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
 		field.is_extended = true;
 		field.name = "user";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[1];
+		auto& field = type_code->fields[1];
 		field.is_extended = true;
 		field.name = "hsid";
 		field.code = {32};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[2];
+		auto& field = type_code->fields[2];
 		field.is_extended = true;
 		field.name = "vsid";
 		field.code = {4};
 	}
 	{
-		vnx::TypeField& field = type_code->fields[3];
+		auto& field = type_code->fields[3];
+		field.data_size = 8;
 		field.name = "login_time";
 		field.code = {8};
 	}
@@ -228,14 +220,11 @@ void read(TypeInput& in, ::vnx::addons::HttpSession& value, const TypeCode* type
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
-		{
-			const vnx::TypeField* const _field = type_code->field_map[3];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.login_time, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[3]) {
+			vnx::read_value(_buf + _field->offset, value.login_time, _field->code.data());
 		}
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			case 0: vnx::read(in, value.user, type_code, _field->code.data()); break;
 			case 1: vnx::read(in, value.hsid, type_code, _field->code.data()); break;
@@ -255,7 +244,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpSession& value, const TypeC
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::HttpSession>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	char* const _buf = out.write(8);

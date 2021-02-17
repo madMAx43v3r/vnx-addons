@@ -12,7 +12,7 @@ namespace addons {
 
 
 const vnx::Hash64 permission_e::VNX_TYPE_HASH(0x50d90a32b3efd091ull);
-const vnx::Hash64 permission_e::VNX_CODE_HASH(0x39b06c2ba8ae2338ull);
+const vnx::Hash64 permission_e::VNX_CODE_HASH(0x1c8bc7f3a8ff7303ull);
 
 vnx::Hash64 permission_e::get_type_hash() const {
 	return VNX_TYPE_HASH;
@@ -44,6 +44,7 @@ void permission_e::write(vnx::TypeOutput& _out, const vnx::TypeCode* _type_code,
 
 std::string permission_e::to_string() const {
 	switch(value) {
+		case FILE_DELETE: return "\"FILE_DELETE\"";
 		case FILE_DOWNLOAD: return "\"FILE_DOWNLOAD\"";
 		case FILE_UPLOAD: return "\"FILE_UPLOAD\"";
 		case READ_DIRECTORY: return "\"READ_DIRECTORY\"";
@@ -53,6 +54,7 @@ std::string permission_e::to_string() const {
 
 std::string permission_e::to_string_value() const {
 	switch(value) {
+		case FILE_DELETE: return "FILE_DELETE";
 		case FILE_DOWNLOAD: return "FILE_DOWNLOAD";
 		case FILE_UPLOAD: return "FILE_UPLOAD";
 		case READ_DIRECTORY: return "READ_DIRECTORY";
@@ -62,6 +64,7 @@ std::string permission_e::to_string_value() const {
 
 std::string permission_e::to_string_value_full() const {
 	switch(value) {
+		case FILE_DELETE: return "vnx.addons.permission_e.FILE_DELETE";
 		case FILE_DOWNLOAD: return "vnx.addons.permission_e.FILE_DOWNLOAD";
 		case FILE_UPLOAD: return "vnx.addons.permission_e.FILE_UPLOAD";
 		case READ_DIRECTORY: return "vnx.addons.permission_e.READ_DIRECTORY";
@@ -79,18 +82,20 @@ void permission_e::from_string_value(const std::string& _name) {
 	vnx::Variant var;
 	vnx::from_string_value(_name, var);
 	if(var.is_string()) {
-		if(_name == "FILE_DOWNLOAD") value = FILE_DOWNLOAD;
+		if(_name == "FILE_DELETE") value = FILE_DELETE;
+		else if(_name == "FILE_DOWNLOAD") value = FILE_DOWNLOAD;
 		else if(_name == "FILE_UPLOAD") value = FILE_UPLOAD;
 		else if(_name == "READ_DIRECTORY") value = READ_DIRECTORY;
 		else value = enum_t(vnx::hash64(_name));
 	} else {
-		value = enum_t(std::atoi(_name.c_str()));
+		value = enum_t(std::stoul(_name.c_str(), nullptr, 0));
 	}
 }
 
 void permission_e::accept(vnx::Visitor& _visitor) const {
 	std::string _name;
 	switch(value) {
+		case FILE_DELETE: _name = "FILE_DELETE"; break;
 		case FILE_DOWNLOAD: _name = "FILE_DOWNLOAD"; break;
 		case FILE_UPLOAD: _name = "FILE_UPLOAD"; break;
 		case READ_DIRECTORY: _name = "READ_DIRECTORY"; break;
@@ -100,6 +105,7 @@ void permission_e::accept(vnx::Visitor& _visitor) const {
 
 void permission_e::write(std::ostream& _out) const {
 	switch(value) {
+		case FILE_DELETE: _out << "\"FILE_DELETE\""; break;
 		case FILE_DOWNLOAD: _out << "\"FILE_DOWNLOAD\""; break;
 		case FILE_UPLOAD: _out << "\"FILE_UPLOAD\""; break;
 		case READ_DIRECTORY: _out << "\"READ_DIRECTORY\""; break;
@@ -108,9 +114,7 @@ void permission_e::write(std::ostream& _out) const {
 }
 
 void permission_e::read(std::istream& _in) {
-	std::string _name;
-	vnx::read(_in, _name);
-	from_string_value(_name);
+	from_string_value(vnx::read(_in).to_string_value());
 }
 
 vnx::Object permission_e::to_object() const {
@@ -164,19 +168,22 @@ const vnx::TypeCode* permission_e::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> permission_e::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.permission_e";
 	type_code->type_hash = vnx::Hash64(0x50d90a32b3efd091ull);
-	type_code->code_hash = vnx::Hash64(0x39b06c2ba8ae2338ull);
+	type_code->code_hash = vnx::Hash64(0x1c8bc7f3a8ff7303ull);
 	type_code->is_native = true;
 	type_code->is_enum = true;
+	type_code->native_size = sizeof(::vnx::addons::permission_e);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<vnx::Struct<permission_e>>(); };
 	type_code->fields.resize(1);
 	{
-		vnx::TypeField& field = type_code->fields[0];
+		auto& field = type_code->fields[0];
+		field.data_size = 4;
 		field.name = "value";
 		field.code = {3};
 	}
+	type_code->enum_map[2726888155] = "FILE_DELETE";
 	type_code->enum_map[1118995787] = "FILE_DOWNLOAD";
 	type_code->enum_map[1788941922] = "FILE_UPLOAD";
 	type_code->enum_map[1875457109] = "READ_DIRECTORY";
@@ -231,14 +238,11 @@ void read(TypeInput& in, ::vnx::addons::permission_e& value, const TypeCode* typ
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
-		{
-			const vnx::TypeField* const _field = type_code->field_map[0];
-			if(_field) {
-				vnx::read_value(_buf + _field->offset, value.value, _field->code.data());
-			}
+		if(const auto* const _field = type_code->field_map[0]) {
+			vnx::read_value(_buf + _field->offset, value.value, _field->code.data());
 		}
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
@@ -255,7 +259,7 @@ void write(TypeOutput& out, const ::vnx::addons::permission_e& value, const Type
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::permission_e>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 	char* const _buf = out.write(4);
@@ -312,6 +316,14 @@ std::string to_string_value(const ::vnx::addons::permission_e::enum_t& _value) {
 template<>
 std::string to_string_value_full(const ::vnx::addons::permission_e::enum_t& _value) {
 	return ::vnx::addons::permission_e(_value).to_string_value_full();
+}
+
+bool is_equivalent<::vnx::addons::permission_e>::operator()(const uint16_t* code, const TypeCode* type_code) {
+	if(code[0] != CODE_STRUCT || !type_code) {
+		return false;
+	}
+	type_code = type_code->depends[code[1]];
+	return type_code->type_hash == ::vnx::addons::permission_e::VNX_TYPE_HASH && type_code->is_equivalent;
 }
 
 } // vnx

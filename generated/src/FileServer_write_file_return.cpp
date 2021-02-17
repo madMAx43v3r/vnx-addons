@@ -55,8 +55,9 @@ void FileServer_write_file_return::write(std::ostream& _out) const {
 }
 
 void FileServer_write_file_return::read(std::istream& _in) {
-	std::map<std::string, std::string> _object;
-	vnx::read_object(_in, _object);
+	if(auto _json = vnx::read_json(_in)) {
+		from_object(_json->to_object());
+	}
 }
 
 vnx::Object FileServer_write_file_return::to_object() const {
@@ -97,13 +98,14 @@ const vnx::TypeCode* FileServer_write_file_return::static_get_type_code() {
 }
 
 std::shared_ptr<vnx::TypeCode> FileServer_write_file_return::static_create_type_code() {
-	std::shared_ptr<vnx::TypeCode> type_code = std::make_shared<vnx::TypeCode>();
+	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.FileServer.write_file.return";
 	type_code->type_hash = vnx::Hash64(0x88bc45fec5f73d30ull);
 	type_code->code_hash = vnx::Hash64(0xd47904754b035074ull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->is_return = true;
+	type_code->native_size = sizeof(::vnx::addons::FileServer_write_file_return);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<FileServer_write_file_return>(); };
 	type_code->build();
 	return type_code;
@@ -148,7 +150,7 @@ void read(TypeInput& in, ::vnx::addons::FileServer_write_file_return& value, con
 	}
 	if(type_code->is_matched) {
 	}
-	for(const vnx::TypeField* _field : type_code->ext_fields) {
+	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
@@ -165,7 +167,7 @@ void write(TypeOutput& out, const ::vnx::addons::FileServer_write_file_return& v
 		out.write_type_code(type_code);
 		vnx::write_class_header<::vnx::addons::FileServer_write_file_return>(out);
 	}
-	if(code && code[0] == CODE_STRUCT) {
+	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
 }
