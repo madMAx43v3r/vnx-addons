@@ -24,6 +24,7 @@ public:
 	std::string redirect_not_found;
 	vnx::bool_t allow_directory_list = 0;
 	vnx::bool_t read_only = true;
+	vnx::bool_t show_hidden = false;
 	int32_t max_queue_ms = 1000;
 	int32_t max_queue_size = 1000;
 	uint64_t limit_no_chunk = 1048576;

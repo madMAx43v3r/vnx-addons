@@ -52,7 +52,7 @@ namespace addons {
 
 
 const vnx::Hash64 FileServerBase::VNX_TYPE_HASH(0xcf578d3ac2b39852ull);
-const vnx::Hash64 FileServerBase::VNX_CODE_HASH(0xdf84770571fd9e76ull);
+const vnx::Hash64 FileServerBase::VNX_CODE_HASH(0x9075df531fb8fb81ull);
 
 FileServerBase::FileServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
@@ -63,6 +63,7 @@ FileServerBase::FileServerBase(const std::string& _vnx_name)
 	vnx::read_config(vnx_name + ".redirect_not_found", redirect_not_found);
 	vnx::read_config(vnx_name + ".allow_directory_list", allow_directory_list);
 	vnx::read_config(vnx_name + ".read_only", read_only);
+	vnx::read_config(vnx_name + ".show_hidden", show_hidden);
 	vnx::read_config(vnx_name + ".max_queue_ms", max_queue_ms);
 	vnx::read_config(vnx_name + ".max_queue_size", max_queue_size);
 	vnx::read_config(vnx_name + ".limit_no_chunk", limit_no_chunk);
@@ -89,9 +90,10 @@ void FileServerBase::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[3], 3); vnx::accept(_visitor, redirect_not_found);
 	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, allow_directory_list);
 	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, read_only);
-	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, max_queue_ms);
-	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, max_queue_size);
-	_visitor.type_field(_type_code->fields[8], 8); vnx::accept(_visitor, limit_no_chunk);
+	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, show_hidden);
+	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, max_queue_ms);
+	_visitor.type_field(_type_code->fields[8], 8); vnx::accept(_visitor, max_queue_size);
+	_visitor.type_field(_type_code->fields[9], 9); vnx::accept(_visitor, limit_no_chunk);
 	_visitor.type_end(*_type_code);
 }
 
@@ -103,6 +105,7 @@ void FileServerBase::write(std::ostream& _out) const {
 	_out << ", \"redirect_not_found\": "; vnx::write(_out, redirect_not_found);
 	_out << ", \"allow_directory_list\": "; vnx::write(_out, allow_directory_list);
 	_out << ", \"read_only\": "; vnx::write(_out, read_only);
+	_out << ", \"show_hidden\": "; vnx::write(_out, show_hidden);
 	_out << ", \"max_queue_ms\": "; vnx::write(_out, max_queue_ms);
 	_out << ", \"max_queue_size\": "; vnx::write(_out, max_queue_size);
 	_out << ", \"limit_no_chunk\": "; vnx::write(_out, limit_no_chunk);
@@ -124,6 +127,7 @@ vnx::Object FileServerBase::to_object() const {
 	_object["redirect_not_found"] = redirect_not_found;
 	_object["allow_directory_list"] = allow_directory_list;
 	_object["read_only"] = read_only;
+	_object["show_hidden"] = show_hidden;
 	_object["max_queue_ms"] = max_queue_ms;
 	_object["max_queue_size"] = max_queue_size;
 	_object["limit_no_chunk"] = limit_no_chunk;
@@ -148,6 +152,8 @@ void FileServerBase::from_object(const vnx::Object& _object) {
 			_entry.second.to(read_only);
 		} else if(_entry.first == "redirect_not_found") {
 			_entry.second.to(redirect_not_found);
+		} else if(_entry.first == "show_hidden") {
+			_entry.second.to(show_hidden);
 		} else if(_entry.first == "www_root") {
 			_entry.second.to(www_root);
 		}
@@ -172,6 +178,9 @@ vnx::Variant FileServerBase::get_field(const std::string& _name) const {
 	}
 	if(_name == "read_only") {
 		return vnx::Variant(read_only);
+	}
+	if(_name == "show_hidden") {
+		return vnx::Variant(show_hidden);
 	}
 	if(_name == "max_queue_ms") {
 		return vnx::Variant(max_queue_ms);
@@ -198,6 +207,8 @@ void FileServerBase::set_field(const std::string& _name, const vnx::Variant& _va
 		_value.to(allow_directory_list);
 	} else if(_name == "read_only") {
 		_value.to(read_only);
+	} else if(_name == "show_hidden") {
+		_value.to(show_hidden);
 	} else if(_name == "max_queue_ms") {
 		_value.to(max_queue_ms);
 	} else if(_name == "max_queue_size") {
@@ -233,7 +244,7 @@ std::shared_ptr<vnx::TypeCode> FileServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.FileServer";
 	type_code->type_hash = vnx::Hash64(0xcf578d3ac2b39852ull);
-	type_code->code_hash = vnx::Hash64(0xdf84770571fd9e76ull);
+	type_code->code_hash = vnx::Hash64(0x9075df531fb8fb81ull);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::FileServerBase);
 	type_code->methods.resize(17);
@@ -254,7 +265,7 @@ std::shared_ptr<vnx::TypeCode> FileServerBase::static_create_type_code() {
 	type_code->methods[14] = ::vnx::addons::FileServer_delete_file::static_get_type_code();
 	type_code->methods[15] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
 	type_code->methods[16] = ::vnx::addons::HttpComponent_http_request_chunk::static_get_type_code();
-	type_code->fields.resize(9);
+	type_code->fields.resize(10);
 	{
 		auto& field = type_code->fields[0];
 		field.is_extended = true;
@@ -294,20 +305,27 @@ std::shared_ptr<vnx::TypeCode> FileServerBase::static_create_type_code() {
 	}
 	{
 		auto& field = type_code->fields[6];
+		field.data_size = 1;
+		field.name = "show_hidden";
+		field.value = vnx::to_string(false);
+		field.code = {31};
+	}
+	{
+		auto& field = type_code->fields[7];
 		field.data_size = 4;
 		field.name = "max_queue_ms";
 		field.value = vnx::to_string(1000);
 		field.code = {7};
 	}
 	{
-		auto& field = type_code->fields[7];
+		auto& field = type_code->fields[8];
 		field.data_size = 4;
 		field.name = "max_queue_size";
 		field.value = vnx::to_string(1000);
 		field.code = {7};
 	}
 	{
-		auto& field = type_code->fields[8];
+		auto& field = type_code->fields[9];
 		field.data_size = 8;
 		field.name = "limit_no_chunk";
 		field.value = vnx::to_string(1048576);
@@ -495,12 +513,15 @@ void read(TypeInput& in, ::vnx::addons::FileServerBase& value, const TypeCode* t
 			vnx::read_value(_buf + _field->offset, value.read_only, _field->code.data());
 		}
 		if(const auto* const _field = type_code->field_map[6]) {
-			vnx::read_value(_buf + _field->offset, value.max_queue_ms, _field->code.data());
+			vnx::read_value(_buf + _field->offset, value.show_hidden, _field->code.data());
 		}
 		if(const auto* const _field = type_code->field_map[7]) {
-			vnx::read_value(_buf + _field->offset, value.max_queue_size, _field->code.data());
+			vnx::read_value(_buf + _field->offset, value.max_queue_ms, _field->code.data());
 		}
 		if(const auto* const _field = type_code->field_map[8]) {
+			vnx::read_value(_buf + _field->offset, value.max_queue_size, _field->code.data());
+		}
+		if(const auto* const _field = type_code->field_map[9]) {
 			vnx::read_value(_buf + _field->offset, value.limit_no_chunk, _field->code.data());
 		}
 	}
@@ -528,12 +549,13 @@ void write(TypeOutput& out, const ::vnx::addons::FileServerBase& value, const Ty
 	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(18);
+	char* const _buf = out.write(19);
 	vnx::write_value(_buf + 0, value.allow_directory_list);
 	vnx::write_value(_buf + 1, value.read_only);
-	vnx::write_value(_buf + 2, value.max_queue_ms);
-	vnx::write_value(_buf + 6, value.max_queue_size);
-	vnx::write_value(_buf + 10, value.limit_no_chunk);
+	vnx::write_value(_buf + 2, value.show_hidden);
+	vnx::write_value(_buf + 3, value.max_queue_ms);
+	vnx::write_value(_buf + 7, value.max_queue_size);
+	vnx::write_value(_buf + 11, value.limit_no_chunk);
 	vnx::write(out, value.www_root, type_code, type_code->fields[0].code.data());
 	vnx::write(out, value.mime_type_map, type_code, type_code->fields[1].code.data());
 	vnx::write(out, value.directory_files, type_code, type_code->fields[2].code.data());
