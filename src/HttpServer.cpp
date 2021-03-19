@@ -74,6 +74,9 @@ private:
 	std::string get_session_cookie(std::shared_ptr<const HttpSession> session) const;
 
 	void update();
+	
+	static void*
+	uri_log_callback(void* cls, const char* uri);
 
 	static MHD_Result
 	access_handler_callback(void* cls,
@@ -162,6 +165,7 @@ void HttpServer::main()
 			port, NULL, NULL,
 			&HttpServer::access_handler_callback, this,
 			MHD_OPTION_NOTIFY_COMPLETED, &HttpServer::request_completed_callback, this,
+			MHD_OPTION_URI_LOG_CALLBACK, &HttpServer::uri_log_callback, this,
 			MHD_OPTION_END);
 
 	if(!m_daemon) {
@@ -504,6 +508,17 @@ void HttpServer::update()
 			<< m_session_map.size() << " sessions, errors=" << vnx::to_string(m_error_map);
 }
 
+void* HttpServer::uri_log_callback(void* cls, const char* uri)
+{
+	auto request = HttpRequest::create();
+	if(uri) {
+		request->url = std::string(uri);
+	}
+	auto* state = new request_state_t();
+	state->request = request;
+	return state;
+}
+
 MHD_Result HttpServer::access_handler_callback(	void* cls,
 												MHD_Connection* connection,
 												const char* url,
@@ -515,13 +530,13 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 {
 	HttpServer* self = (HttpServer*)cls;
 	request_state_t* state = (request_state_t*)(*con_cls);
-	if(!state) {
-		state = new request_state_t();
+	if(!state->connection) {
 		state->connection = connection;
-		auto request = HttpRequest::create();
+		auto request = state->request;
 		request->id = self->m_next_id++;
-		request->url = std::string(url);
-		request->method = std::string(method);
+		if(method) {
+			request->method = std::string(method);
+		}
 		try {
 			// convert relative paths to absolute
 			request->path = Url::Url(request->url).abspath().path();
