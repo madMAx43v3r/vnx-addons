@@ -25,15 +25,15 @@ public:
 			const std::function<void(const ::vnx::Object&)>& _callback = std::function<void(const ::vnx::Object&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t vnx_get_config(const std::string& name, 
+	uint64_t vnx_get_config(const std::string& name = "", 
 			const std::function<void(const ::vnx::Variant&)>& _callback = std::function<void(const ::vnx::Variant&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t vnx_set_config_object(const ::vnx::Object& config, 
+	uint64_t vnx_set_config_object(const ::vnx::Object& config = ::vnx::Object(), 
 			const std::function<void()>& _callback = std::function<void()>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t vnx_set_config(const std::string& name, const ::vnx::Variant& value, 
+	uint64_t vnx_set_config(const std::string& name = "", const ::vnx::Variant& value = ::vnx::Variant(), 
 			const std::function<void()>& _callback = std::function<void()>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
@@ -57,35 +57,35 @@ public:
 			const std::function<void(const vnx::bool_t&)>& _callback = std::function<void(const vnx::bool_t&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t read_file(const std::string& path, 
+	uint64_t read_file(const std::string& path = "", 
 			const std::function<void(const ::vnx::Buffer&)>& _callback = std::function<void(const ::vnx::Buffer&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t read_file_range(const std::string& path, const int64_t& offset, const int64_t& length, 
+	uint64_t read_file_range(const std::string& path = "", const int64_t& offset = 0, const int64_t& length = 0, 
 			const std::function<void(const ::vnx::Buffer&)>& _callback = std::function<void(const ::vnx::Buffer&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t get_file_info(const std::string& path, 
+	uint64_t get_file_info(const std::string& path = "", 
 			const std::function<void(const ::vnx::addons::file_info_t&)>& _callback = std::function<void(const ::vnx::addons::file_info_t&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t read_directory(const std::string& path, 
+	uint64_t read_directory(const std::string& path = "", 
 			const std::function<void(const std::vector<::vnx::addons::file_info_t>&)>& _callback = std::function<void(const std::vector<::vnx::addons::file_info_t>&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t write_file(const std::string& path, const ::vnx::Buffer& data, 
+	uint64_t write_file(const std::string& path = "", const ::vnx::Buffer& data = ::vnx::Buffer(), 
 			const std::function<void()>& _callback = std::function<void()>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t delete_file(const std::string& path, 
+	uint64_t delete_file(const std::string& path = "", 
 			const std::function<void()>& _callback = std::function<void()>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, 
+	uint64_t http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request = nullptr, const std::string& sub_path = "", 
 			const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback = std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
-	uint64_t http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes, 
+	uint64_t http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request = nullptr, const std::string& sub_path = "", const int64_t& offset = 0, const int64_t& max_bytes = 0, 
 			const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback = std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
