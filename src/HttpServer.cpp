@@ -582,12 +582,12 @@ MHD_Result HttpServer::http_header_callback(void* cls, MHD_ValueKind kind, const
 {
 	request_state_t* state = (request_state_t*)cls;
 	auto request = state->request;
-	if(key && value) {
+	if(key) {
 		const auto key_ = ascii_tolower(std::string(key));
-		if(key_ == "content-type") {
+		if(key_ == "content-type" && value) {
 			request->content_type = ascii_tolower(std::string(value));
 		}
-		request->headers.emplace_back(key_, std::string(value));
+		request->headers.emplace_back(key_, value ? std::string(value) : std::string());
 	}
 	return MHD_YES;
 }
@@ -604,8 +604,8 @@ MHD_Result HttpServer::cookie_callback(void* cls, MHD_ValueKind kind, const char
 MHD_Result HttpServer::query_params_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value)
 {
 	request_state_t* state = (request_state_t*)cls;
-	if(key && value) {
-		state->request->query_params[std::string(key)] = std::string(value);
+	if(key) {
+		state->request->query_params[std::string(key)] = value ? std::string(value) : std::string();
 	}
 	return MHD_YES;
 }
@@ -615,8 +615,8 @@ HttpServer::post_data_iterator(	void* cls, MHD_ValueKind kind, const char* key, 
 								const char* transfer_encoding, const char* data, uint64_t off, size_t size)
 {
 	request_state_t* state = (request_state_t*)cls;
-	if(key && data && off == 0) {
-		state->request->query_params[std::string(key)] = std::string(data, size);
+	if(key && off == 0) {
+		state->request->query_params[std::string(key)] = data ? std::string(data, size) : std::string();
 	}
 	return MHD_YES;
 }
