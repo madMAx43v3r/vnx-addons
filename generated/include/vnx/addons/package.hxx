@@ -226,9 +226,7 @@ struct type<::vnx::addons::CompressedValue> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue& value, bool special = false);
 };
 
 /// \private
@@ -250,9 +248,7 @@ struct type<::vnx::addons::DeflatedValue> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue& value, bool special = false);
 };
 
 /// \private
@@ -294,9 +290,7 @@ struct type<::vnx::addons::FileServer_delete_file> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file& value, bool special = false);
 };
 
 /// \private
@@ -318,9 +312,7 @@ struct type<::vnx::addons::FileServer_delete_file_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file_return& value, bool special = false);
 };
 
 /// \private
@@ -342,9 +334,7 @@ struct type<::vnx::addons::FileServer_get_file_info> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info& value, bool special = false);
 };
 
 /// \private
@@ -366,9 +356,7 @@ struct type<::vnx::addons::FileServer_get_file_info_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info_return& value, bool special = false);
 };
 
 /// \private
@@ -390,9 +378,7 @@ struct type<::vnx::addons::FileServer_read_directory> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory& value, bool special = false);
 };
 
 /// \private
@@ -414,9 +400,7 @@ struct type<::vnx::addons::FileServer_read_directory_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory_return& value, bool special = false);
 };
 
 /// \private
@@ -438,9 +422,7 @@ struct type<::vnx::addons::FileServer_read_file> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file& value, bool special = false);
 };
 
 /// \private
@@ -462,9 +444,7 @@ struct type<::vnx::addons::FileServer_read_file_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_return& value, bool special = false);
 };
 
 /// \private
@@ -486,9 +466,7 @@ struct type<::vnx::addons::FileServer_read_file_range> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range& value, bool special = false);
 };
 
 /// \private
@@ -510,9 +488,7 @@ struct type<::vnx::addons::FileServer_read_file_range_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range_return& value, bool special = false);
 };
 
 /// \private
@@ -534,9 +510,7 @@ struct type<::vnx::addons::FileServer_write_file> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file& value, bool special = false);
 };
 
 /// \private
@@ -558,9 +532,7 @@ struct type<::vnx::addons::FileServer_write_file_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file_return& value, bool special = false);
 };
 
 /// \private
@@ -602,9 +574,7 @@ struct type<::vnx::addons::HttpComponent_http_request> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request& value, bool special = false);
 };
 
 /// \private
@@ -626,9 +596,7 @@ struct type<::vnx::addons::HttpComponent_http_request_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_return& value, bool special = false);
 };
 
 /// \private
@@ -650,9 +618,7 @@ struct type<::vnx::addons::HttpComponent_http_request_chunk> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk& value, bool special = false);
 };
 
 /// \private
@@ -674,9 +640,7 @@ struct type<::vnx::addons::HttpComponent_http_request_chunk_return> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk_return& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk_return& value, bool special = false);
 };
 
 /// \private
@@ -698,9 +662,7 @@ struct type<::vnx::addons::HttpRequest> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest& value, bool special = false);
 };
 
 /// \private
@@ -722,9 +684,7 @@ struct type<::vnx::addons::HttpResponse> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpResponse& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpResponse& value, bool special = false);
 };
 
 /// \private
@@ -766,9 +726,7 @@ struct type<::vnx::addons::HttpSession> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpSession& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpSession& value, bool special = false);
 };
 
 /// \private
@@ -790,9 +748,7 @@ struct type<::vnx::addons::file_info_t> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::file_info_t& value, bool special = false) {
-		code.push_back(CODE_OBJECT);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::file_info_t& value, bool special = false);
 };
 
 /// \private
@@ -814,9 +770,7 @@ struct type<::vnx::addons::permission_e> {
 		vnx::accept(visitor, value);
 	}
 	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::permission_e& value, bool special = false) {
-		code.push_back(CODE_STRING);
-	}
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::permission_e& value, bool special = false);
 };
 
 

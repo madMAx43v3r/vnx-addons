@@ -38,92 +38,188 @@ void type<::vnx::addons::CompressedValue>::create_dynamic_code(std::vector<uint1
 	create_dynamic_code(code, ::vnx::addons::CompressedValue());
 }
 
+void type<::vnx::addons::CompressedValue>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::DeflatedValue>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::DeflatedValue());
+}
+
+void type<::vnx::addons::DeflatedValue>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::FileServer_delete_file>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_delete_file());
 }
 
+void type<::vnx::addons::FileServer_delete_file>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::FileServer_delete_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_delete_file_return());
+}
+
+void type<::vnx::addons::FileServer_delete_file_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::FileServer_get_file_info>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_get_file_info());
 }
 
+void type<::vnx::addons::FileServer_get_file_info>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::FileServer_get_file_info_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_get_file_info_return());
+}
+
+void type<::vnx::addons::FileServer_get_file_info_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::FileServer_read_directory>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_directory());
 }
 
+void type<::vnx::addons::FileServer_read_directory>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::FileServer_read_directory_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_directory_return());
+}
+
+void type<::vnx::addons::FileServer_read_directory_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::FileServer_read_file>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_file());
 }
 
+void type<::vnx::addons::FileServer_read_file>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::FileServer_read_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_file_return());
+}
+
+void type<::vnx::addons::FileServer_read_file_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::FileServer_read_file_range>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_file_range());
 }
 
+void type<::vnx::addons::FileServer_read_file_range>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::FileServer_read_file_range_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_file_range_return());
+}
+
+void type<::vnx::addons::FileServer_read_file_range_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::FileServer_write_file>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_write_file());
 }
 
+void type<::vnx::addons::FileServer_write_file>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::FileServer_write_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_write_file_return());
+}
+
+void type<::vnx::addons::FileServer_write_file_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::HttpComponent_http_request>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpComponent_http_request());
 }
 
+void type<::vnx::addons::HttpComponent_http_request>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::HttpComponent_http_request_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpComponent_http_request_return());
+}
+
+void type<::vnx::addons::HttpComponent_http_request_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::HttpComponent_http_request_chunk>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpComponent_http_request_chunk());
 }
 
+void type<::vnx::addons::HttpComponent_http_request_chunk>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::HttpComponent_http_request_chunk_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpComponent_http_request_chunk_return());
+}
+
+void type<::vnx::addons::HttpComponent_http_request_chunk_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::HttpRequest>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpRequest());
 }
 
+void type<::vnx::addons::HttpRequest>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::HttpResponse>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpResponse());
+}
+
+void type<::vnx::addons::HttpResponse>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpResponse& value, bool special) {
+	code.push_back(CODE_OBJECT);
 }
 
 void type<::vnx::addons::HttpSession>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpSession());
 }
 
+void type<::vnx::addons::HttpSession>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpSession& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::file_info_t>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::file_info_t());
 }
 
+void type<::vnx::addons::file_info_t>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::file_info_t& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 void type<::vnx::addons::permission_e>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::permission_e());
+}
+
+void type<::vnx::addons::permission_e>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::permission_e& value, bool special) {
+	if(!special || value.is_valid()) {
+		code.push_back(CODE_STRING);
+	} else {
+		code.push_back(CODE_UINT32);
+	}
 }
 
 
