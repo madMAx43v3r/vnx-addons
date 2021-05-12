@@ -23,7 +23,7 @@ protected:
 	struct state_t {
 		bool is_parsed = false;
 		bool is_blocked = false;
-		bool is_finished = true;
+		bool keep_alive = true;
 		vnx::Memory payload;
 		std::string sub_path;
 		std::shared_ptr<vnx::Pipe> pipe;
@@ -65,13 +65,15 @@ private:
 
 	void update();
 
+	std::shared_ptr<state_t> find_state(int fd) const;
+
 	void on_connect(int fd);
 
 	void on_read(int fd);
 
 	void on_write(int fd);
 
-	void on_close(int fd);
+	void close(int fd);
 
 	void poll_reset();
 
@@ -82,7 +84,7 @@ private:
 	int m_signal_pipe[2] = {-1, -1};
 	uint64_t m_next_id = 1;
 
-	std::unordered_map<uint64_t, int> m_fd_map;													// [id => fd]
+	std::unordered_map<uint64_t, int> m_request_map;											// [request id => fd]
 	std::unordered_map<int, std::shared_ptr<state_t>> m_state_map;								// [fd => state]
 	std::map<std::string, std::shared_ptr<HttpComponentAsyncClient>> m_client_map;				// [url path => clients]
 
@@ -98,8 +100,6 @@ private:
 	std::unordered_map<int, poll_bits_e> m_poll_map;		// [fd => bits]
 
 };
-
-HttpServerBase* new_HttpServer(const std::string& name);
 
 
 } // addons

@@ -53,32 +53,46 @@ void HttpServer::poll_loop() noexcept
 				}
 			}
 		}
-		const auto ret = ::poll(fds.data(), fds.size(), poll_timeout_ms);
-
-		if(ret < 0) {
-			log(ERROR) << "poll() failed with: " << errno;
+		if(::poll(fds.data(), fds.size(), poll_timeout_ms) < 0) {
+			log(ERROR) << "poll() failed with: " << std::strerror(errno);
 			break;
 		}
-		if(ret > 0) {
-			if(fds[1].revents & POLLIN) {
-				while(true) {
-					const int fd = ::accept(m_socket, 0, 0);
-					if(fd >= 0) {
-						::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
-						add_task(std::bind(&HttpServer::on_connect, this, fd));
-					} else {
-						break;
-					}
+		std::lock_guard lock(m_poll_mutex);
+
+		if(fds[1].revents & POLLIN) {
+			while(true) {
+				const int fd = ::accept(m_socket, 0, 0);
+				if(fd >= 0) {
+					m_poll_map[fd] = POLL_READ;
+					::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL, 0) | O_NONBLOCK);		// set O_NONBLOCK
+					add_task(std::bind(&HttpServer::on_connect, this, fd));
+				} else {
+					break;
 				}
 			}
-			for(size_t i = 2; i < fds.size(); ++i)
-			{
-				if(fds[i].revents & POLLIN) {
-					add_task(std::bind(&HttpServer::on_read, this, fds[i].fd));
+		}
+		for(size_t i = 2; i < fds.size(); ++i)
+		{
+			const auto& set = fds[i];
+			if(set.revents & POLLIN) {
+				{
+					// reset poll bit first
+					auto iter = m_poll_map.find(set.fd);
+					if(iter != m_poll_map.end()) {
+						iter->second &= ~POLL_READ;
+					}
 				}
-				if(fds[i].revents & POLLOUT) {
-					add_task(std::bind(&HttpServer::on_write, this, fds[i].fd));
+				add_task(std::bind(&HttpServer::on_read, this, set.fd));
+			}
+			if(set.revents & POLLOUT) {
+				{
+					// reset poll bit first
+					auto iter = m_poll_map.find(set.fd);
+					if(iter != m_poll_map.end()) {
+						iter->second &= ~POLL_WRITE;
+					}
 				}
+				add_task(std::bind(&HttpServer::on_write, this, set.fd));
 			}
 		}
 	}

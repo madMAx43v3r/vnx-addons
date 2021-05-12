@@ -540,28 +540,53 @@ ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, c
 	return size;
 }
 
+std::shared_ptr<HttpServer::state_t> HttpServer::find_state(int fd) const
+{
+	auto iter = m_state_map.find(fd);
+	if(iter != m_state_map.end()) {
+		return iter->second;
+	}
+	return nullptr;
+}
+
 void HttpServer::on_connect(int fd)
 {
-	// TODO
+	auto state = std::make_shared<state_t>();
+	m_state_map[fd] = state;
 }
 
 void HttpServer::on_read(int fd)
 {
-	// TODO
+	if(auto state = find_state(fd))
+	{
+		if(!state->is_parsed) {
+			// TODO: parse
+		}
+	}
 }
 
 void HttpServer::on_write(int fd)
 {
-	// TODO
+	if(auto state = find_state(fd))
+	{
+		// TODO
+	}
 }
 
-void HttpServer::on_close(int fd)
+void HttpServer::close(int fd)
 {
-	// TODO
-}
-
-HttpServerBase* new_HttpServer(const std::string& name) {
-	return new HttpServer(name);
+	auto iter = m_state_map.find(fd);
+	if(iter != m_state_map.end()) {
+		auto state = iter->second;
+		if(auto request = state->request) {
+			m_request_map.erase(request->id);
+		}
+		m_state_map.erase(iter);
+	}
+	{
+		std::lock_guard lock(m_poll_mutex);
+		m_poll_map.erase(fd);
+	}
 }
 
 
