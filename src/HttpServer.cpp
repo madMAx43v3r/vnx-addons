@@ -38,7 +38,7 @@ protected:
 		MHD_PostProcessor* post_processor = nullptr;
 		std::shared_ptr<HttpRequest> request;
 		std::shared_ptr<const HttpResponse> response;
-		std::shared_ptr<HttpComponentClient> httpclient;
+		std::shared_ptr<HttpComponentClient> http_client;
 		std::string sub_path;
 	};
 
@@ -356,7 +356,7 @@ void HttpServer::process(request_state_t* state)
 					<< "' => '" << components[prefix] << sub_path << "'";
 		}
 		state->sub_path = sub_path;
-		state->httpclient = clients.sync_client;
+		state->http_client = clients.sync_client;
 		clients.async_client->http_request(request, sub_path,
 				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, state, std::placeholders::_1));
@@ -638,10 +638,10 @@ void HttpServer::request_completed_callback(void* cls,
 ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length)
 {
 	request_state_t *state = (request_state_t *)userdata;
-	if(!state->httpclient) {
+	if(!state->http_client) {
 		return MHD_CONTENT_READER_END_OF_STREAM;
 	}
-	std::shared_ptr<const HttpResponse> response = state->httpclient->http_request_chunk(state->request, state->sub_path, offset, length);
+	std::shared_ptr<const HttpResponse> response = state->http_client->http_request_chunk(state->request, state->sub_path, offset, length);
 	const size_t size = response->payload.size();
 	if(size == 0){
 		return MHD_CONTENT_READER_END_OF_STREAM;
