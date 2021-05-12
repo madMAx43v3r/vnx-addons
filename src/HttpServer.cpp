@@ -1,134 +1,24 @@
 /*
  * HttpServer.cpp
  *
- *  Created on: Jul 8, 2020
+ *  Created on: May 12, 2021
  *      Author: mad
  */
 
 #include <vnx/addons/HttpServer.h>
+#include <vnx/addons/HttpChunk.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
-#include <vnx/addons/HttpComponentClient.hxx>
-#include <vnx/addons/HttpComponentAsyncClient.hxx>
 #include <vnx/OverflowException.hxx>
 #include <vnx/PermissionDenied.hxx>
-#include <vnx/vnx.h>
 #include <vnx/SHA256.h>
-
-#include <atomic>
+#include <vnx/vnx.h>
 
 #include <url.h>
-#include <microhttpd.h>
-
-#if MHD_VERSION < 0x00097002
-typedef int MHD_Result;
-#endif
 
 
 namespace vnx {
 namespace addons {
-
-class HttpServer : public HttpServerBase {
-public:
-	HttpServer(const std::string& _vnx_name);
-
-protected:
-	struct request_state_t {
-		MHD_Connection* connection = nullptr;
-		MHD_PostProcessor* post_processor = nullptr;
-		std::shared_ptr<HttpRequest> request;
-		std::shared_ptr<const HttpResponse> response;
-		std::shared_ptr<HttpComponentClient> http_client;
-		std::string sub_path;
-	};
-
-	void init() override;
-
-	void main() override;
-
-	void http_request_async(std::shared_ptr<const HttpRequest> request,
-							const std::string& sub_path,
-							const vnx::request_id_t& request_id) const override;
-
-	void http_request_chunk_async(std::shared_ptr<const HttpRequest> request,
-							const std::string& sub_path,
-							const int64_t& offset,
-							const int64_t& max_bytes,
-							const vnx::request_id_t& _request_id) const override;
-
-private:
-	void process(request_state_t* state);
-
-	void reply(	request_state_t* state,
-				std::shared_ptr<const HttpResponse> result);
-
-	void reply_error(	request_state_t* state,
-						const vnx::exception& ex);
-
-	std::shared_ptr<HttpSession> create_session() const;
-
-	void add_session(std::shared_ptr<HttpSession> session) const;
-
-	void remove_session(const std::string& http_sid) const;
-
-	std::string get_session_cookie(std::shared_ptr<const HttpSession> session) const;
-
-	void update();
-	
-	static void*
-	uri_log_callback(void* cls, const char* uri);
-
-	static MHD_Result
-	access_handler_callback(void* cls,
-							MHD_Connection* connection,
-							const char* url,
-							const char* method,
-							const char* version,
-							const char* upload_data,
-							size_t* upload_data_size,
-							void** con_cls);
-
-	static MHD_Result
-	http_header_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
-
-	static MHD_Result
-	cookie_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
-
-	static MHD_Result
-	query_params_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value);
-
-	static MHD_Result
-	post_data_iterator(	void* cls, MHD_ValueKind kind, const char* key, const char* filename, const char* content_type,
-						const char* transfer_encoding, const char* data, uint64_t off, size_t size);
-
-	static void
-	request_completed_callback(	void* cls,
-								MHD_Connection* connection,
-								void** con_cls,
-								MHD_RequestTerminationCode term_code);
-
-	static ssize_t chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length);
-
-private:
-	struct http_clients_t {
-		std::shared_ptr<HttpComponentClient> sync_client;
-		std::shared_ptr<HttpComponentAsyncClient> async_client;
-	};
-	MHD_Daemon* m_daemon = nullptr;
-	std::atomic<uint64_t> m_next_id {1};
-
-	std::map<std::string, http_clients_t> m_client_map;									// [url path => clients]
-	std::shared_ptr<const HttpSession> m_default_session;
-
-	mutable std::unordered_map<std::string, std::shared_ptr<const HttpSession>> m_session_map;	// [http session id => session]
-	mutable std::multimap<int64_t, std::string> m_session_timeout_queue;						// [deadline => http session id]
-
-	mutable size_t m_error_counter = 0;
-	mutable size_t m_request_counter = 0;
-	mutable std::map<int, size_t> m_error_map;
-
-};
-
 
 HttpServer::HttpServer(const std::string& _vnx_name)
 	:	HttpServerBase(_vnx_name)
@@ -648,6 +538,26 @@ ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, c
 	}
 	::memcpy(dest, response->payload.data(), size);
 	return size;
+}
+
+void HttpServer::on_connect(int fd)
+{
+	// TODO
+}
+
+void HttpServer::on_read(int fd)
+{
+	// TODO
+}
+
+void HttpServer::on_write(int fd)
+{
+	// TODO
+}
+
+void HttpServer::on_close(int fd)
+{
+	// TODO
 }
 
 HttpServerBase* new_HttpServer(const std::string& name) {

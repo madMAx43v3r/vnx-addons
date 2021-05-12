@@ -20,6 +20,8 @@ class HttpRequest {
 	
 	vnx.Buffer payload;
 	
+	vnx.Hash64 stream;							// stream address in case of a stream (zero otherwise)
+	
 	HttpSession* session;						// (optional)
 	
 	

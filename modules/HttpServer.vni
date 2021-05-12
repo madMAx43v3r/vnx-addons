@@ -6,39 +6,27 @@ module HttpServer implements HttpComponent {
 	vnx.TopicPtr output_response;			// HttpResponse
 	
 	int port = 8080;
-	
-	bool use_epoll = false;					// if to use epoll() interface (might be buggy)
+	int session_size = 3;					// number of 64-bit values for session ids
+	int poll_timeout_ms = 100;
 	
 	bool non_blocking = true;				// if to send requests non-blocking (fail in case of overload)
-	
 	bool show_info = false;					// if to show access info
-	
 	bool show_warnings = false;				// if to show access failures
-	
 	bool error_payload = true;				// if to enable error message replies (text/plain)
-	
 	bool auto_session = false;				// if to create sessions automatically
 	
-	int session_size = 3;					// number of 64-bit values for session ids
-	
 	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
-	
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]
 	
 	ulong chunk_size = 1048576;				// maximum chunk size for chunked transfer encoding [bytes]
 	
 	map<string, string> components;			// [url path => module name]
-	
 	map<string, string> charset;			// [mime type => default charset]
 	
 	string access_control_allow_origin = "*";		// "Access-Control-Allow-Origin" HTTP header
-	
 	string content_security_policy = "";			// "Content-Security-Policy" HTTP header
-	
 	string cookie_policy = "SameSite=Strict;";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/
-	
 	string session_coookie_name = "hsid";
-	
 	string default_access = "VIEWER";		// default access role for anonymous clients
 	
 	
@@ -53,5 +41,8 @@ module HttpServer implements HttpComponent {
 	string logout_path = "/logout";
 	
 	string session_path = "/session";
+	
+	
+	void handle(HttpChunk sample);
 	
 }

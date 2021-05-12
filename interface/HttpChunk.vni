@@ -1,0 +1,9 @@
+package vnx.addons;
+
+class HttpChunk {
+	
+	ulong id;					// HTTP request id
+	
+	vnx.Buffer data;
+	
+}

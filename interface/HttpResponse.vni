@@ -6,14 +6,17 @@ class HttpResponse {
 	
 	string content_type;			// MIME type of payload
 	
-	vector<pair<string, string>> headers;		// http headers
+	vector<pair<string, string>> headers;		// HTTP headers
 	
 	vnx.Buffer payload;
 	
-	bool is_chunked;				// if response is split into chunks
-	long chunked_total_size;		// total size of the response if it is chunked, -1 if unknown [bytes]
+	vnx.Hash64 stream;				// stream address in case of a stream (zero otherwise)
 	
-	string error_text;				// optional
+	long total_size = -1;			// total size of the response if it is chunked, -1 if unknown [bytes]
+	
+	string error_text;				// optional error description
+	
+	bool is_chunked;				// if response is split into chunks
 	
 	
 	static HttpResponse* from_status(int status);
