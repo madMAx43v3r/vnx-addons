@@ -39,7 +39,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_string_ex(const std::stri
 	auto result = HttpResponse::create();
 	result->status = status;
 	result->content_type = mime_type;
-	result->payload = content;
+	result->data = content;
 	if(status >= 400) {
 		result->error_text = content;
 	}
@@ -56,7 +56,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_string_json_ex(const std:
 	auto result = HttpResponse::create();
 	result->status = status;
 	result->content_type = "application/json";
-	result->payload = content;
+	result->data = content;
 	return result;
 }
 
@@ -70,7 +70,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_object_json_ex(const vnx:
 	auto result = HttpResponse::create();
 	result->status = status;
 	result->content_type = "application/json";
-	result->payload = vnx::to_string(value);
+	result->data = vnx::to_string(value);
 	return result;
 }
 
@@ -84,7 +84,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_value_json_ex(std::shared
 	auto result = HttpResponse::create();
 	result->status = status;
 	result->content_type = "application/json";
-	result->payload = vnx::to_string(value);
+	result->data = vnx::to_string(value);
 	return result;
 }
 
@@ -104,7 +104,7 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_value_binary_ex(std::shar
 		TypeOutput out(&stream);
 		vnx::write(out, value);
 		out.flush();
-		result->payload = tmp;
+		result->data = tmp;
 	}
 	return result;
 }

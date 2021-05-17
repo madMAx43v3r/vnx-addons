@@ -11,6 +11,8 @@
 #include <vnx/addons/HttpServerBase.hxx>
 #include <vnx/addons/HttpComponentAsyncClient.hxx>
 
+#include <llhttp.h>
+
 
 namespace vnx {
 namespace addons {
@@ -20,23 +22,34 @@ public:
 	HttpServer(const std::string& _vnx_name);
 
 protected:
+	enum poll_bits_e : char {
+		POLL_BIT_READ = 1,
+		POLL_BIT_WRITE = 2
+	};
+
 	struct state_t {
-		bool is_parsed = false;
 		bool is_blocked = false;
-		bool keep_alive = true;
+		bool is_chunked_reply = false;
+		bool do_keep_alive = false;
+		poll_bits_e poll_bits = poll_bits_e();
+		int fd = -1;
+		HttpServer* server = nullptr;
+		llhttp_t parser = {};
+		struct {
+			std::string key;
+			std::string value;
+		} header;
 		vnx::Memory payload;
-		std::string sub_path;
+		size_t payload_size = 0;
 		std::shared_ptr<vnx::Pipe> pipe;
 		std::shared_ptr<vnx::Stream> stream;
 		std::shared_ptr<HttpRequest> request;
+		std::shared_ptr<const HttpResponse> response;
 		std::shared_ptr<HttpComponentAsyncClient> module;
-		std::list<std::pair<std::shared_ptr<const HttpChunk>, size_t>> write_queue;
+		std::list<std::pair<std::shared_ptr<const HttpData>, size_t>> write_queue;
 	};
 
-	enum poll_bits_e : int {
-		POLL_READ = 1,
-		POLL_WRITE = 2
-	};
+	void notify(std::shared_ptr<vnx::Pipe> pipe) override;
 
 	void init() override;
 
@@ -55,6 +68,12 @@ protected:
 							const vnx::request_id_t& _request_id) const override;
 
 private:
+	void process(state_t* state);
+
+	void reply(uint64_t id, std::shared_ptr<const HttpResponse> response);
+
+	void reply_error(uint64_t id, const vnx::exception& ex);
+
 	std::shared_ptr<HttpSession> create_session() const;
 
 	void add_session(std::shared_ptr<HttpSession> session) const;
@@ -65,27 +84,44 @@ private:
 
 	void update();
 
-	std::shared_ptr<state_t> find_state(int fd) const;
+	std::shared_ptr<state_t> find_state_by_id(uint64_t id) const;
+
+	std::shared_ptr<state_t> find_state_by_socket(int fd) const;
 
 	void on_connect(int fd);
 
-	void on_read(int fd);
+	void on_request(std::shared_ptr<state_t> state);
 
-	void on_write(int fd);
+	void on_read(std::shared_ptr<state_t> state);
 
-	void close(int fd);
+	void on_write(std::shared_ptr<state_t> state);
 
-	void poll_reset();
+	void on_finish(std::shared_ptr<state_t> state);
 
-	void poll_loop() noexcept;
+	void on_disconnect(std::shared_ptr<state_t> state);
+
+	void do_poll(int timeout_ms) noexcept;
+
+	int set_socket_nonblocking(int fd);
+
+	static int on_url(llhttp_t* parser, const char* at, size_t length);
+	static int on_header_field(llhttp_t* parser, const char* at, size_t length);
+	static int on_header_field_complete(llhttp_t* parser);
+	static int on_header_value(llhttp_t* parser, const char* at, size_t length);
+	static int on_header_value_complete(llhttp_t* parser);
+	static int on_headers_complete(llhttp_t* parser);
+	static int on_body(llhttp_t* parser, const char* at, size_t length);
+	static int on_message_complete(llhttp_t* parser);
 
 private:
 	int m_socket = -1;
-	int m_signal_pipe[2] = {-1, -1};
-	uint64_t m_next_id = 1;
+	int m_notify_pipe[2] = {-1, -1};
 
-	std::unordered_map<uint64_t, int> m_request_map;											// [request id => fd]
+	uint64_t m_next_id = 1;
+	llhttp_settings_t m_settings = {};
+
 	std::unordered_map<int, std::shared_ptr<state_t>> m_state_map;								// [fd => state]
+	std::unordered_map<uint64_t, std::shared_ptr<state_t>> m_request_map;						// [request id => state]
 	std::map<std::string, std::shared_ptr<HttpComponentAsyncClient>> m_client_map;				// [url path => clients]
 
 	std::shared_ptr<const HttpSession> m_default_session;
@@ -94,10 +130,8 @@ private:
 
 	mutable size_t m_error_counter = 0;
 	mutable size_t m_request_counter = 0;
+	mutable size_t m_connect_counter = 0;
 	mutable std::map<int, size_t> m_error_map;
-
-	std::mutex m_poll_mutex;
-	std::unordered_map<int, poll_bits_e> m_poll_map;		// [fd => bits]
 
 };
 

@@ -221,16 +221,16 @@ void FileServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 			if(file_size > limit_no_chunk){
 				// leave payload empty and signal chunked transfer to caller
 				response->is_chunked = true;
-				response->chunked_total_size = file_size;
+				response->total_size = file_size;
 			}else{
 				response->is_chunked = false;
-				response->payload = read_file(file_path);
+				response->data = read_file(file_path);
 			}
 			response->content_type = detect_mime_type(file_path);
 		}
 		catch(const std::exception& ex) {
 			response->status = 404;
-			response->payload = ex.what();
+			response->data = ex.what();
 			response->error_text = ex.what();
 			response->content_type = "text/plain";
 		}
@@ -247,7 +247,7 @@ void FileServer::http_request_chunk_async(std::shared_ptr<const HttpRequest> req
 	auto response = HttpResponse::create();
 	std::string file_path;
 	if(!http_request_boilerplate(request, response, sub_path, file_path)){
-		response->payload = read_file_range(file_path, offset, max_bytes);
+		response->data = read_file_range(file_path, offset, max_bytes);
 		response->content_type = detect_mime_type(file_path);
 		response->is_chunked = true;
 	}
@@ -284,7 +284,7 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 				const auto list = read_directory(file_path);
 				auto format = request->query_params.find("format");
 				if(format != request->query_params.end() && format->second == "json") {
-					response->payload = vnx::to_string(list);
+					response->data = vnx::to_string(list);
 					response->content_type = "application/json";
 				} else {
 					std::ostringstream out;
@@ -299,7 +299,7 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 							<< "<td style=\"text-align: right;\">" << info.size << "</td></tr>\n";
 					}
 					out << "</table></body>\n</html>\n";
-					response->payload = out.str();
+					response->data = out.str();
 					response->content_type = "text/html";
 				}
 			} else {
@@ -330,7 +330,7 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 	}
 	catch(const vnx::permission_denied& ex) {
 		response->status = 403;
-		response->payload = ex.what();
+		response->data = ex.what();
 		response->error_text = ex.what();
 		response->content_type = "text/plain";
 	}

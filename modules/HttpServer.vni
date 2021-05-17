@@ -6,14 +6,17 @@ module HttpServer implements HttpComponent {
 	vnx.TopicPtr output_response;			// HttpResponse
 	
 	int port = 8080;
-	int session_size = 3;					// number of 64-bit values for session ids
-	int poll_timeout_ms = 100;
+	string host = "localhost";				// use "0.0.0.0" to listen on all interfaces
 	
 	bool non_blocking = true;				// if to send requests non-blocking (fail in case of overload)
 	bool show_info = false;					// if to show access info
 	bool show_warnings = false;				// if to show access failures
 	bool error_payload = true;				// if to enable error message replies (text/plain)
 	bool auto_session = false;				// if to create sessions automatically
+	
+	int session_size = 3;					// number of 64-bit values for session ids
+	int listen_queue_size = 1000;
+	int stats_interval_ms = 10000;			// -1 = disable [ms]
 	
 	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]

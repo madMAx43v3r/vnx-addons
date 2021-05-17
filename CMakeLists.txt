@@ -5,15 +5,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -pthread -Wall -Wno-unu
 
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
+file(GLOB LLHTTP_SOURCE_FILES lib/pyllhttp/lib/*.c)
 
 add_library(url_cpp SHARED
 	${URL_CPP_SOURCE_FILES}
 )
 
-target_include_directories(url_cpp
-	PUBLIC
-		lib/url-cpp/include
+add_library(llhttp SHARED
+	${LLHTTP_SOURCE_FILES}
 )
+
+target_include_directories(url_cpp PUBLIC lib/url-cpp/include)
+
+target_include_directories(llhttp PUBLIC lib/pyllhttp/lib)
 
 add_library(vnx_addons SHARED
 	${GENERATED_SOURCE_FILES}
@@ -32,7 +36,7 @@ target_include_directories(vnx_addons
 		include
 		generated/include
 )
-target_link_libraries(vnx_addons vnx_base url_cpp microhttpd z)
+target_link_libraries(vnx_addons vnx_base url_cpp llhttp z)
 
 add_executable(test_deflate test/test_deflate.cpp)
 target_link_libraries(test_deflate vnx_addons)

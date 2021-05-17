@@ -1,6 +1,8 @@
 package vnx.addons;
 
-class HttpResponse {
+class HttpResponse extends HttpData {
+	
+	bool is_chunked;				// if response payload should be sent via http_request_chunk() calls
 	
 	int status;						// HTTP status code
 	
@@ -8,15 +10,11 @@ class HttpResponse {
 	
 	vector<pair<string, string>> headers;		// HTTP headers
 	
-	vnx.Buffer payload;
-	
 	vnx.Hash64 stream;				// stream address in case of a stream (zero otherwise)
 	
-	long total_size = -1;			// total size of the response if it is chunked, -1 if unknown [bytes]
+	long total_size = -1;			// total size of the response if chunked or streamed, -1 if unknown [bytes]
 	
 	string error_text;				// optional error description
-	
-	bool is_chunked;				// if response is split into chunks
 	
 	
 	static HttpResponse* from_status(int status);

@@ -16,6 +16,86 @@
 
 #include <url.h>
 
+#include <cstdlib>
+#include <unistd.h>
+#ifdef _WIN32
+#include <winsock2.h>
+#else
+#include <fcntl.h>
+#include <netdb.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#endif
+
+
+// trim from left
+inline
+std::string ltrim(const std::string& str, const char* t = " \t\n\r\f\v")
+{
+	std::string out(str);
+	out.erase(0, out.find_first_not_of(t));
+	return out;
+}
+
+// trim from right
+inline
+std::string rtrim(const std::string& str, const char* t = " \t\n\r\f\v")
+{
+	std::string out(str);
+	out.erase(out.find_last_not_of(t) + 1);
+	return out;
+}
+
+// trim from left & right
+inline
+std::string trim(const std::string& str, const char* t = " \t\n\r\f\v")
+{
+    return ltrim(rtrim(str, t), t);
+}
+
+inline
+::sockaddr_in get_sockaddr_byname(const std::string& endpoint, int port)
+{
+	::sockaddr_in addr;
+	::memset(&addr, 0, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = ::htons(port);
+	::hostent* host = ::gethostbyname(endpoint.c_str());
+	if(!host) {
+		throw std::runtime_error("could not resolve: '" + endpoint + "'");
+	}
+	::memcpy(&addr.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
+	return addr;
+}
+
+inline
+std::vector<std::pair<std::string, std::string>> parse_query_string(const std::string& query)
+{
+	std::vector<std::pair<std::string, std::string>> out;
+	for(const auto& entry : vnx::string_split(query, '&', true)) {
+		const auto pos = entry.find('=');
+		if(pos != std::string::npos) {
+			out.emplace_back(entry.substr(0, pos), entry.substr(pos + 1));
+		} else {
+			out.emplace_back(entry, "");
+		}
+	}
+	return out;
+}
+
+inline
+std::vector<std::pair<std::string, std::string>> parse_cookie_header(const std::string& value)
+{
+	std::vector<std::pair<std::string, std::string>> out;
+	for(const auto& entry : vnx::string_split(value, ';', true)) {
+		const auto pos = entry.find('=');
+		if(pos != std::string::npos) {
+			out.emplace_back(trim(entry.substr(0, pos)), trim(entry.substr(pos + 1)));
+		}
+	}
+	return out;
+}
+
 
 namespace vnx {
 namespace addons {
@@ -35,6 +115,15 @@ HttpServer::HttpServer(const std::string& _vnx_name)
 	charset.emplace("application/javascript", "utf-8");
 }
 
+void HttpServer::notify(std::shared_ptr<vnx::Pipe> pipe)
+{
+	Node::notify(pipe);
+
+	// trigger poll() to wake up
+	char dummy = 0;
+	::write(m_notify_pipe[1], &dummy, 1);
+}
+
 void HttpServer::init()
 {
 	vnx::open_pipe(vnx_name, this, 500);
@@ -50,19 +139,44 @@ void HttpServer::main()
 		session->vsid = vnx::get_auth_server()->login_anonymous(default_access)->id;
 		m_default_session = session;
 	}
-	m_daemon = MHD_start_daemon(
-			MHD_USE_SELECT_INTERNALLY | MHD_USE_SUSPEND_RESUME | (use_epoll ? MHD_USE_EPOLL_LINUX_ONLY : MHD_USE_POLL),
-			port, NULL, NULL,
-			&HttpServer::access_handler_callback, this,
-			MHD_OPTION_NOTIFY_COMPLETED, &HttpServer::request_completed_callback, this,
-			MHD_OPTION_URI_LOG_CALLBACK, &HttpServer::uri_log_callback, this,
-			MHD_OPTION_END);
 
-	if(!m_daemon) {
-		log(ERROR) << "Failed to start MHD daemon!";
-		return;
+	// setup parser
+	llhttp_settings_init(&m_settings);
+	m_settings.on_url = &HttpServer::on_url;
+	// TODO
+
+	// create notify pipe
+	if(::pipe(m_notify_pipe) < 0) {
+		throw std::runtime_error("pipe() failed with: " + std::string(strerror(errno)));
 	}
-	log(INFO) << "Running on port " << port;
+	if(set_socket_nonblocking(m_notify_pipe[0]) < 0) {
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+	}
+
+	// create server socket
+	m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
+	if(m_socket < 0) {
+		throw std::runtime_error("socket() failed with: " + std::string(strerror(errno)));
+	}
+	if(set_socket_nonblocking(m_socket) < 0) {
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+	}
+	{
+		int enable = 1;
+		if(::setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(int)) < 0) {
+			log(WARN) << "setsockopt(SO_REUSEADDR) failed with: " << strerror(errno);
+		}
+	}
+	{
+		::sockaddr_in addr = get_sockaddr_byname(host, port);
+		if(::bind(m_socket, (::sockaddr*)&addr, sizeof(addr)) < 0) {
+			throw std::runtime_error("bind() failed with: " + std::string(strerror(errno)));
+		}
+	}
+	if(::listen(m_socket, listen_queue_size) < 0) {
+		throw std::runtime_error("listen() failed with: " + std::string(strerror(errno)));
+	}
+	log(INFO) << "Running on " << host << ":" << port;
 
 	for(const auto& entry : components)
 	{
@@ -74,25 +188,34 @@ void HttpServer::main()
 		}
 		const bool is_ourself = module == vnx_name;
 		{
-			auto async_client = std::make_shared<HttpComponentAsyncClient>(module);
-			async_client->vnx_set_non_blocking(is_ourself ? true : non_blocking);
-			add_async_client(async_client);
-			m_client_map[path].async_client = async_client;
-		}
-		if(!is_ourself) {
-			auto sync_client = std::make_shared<HttpComponentClient>(module);
-			m_client_map[path].sync_client = sync_client;
+			auto client = std::make_shared<HttpComponentAsyncClient>(module);
+			client->vnx_set_non_blocking(is_ourself ? true : non_blocking);
+			add_async_client(client);
+			m_client_map[path] = client;
 		}
 		log(INFO) << "Got component '" << module << "' for path '" << path << "'";
 	}
 
-	set_timer_millis(10 * 1000, std::bind(&HttpServer::update, this));
-
-	Super::main();
-
-	if(m_daemon) {
-		MHD_stop_daemon(m_daemon);
+	if(stats_interval_ms > 0) {
+		set_timer_millis(stats_interval_ms, std::bind(&HttpServer::update, this));
 	}
+
+	while(vnx_do_run())
+	{
+		const auto timeout_us = vnx_process(false);
+		do_poll(timeout_us >= 0 ? timeout_us / 1000 : 1000);
+	}
+
+	// close all sockets
+	for(const auto& entry : m_state_map) {
+		::close(entry.first);
+	}
+	m_state_map.clear();
+
+	::close(m_socket);
+	::close(m_notify_pipe[0]);
+	::close(m_notify_pipe[1]);
+
 	if(m_default_session) {
 		vnx::get_auth_server()->logout(m_default_session->vsid);
 	}
@@ -195,23 +318,155 @@ void HttpServer::http_request_chunk_async(	std::shared_ptr<const HttpRequest> re
 	throw std::logic_error("invalid request");
 }
 
-void HttpServer::process(request_state_t* state)
+int HttpServer::on_url(llhttp_t* parser, const char* at, size_t length)
 {
-	m_request_counter++;
+	auto state = (state_t*)parser->data;
+	state->request->url += std::string(at, length);
+	return 0;
+}
+
+int HttpServer::on_header_field(llhttp_t* parser, const char* at, size_t length)
+{
+	auto state = (state_t*)parser->data;
+	state->header.key += ascii_tolower(std::string(at, length));
+	return 0;
+}
+
+int HttpServer::on_header_field_complete(llhttp_t* parser)
+{
+	auto state = (state_t*)parser->data;
+	state->header.value.clear();
+	return 0;
+}
+
+int HttpServer::on_header_value(llhttp_t* parser, const char* at, size_t length)
+{
+	auto state = (state_t*)parser->data;
+	state->header.value += std::string(at, length);
+	return 0;
+}
+
+int HttpServer::on_header_value_complete(llhttp_t* parser)
+{
+	auto state = (state_t*)parser->data;
+	const auto key = state->header.key;
+	const auto value = trim(state->header.value);
+	if(key == "cookie") {
+		for(const auto& entry : parse_cookie_header(value)) {
+			state->request->cookies[entry.first] = entry.second;
+		}
+	}
+	if(key == "content-type") {
+		state->request->content_type = value;
+	}
+	state->request->headers.emplace_back(key, value);
+	state->header.key.clear();
+	state->header.value.clear();
+	return 0;
+}
+
+int HttpServer::on_headers_complete(llhttp_t* parser)
+{
+	if(parser->flags & F_TRANSFER_ENCODING) {
+		return -1;
+	}
+	auto state = (state_t*)parser->data;
+	auto self = state->server;
 	auto request = state->request;
-	request->session = m_default_session;
+
+	// url parsing
+	request->method = llhttp_method_name(llhttp_method(parser->method));
+	try {
+		Url::Url parsed(request->url);
+		parsed.abspath();
+		request->path = parsed.path();
+		for(const auto& entry : parse_query_string(parsed.query())) {
+			request->query_params[entry.first] = entry.second;
+		}
+	}
+	catch(...) {
+		return -1;
+	}
+
+	// session handling
+	request->session = self->m_default_session;
 	{
-		auto cookie = request->cookies.find(session_coookie_name);
+		auto cookie = request->cookies.find(self->session_coookie_name);
 		if(cookie != request->cookies.end()) {
-			auto iter = m_session_map.find(cookie->second);
-			if(iter != m_session_map.end()) {
+			auto iter = self->m_session_map.find(cookie->second);
+			if(iter != self->m_session_map.end()) {
 				request->session = iter->second;
 			}
 		}
 	}
-	if(output_request) {
-		publish(request, output_request);
+
+	// TODO: handle streams
+	if(false) {
+		const auto dst_mac = Hash64::rand();
+		state->stream = std::make_shared<Stream>(dst_mac);
+		state->request->stream = dst_mac;
+		self->process(state);
+		return HPE_PAUSED;
 	}
+	return 0;
+}
+
+int HttpServer::on_body(llhttp_t* parser, const char* at, size_t length)
+{
+	auto state = (state_t*)parser->data;
+	auto self = state->server;
+	if(state->payload_size + length > self->max_payload_size) {
+		if(self->show_warnings) {
+			self->log(WARN) << "Maximum payload size of " << self->max_payload_size << " bytes exceeded!";
+		}
+		return -1;
+	}
+	if(state->stream) {
+		auto chunk = HttpChunk::create();
+		chunk->id = state->request->id;
+		chunk->data.resize(length);
+		chunk->is_eof = false;
+		::memcpy(chunk->data.data(), at, length);
+		state->stream->send(chunk);
+	} else {
+		char* chunk = state->payload.add_chunk(length);
+		::memcpy(chunk, at, length);
+	}
+	state->payload_size += length;
+	return 0;
+}
+
+int HttpServer::on_message_complete(llhttp_t* parser)
+{
+	auto state = (state_t*)parser->data;
+	auto self = state->server;
+	if(state->stream) {
+		auto chunk = HttpChunk::create();
+		chunk->id = state->request->id;
+		chunk->is_eof = true;
+		state->stream->send(chunk);
+		state->stream = nullptr;
+	}
+	else {
+		auto request = state->request;
+		request->payload = vnx::Buffer(state->payload);
+		if(request->content_type == "application/x-www-form-urlencoded") {
+			// TODO: parse into query_params
+		}
+		self->process(state);
+	}
+	state->payload.clear();
+	state->payload_size = 0;
+	state->do_keep_alive = llhttp_should_keep_alive(parser);
+	return HPE_PAUSED;
+}
+
+void HttpServer::process(state_t* state)
+{
+	m_request_counter++;
+	auto request = state->request;
+	publish(request, output_request);
+
 	if(request->method == "OPTIONS")
 	{
 		auto result = HttpResponse::create();
@@ -220,13 +475,13 @@ void HttpServer::process(request_state_t* state)
 		result->headers.emplace_back("Access-Control-Allow-Methods", "DELETE, PUT, POST, GET, OPTIONS");
 		result->headers.emplace_back("Access-Control-Allow-Headers", "Content-Type");
 		result->headers.emplace_back("Access-Control-Max-Age", "86400");
-		reply(state, result);
+		reply(request->id, result);
 		return;
 	}
 	std::string prefix;
 	std::string sub_path;
 	size_t best_match_length = 0;
-	http_clients_t clients;
+	std::shared_ptr<HttpComponentAsyncClient> client;
 	for(const auto& entry : m_client_map)
 	{
 		const auto entry_size = entry.first.size();
@@ -237,21 +492,77 @@ void HttpServer::process(request_state_t* state)
 			prefix = entry.first;
 			sub_path = "/" + request->path.substr(entry_size);
 			best_match_length = entry_size;
-			clients = entry.second;
+			client = entry.second;
 		}
 	}
-	if(clients.async_client) {
+	if(client) {
 		if(show_info) {
 			log(INFO) << request->method << " '" << request->path
 					<< "' => '" << components[prefix] << sub_path << "'";
 		}
-		state->sub_path = sub_path;
-		state->http_client = clients.sync_client;
-		clients.async_client->http_request(request, sub_path,
-				std::bind(&HttpServer::reply, this, state, std::placeholders::_1),
-				std::bind(&HttpServer::reply_error, this, state, std::placeholders::_1));
+		client->http_request(request, sub_path,
+				std::bind(&HttpServer::reply, this, request->id, std::placeholders::_1),
+				std::bind(&HttpServer::reply_error, this, request->id, std::placeholders::_1));
 	} else {
-		reply(state, HttpResponse::from_status(404));
+		reply(request->id, HttpResponse::from_status(404));
+	}
+}
+
+void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response)
+{
+	publish(response, output_response);
+
+	const auto state = find_state_by_id(id);
+	if(!state) {
+		if(show_warnings) {
+			log(WARN) << "Invalid response id: " << id;
+		}
+		return;
+	}
+	if(state->stream) {
+		// input stream is supported only when response is also a stream
+		if(response->stream) {
+			llhttp_resume(&state->parser);
+		} else {
+			if(show_warnings) {
+				log(WARN) << "Input stream of type '" << state->request->content_type << "' was not accepted!";
+			}
+			on_disconnect(state);
+			return;
+		}
+	}
+	state->response = response;
+
+	std::vector<std::pair<std::string, std::string>> headers;
+	headers.emplace_back("Server", "vnx.addons.HttpServer");
+	// TODO: more headers
+
+	std::shared_ptr<const HttpData> payload;
+	if(response->stream) {
+		// TODO: open and connect pipe
+	}
+	else if(response->is_chunked) {
+		state->payload_size = 0;	// reset offset
+		state->is_chunked_reply = true;
+	}
+	else {
+		payload = response;
+	}
+
+	// TODO: append response header HttpChunk to write queue
+
+	if(payload) {
+		state->write_queue.emplace_back(payload, 0);
+	}
+	on_write(state);
+
+	if(response->status >= 400) {
+		m_error_counter++;
+		m_error_map[response->status]++;
+		if(show_warnings) {
+			log(WARN) << state->request->method << " '" << state->request->path << "' failed with: HTTP "
+					<< response->status << " (" << response->error_text << ")";
+		}
 	}
 }
 
@@ -310,8 +621,7 @@ void HttpServer::reply(	request_state_t* state,
 	MHD_destroy_response(response);
 }
 
-void HttpServer::reply_error(	request_state_t* state,
-								const vnx::exception& ex)
+void HttpServer::reply_error(uint64_t id, const vnx::exception& ex)
 {
 	auto response = HttpResponse::create();
 	if(std::dynamic_pointer_cast<const OverflowException>(ex.value())) {
@@ -326,7 +636,7 @@ void HttpServer::reply_error(	request_state_t* state,
 		response->content_type = "text/plain; charset=utf-8";
 		response->payload = response->error_text;
 	}
-	reply(state, response);
+	reply(id, response);
 }
 
 std::shared_ptr<HttpSession> HttpServer::create_session() const
@@ -398,17 +708,6 @@ void HttpServer::update()
 			<< m_session_map.size() << " sessions, errors=" << vnx::to_string(m_error_map);
 }
 
-void* HttpServer::uri_log_callback(void* cls, const char* uri)
-{
-	auto request = HttpRequest::create();
-	if(uri) {
-		request->url = std::string(uri);
-	}
-	auto* state = new request_state_t();
-	state->request = request;
-	return state;
-}
-
 MHD_Result HttpServer::access_handler_callback(	void* cls,
 												MHD_Connection* connection,
 												const char* url,
@@ -468,63 +767,6 @@ MHD_Result HttpServer::access_handler_callback(	void* cls,
 	return MHD_YES;
 }
 
-MHD_Result HttpServer::http_header_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value)
-{
-	request_state_t* state = (request_state_t*)cls;
-	auto request = state->request;
-	if(key) {
-		const auto key_ = ascii_tolower(std::string(key));
-		if(key_ == "content-type" && value) {
-			request->content_type = ascii_tolower(std::string(value));
-		}
-		request->headers.emplace_back(key_, value ? std::string(value) : std::string());
-	}
-	return MHD_YES;
-}
-
-MHD_Result HttpServer::cookie_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value)
-{
-	request_state_t* state = (request_state_t*)cls;
-	if(key && value) {
-		state->request->cookies[std::string(key)] = std::string(value);
-	}
-	return MHD_YES;
-}
-
-MHD_Result HttpServer::query_params_callback(void* cls, MHD_ValueKind kind, const char* key, const char* value)
-{
-	request_state_t* state = (request_state_t*)cls;
-	if(key) {
-		state->request->query_params[std::string(key)] = value ? std::string(value) : std::string();
-	}
-	return MHD_YES;
-}
-
-MHD_Result
-HttpServer::post_data_iterator(	void* cls, MHD_ValueKind kind, const char* key, const char* filename, const char* content_type,
-								const char* transfer_encoding, const char* data, uint64_t off, size_t size)
-{
-	request_state_t* state = (request_state_t*)cls;
-	if(key && off == 0) {
-		state->request->query_params[std::string(key)] = data ? std::string(data, size) : std::string();
-	}
-	return MHD_YES;
-}
-
-void HttpServer::request_completed_callback(void* cls,
-											MHD_Connection* connection,
-											void** con_cls,
-											MHD_RequestTerminationCode term_code)
-{
-	request_state_t* state = (request_state_t*)(*con_cls);
-	if(state) {
-		if(state->post_processor) {
-			MHD_destroy_post_processor(state->post_processor);
-		}
-		delete state;
-	}
-}
-
 ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length)
 {
 	request_state_t *state = (request_state_t *)userdata;
@@ -540,7 +782,16 @@ ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, c
 	return size;
 }
 
-std::shared_ptr<HttpServer::state_t> HttpServer::find_state(int fd) const
+std::shared_ptr<HttpServer::state_t> HttpServer::find_state_by_id(uint64_t id) const
+{
+	auto iter = m_request_map.find(id);
+	if(iter != m_request_map.end()) {
+		return iter->second;
+	}
+	return nullptr;
+}
+
+std::shared_ptr<HttpServer::state_t> HttpServer::find_state_by_socket(int fd) const
 {
 	auto iter = m_state_map.find(fd);
 	if(iter != m_state_map.end()) {
@@ -552,41 +803,100 @@ std::shared_ptr<HttpServer::state_t> HttpServer::find_state(int fd) const
 void HttpServer::on_connect(int fd)
 {
 	auto state = std::make_shared<state_t>();
+	state->fd = fd;
+	state->server = this;
+	on_request(state);
+
 	m_state_map[fd] = state;
+	m_connect_counter++;
 }
 
-void HttpServer::on_read(int fd)
+void HttpServer::on_request(std::shared_ptr<state_t> state)
 {
-	if(auto state = find_state(fd))
-	{
-		if(!state->is_parsed) {
-			// TODO: parse
+	state->poll_bits = POLL_BIT_READ;
+	state->request = HttpRequest::create();
+	state->request->id = m_next_id++;
+
+	llhttp_init(&state->parser, HTTP_REQUEST, &m_settings);
+	state->parser.data = state.get();
+
+	m_request_map[state->request->id] = state;
+}
+
+void HttpServer::on_read(std::shared_ptr<state_t> state)
+{
+	// TODO: read + parse
+}
+
+void HttpServer::on_write(std::shared_ptr<state_t> state)
+{
+	bool is_eof = false;
+	bool is_blocked = false;
+	while(!state->write_queue.empty()) {
+		const auto iter = state->write_queue.begin();
+		const auto chunk = iter->first;
+		const void* data = chunk->data.data(iter->second);
+		const size_t num_bytes = chunk->data.size() - iter->second;
+		#ifdef _WIN32
+			ssize_t res = ::send(state->fd, data, num_bytes, 0);
+		#else
+			ssize_t res = ::send(state->fd, data, num_bytes, MSG_NOSIGNAL);
+		#endif
+		if(res >= 0) {
+			if(size_t(res) >= num_bytes) {
+				state->write_queue.erase(iter);
+				if(chunk->is_eof) {
+					is_eof = true;
+					break;
+				}
+			} else {
+				iter->second += res;
+				is_blocked = true;
+				break;
+			}
+		} else {
+			break;	// cannot write to socket, wait for on_read() to close connection
 		}
 	}
-}
+	state->is_blocked = is_blocked;
 
-void HttpServer::on_write(int fd)
-{
-	if(auto state = find_state(fd))
-	{
-		// TODO
+	if(is_blocked) {
+		state->poll_bits |= POLL_BIT_WRITE;
 	}
-}
-
-void HttpServer::close(int fd)
-{
-	auto iter = m_state_map.find(fd);
-	if(iter != m_state_map.end()) {
-		auto state = iter->second;
-		if(auto request = state->request) {
-			m_request_map.erase(request->id);
+	else if(is_eof) {
+		if(state->do_keep_alive) {
+			on_finish(state);
+			on_request(state);
+		} else {
+			on_disconnect(state);
 		}
-		m_state_map.erase(iter);
 	}
-	{
-		std::lock_guard lock(m_poll_mutex);
-		m_poll_map.erase(fd);
+	else if(state->is_chunked_reply) {
+		// TODO: request more data
 	}
+}
+
+void HttpServer::on_finish(std::shared_ptr<state_t> state)
+{
+	if(auto request = state->request) {
+		m_request_map.erase(request->id);
+	}
+}
+
+void HttpServer::on_disconnect(std::shared_ptr<state_t> state)
+{
+	on_finish(state);
+	m_state_map.erase(state->fd);
+	::close(state->fd);
+}
+
+int HttpServer::set_socket_nonblocking(int fd)
+{
+	const auto res = ::fcntl(fd, F_SETFL, ::fcntl(fd, F_GETFL, 0) | O_NONBLOCK);
+	if(res < 0 && show_warnings) {
+		log(WARN) << "fcntl() failed with: " << strerror(errno);
+	}
+	return res;
 }
 
 
