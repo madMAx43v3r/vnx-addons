@@ -30,6 +30,7 @@ protected:
 	struct state_t {
 		bool is_blocked = false;
 		bool is_chunked_reply = false;
+		bool is_chunked_encoding = false;
 		bool do_keep_alive = false;
 		char poll_bits = 0;
 		char buffer[4096];

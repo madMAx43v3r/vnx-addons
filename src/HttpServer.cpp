@@ -641,6 +641,12 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 	else if(response->is_chunked) {
 		state->payload_size = 0;	// reset offset
 		state->is_chunked_reply = true;
+		if(response->total_size >= 0) {
+			headers.emplace_back("Content-Length", std::to_string(response->total_size));
+		} else {
+			state->is_chunked_encoding = true;
+			headers.emplace_back("Transfer-Encoding", "chunked");
+		}
 	}
 	else {
 		payload = response;
@@ -905,6 +911,12 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk)
 {
 	if(auto state = find_state_by_id(id)) {
+		if(state->is_chunked_encoding) {
+			auto data = HttpData::create();
+			data->data = std::to_string(chunk->data.size()) + "\r\n";
+			data->is_eof = false;
+			state->write_queue.emplace_back(data, 0);
+		}
 		state->payload_size += chunk->data.size();
 		state->write_queue.emplace_back(chunk, 0);
 		on_write(state);
