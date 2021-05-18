@@ -4,6 +4,6 @@ interface HttpComponent {
 	
 	HttpResponse* http_request(HttpRequest* request, string sub_path) const async;
 	
-	HttpResponse* http_request_chunk(HttpRequest* request, string sub_path, long offset, long max_bytes) const async;
+	HttpData* http_request_chunk(HttpRequest* request, string sub_path, long offset, long max_bytes) const async;
 	
 }

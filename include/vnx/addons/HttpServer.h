@@ -31,8 +31,10 @@ protected:
 		bool is_blocked = false;
 		bool is_chunked_reply = false;
 		bool do_keep_alive = false;
-		poll_bits_e poll_bits = poll_bits_e();
+		char poll_bits = 0;
+		char buffer[4096];
 		int fd = -1;
+		uint32_t offset = 0;					// offset into buffer
 		HttpServer* server = nullptr;
 		llhttp_t parser = {};
 		struct {
@@ -41,6 +43,7 @@ protected:
 		} header;
 		vnx::Memory payload;
 		size_t payload_size = 0;
+		std::string sub_path;
 		std::shared_ptr<vnx::Pipe> pipe;
 		std::shared_ptr<vnx::Stream> stream;
 		std::shared_ptr<HttpRequest> request;
@@ -92,6 +95,10 @@ private:
 
 	void on_request(std::shared_ptr<state_t> state);
 
+	void on_resume(std::shared_ptr<state_t> state);
+
+	void on_parse(std::shared_ptr<state_t> state);
+
 	void on_read(std::shared_ptr<state_t> state);
 
 	void on_write(std::shared_ptr<state_t> state);
@@ -99,6 +106,10 @@ private:
 	void on_finish(std::shared_ptr<state_t> state);
 
 	void on_disconnect(std::shared_ptr<state_t> state);
+
+	void on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk);
+
+	void on_write_error(uint64_t id, const vnx::exception& ex);
 
 	void do_poll(int timeout_ms) noexcept;
 

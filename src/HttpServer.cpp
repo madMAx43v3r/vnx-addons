@@ -28,6 +28,12 @@
 #endif
 
 
+#ifndef _WIN32
+inline void closesocket(int fd) {
+	::close(fd);
+}
+#endif
+
 // trim from left
 inline
 std::string ltrim(const std::string& str, const char* t = " \t\n\r\f\v")
@@ -96,6 +102,27 @@ std::vector<std::pair<std::string, std::string>> parse_cookie_header(const std::
 	return out;
 }
 
+inline
+std::string get_http_status_string(const ::int32_t& code) {
+	switch(code) {
+		case 200: return "OK";
+		case 204: return "No Content";
+		case 301: return "Moved Permanently";
+		case 302: return "Found";
+		case 303: return "See Other";
+		case 307: return "Temporary Redirect";
+		case 308: return "Permanent Redirect";
+		case 400: return "Bad Request";
+		case 403: return "Forbidden";
+		case 404: return "Not Found";
+		case 405: return "Method Not Allowed";
+		case 429: return "Timeout";
+		case 500: return "Internal Server Error";
+		case 503: return "Overload";
+		default: return "?";
+	}
+}
+
 
 namespace vnx {
 namespace addons {
@@ -121,12 +148,22 @@ void HttpServer::notify(std::shared_ptr<vnx::Pipe> pipe)
 
 	// trigger poll() to wake up
 	char dummy = 0;
-	::write(m_notify_pipe[1], &dummy, 1);
+	if(::write(m_notify_pipe[1], &dummy, 1) != 1) {
+		// file a bug report
+	}
 }
 
 void HttpServer::init()
 {
 	vnx::open_pipe(vnx_name, this, 500);
+
+	// create notify pipe
+	if(::pipe(m_notify_pipe) < 0) {
+		throw std::runtime_error("pipe() failed with: " + std::string(strerror(errno)));
+	}
+	if(set_socket_nonblocking(m_notify_pipe[0]) < 0) {
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+	}
 }
 
 void HttpServer::main()
@@ -143,15 +180,13 @@ void HttpServer::main()
 	// setup parser
 	llhttp_settings_init(&m_settings);
 	m_settings.on_url = &HttpServer::on_url;
-	// TODO
-
-	// create notify pipe
-	if(::pipe(m_notify_pipe) < 0) {
-		throw std::runtime_error("pipe() failed with: " + std::string(strerror(errno)));
-	}
-	if(set_socket_nonblocking(m_notify_pipe[0]) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
-	}
+	m_settings.on_header_field = &HttpServer::on_header_field;
+	m_settings.on_header_field_complete = &HttpServer::on_header_field_complete;
+	m_settings.on_header_value = &HttpServer::on_header_value;
+	m_settings.on_header_value_complete = &HttpServer::on_header_value_complete;
+	m_settings.on_headers_complete = &HttpServer::on_headers_complete;
+	m_settings.on_body = &HttpServer::on_body;
+	m_settings.on_message_complete = &HttpServer::on_message_complete;
 
 	// create server socket
 	m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
@@ -208,16 +243,26 @@ void HttpServer::main()
 
 	// close all sockets
 	for(const auto& entry : m_state_map) {
-		::close(entry.first);
+		closesocket(entry.first);
 	}
 	m_state_map.clear();
 
-	::close(m_socket);
-	::close(m_notify_pipe[0]);
-	::close(m_notify_pipe[1]);
+	closesocket(m_socket);
+	closesocket(m_notify_pipe[0]);
+	closesocket(m_notify_pipe[1]);
 
 	if(m_default_session) {
 		vnx::get_auth_server()->logout(m_default_session->vsid);
+	}
+}
+
+void HttpServer::handle(std::shared_ptr<const HttpChunk> value)
+{
+	if(auto state = find_state_by_id(value->id)) {
+		state->write_queue.emplace_back(value, 0);
+	}
+	else if(show_warnings) {
+		log(WARN) << "Invalid chunk id: " << value->id;
 	}
 }
 
@@ -296,7 +341,15 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		return;
 	}
 	else {
-		throw std::logic_error("invalid request");
+		std::ostringstream out;
+		out << "<html><body><ul><li>/?"
+				<< login_path << "</li><li>/?"
+				<< logout_path << "</li><li>/?"
+				<< session_path << "</li></ul></body></html>";
+		response = HttpResponse::create();
+		response->status = 404;
+		response->data = out.str();
+		response->content_type = "text/html";
 	}
 
 	if(response) {
@@ -451,7 +504,9 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 		auto request = state->request;
 		request->payload = vnx::Buffer(state->payload);
 		if(request->content_type == "application/x-www-form-urlencoded") {
-			// TODO: parse into query_params
+			for(const auto& entry : parse_query_string(request->payload.as_string())) {
+				request->query_params[entry.first] = entry.second;
+			}
 		}
 		self->process(state);
 	}
@@ -497,9 +552,10 @@ void HttpServer::process(state_t* state)
 	}
 	if(client) {
 		if(show_info) {
-			log(INFO) << request->method << " '" << request->path
-					<< "' => '" << components[prefix] << sub_path << "'";
+			log(INFO) << request->method << " '" << request->path << "' => '" << components[prefix] << sub_path << "'";
 		}
+		state->module = client;
+		state->sub_path = sub_path;
 		client->http_request(request, sub_path,
 				std::bind(&HttpServer::reply, this, request->id, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, request->id, std::placeholders::_1));
@@ -519,6 +575,17 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		}
 		return;
 	}
+	state->response = response;
+
+	if(response->status >= 400) {
+		m_error_counter++;
+		m_error_map[response->status]++;
+		if(show_warnings) {
+			log(WARN) << state->request->method << " '" << state->request->path << "' failed with: HTTP "
+					<< response->status << " (" << response->error_text << ")";
+		}
+	}
+
 	if(state->stream) {
 		// input stream is supported only when response is also a stream
 		if(response->stream) {
@@ -531,15 +598,45 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 			return;
 		}
 	}
-	state->response = response;
 
 	std::vector<std::pair<std::string, std::string>> headers;
 	headers.emplace_back("Server", "vnx.addons.HttpServer");
-	// TODO: more headers
+
+	if(!access_control_allow_origin.empty()) {
+		headers.emplace_back("Access-Control-Allow-Origin", access_control_allow_origin);
+	}
+	if(!content_security_policy.empty()) {
+		headers.emplace_back("Content-Security-Policy", content_security_policy);
+	}
+	if(!response->content_type.empty())
+	{
+		auto content_type = response->content_type;
+		if(content_type.find("charset=") == std::string::npos) {
+			auto iter = charset.find(content_type);
+			if(iter != charset.end()) {
+				content_type += "; charset=" + iter->second;
+			}
+		}
+		headers.emplace_back("Content-Type", content_type.c_str());
+	}
+	if(auto_session && state->request->session == m_default_session)
+	{
+		auto session = create_session();
+		session->vsid = m_default_session->vsid;
+		add_session(session);
+		headers.emplace_back("Set-Cookie", get_session_cookie(session));
+	}
 
 	std::shared_ptr<const HttpData> payload;
 	if(response->stream) {
-		// TODO: open and connect pipe
+		if(auto pipe = vnx::get_pipe(response->stream)) {
+			vnx::connect(pipe, this, 100, 100);
+			state->pipe = pipe;
+			on_resume(state);		// resume reading & parsing body
+		}
+		else {
+			payload = response;
+		}
 	}
 	else if(response->is_chunked) {
 		state->payload_size = 0;	// reset offset
@@ -549,76 +646,25 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		payload = response;
 	}
 
-	// TODO: append response header HttpChunk to write queue
-
+	if(payload) {
+		headers.emplace_back("Content-Length", std::to_string(payload->data.size()));
+	}
+	std::ostringstream out;
+	out << "HTTP/1.1 " << response->status << " " << get_http_status_string(response->status) << "\r\n";
+	for(const auto& entry : headers) {
+		out << entry.first << ": " << entry.second << "\r\n";
+	}
+	out << "\r\n";
+	{
+		auto data = HttpData::create();
+		data->data = out.str();
+		data->is_eof = false;
+		state->write_queue.emplace_back(data, 0);
+	}
 	if(payload) {
 		state->write_queue.emplace_back(payload, 0);
 	}
 	on_write(state);
-
-	if(response->status >= 400) {
-		m_error_counter++;
-		m_error_map[response->status]++;
-		if(show_warnings) {
-			log(WARN) << state->request->method << " '" << state->request->path << "' failed with: HTTP "
-					<< response->status << " (" << response->error_text << ")";
-		}
-	}
-}
-
-void HttpServer::reply(	request_state_t* state,
-						std::shared_ptr<const HttpResponse> result)
-{
-	auto request = state->request;
-	if(result->status >= 400) {
-		m_error_counter++;
-		m_error_map[result->status]++;
-		if(show_warnings) {
-			log(WARN) << request->method << " '" << request->path << "' failed with: HTTP " << result->status << " (" << result->error_text << ")";
-		}
-	}
-	publish(result, output_response);
-	state->response = result;
-
-	MHD_Response *response;
-	if(result->is_chunked){
-		response = MHD_create_response_from_callback(result->chunked_total_size, chunk_size, chunked_transfer_callback, state, NULL);
-	}else{
-		response = MHD_create_response_from_buffer(result->payload.size(), (void*)result->payload.data(), MHD_RESPMEM_PERSISTENT);
-	}
-	MHD_add_response_header(response, "Server", "vnx.addons.HttpServer");
-	if(!access_control_allow_origin.empty()) {
-		MHD_add_response_header(response, "Access-Control-Allow-Origin", access_control_allow_origin.c_str());
-	}
-	if(!content_security_policy.empty()) {
-		MHD_add_response_header(response, "Content-Security-Policy", content_security_policy.c_str());
-	}
-	if(!result->content_type.empty()) {
-		auto content_type = result->content_type;
-		if(content_type.find("charset=") == std::string::npos) {
-			auto iter = charset.find(content_type);
-			if(iter != charset.end()) {
-				content_type += "; charset=" + iter->second;
-			}
-		}
-		MHD_add_response_header(response, "Content-Type", content_type.c_str());
-	}
-	for(const auto& entry : result->headers) {
-		MHD_add_response_header(response, entry.first.c_str(), entry.second.c_str());
-	}
-	if(auto_session && request->session == m_default_session)
-	{
-		auto session = create_session();
-		session->vsid = m_default_session->vsid;
-		add_session(session);
-		MHD_add_response_header(response, "Set-Cookie", get_session_cookie(session).c_str());
-	}
-	const auto ret = MHD_queue_response(state->connection, result->status, response);
-	if(ret != MHD_YES) {
-		log(WARN) << "Failed to queue MHD response!";
-	}
-	MHD_resume_connection(state->connection);	// after this, 'state' may be deleted at any time
-	MHD_destroy_response(response);
 }
 
 void HttpServer::reply_error(uint64_t id, const vnx::exception& ex)
@@ -633,8 +679,8 @@ void HttpServer::reply_error(uint64_t id, const vnx::exception& ex)
 	}
 	response->error_text = ex.what();
 	if(error_payload) {
-		response->content_type = "text/plain; charset=utf-8";
-		response->payload = response->error_text;
+		response->content_type = "text/plain";
+		response->data = response->error_text;
 	}
 	reply(id, response);
 }
@@ -708,80 +754,6 @@ void HttpServer::update()
 			<< m_session_map.size() << " sessions, errors=" << vnx::to_string(m_error_map);
 }
 
-MHD_Result HttpServer::access_handler_callback(	void* cls,
-												MHD_Connection* connection,
-												const char* url,
-												const char* method,
-												const char* version,
-												const char* upload_data,
-												size_t* upload_data_size,
-												void** con_cls)
-{
-	HttpServer* self = (HttpServer*)cls;
-	request_state_t* state = (request_state_t*)(*con_cls);
-	if(!state->connection) {
-		state->connection = connection;
-		auto request = state->request;
-		request->id = self->m_next_id++;
-		if(method) {
-			request->method = std::string(method);
-		}
-		try {
-			// convert relative paths to absolute
-			request->path = Url::Url(request->url).abspath().path();
-		} catch(...) {
-			return MHD_NO;
-		}
-		state->request = request;
-		*con_cls = state;
-		MHD_get_connection_values(connection, MHD_HEADER_KIND, &HttpServer::http_header_callback, state);
-		MHD_get_connection_values(connection, MHD_COOKIE_KIND, &HttpServer::cookie_callback, state);
-		MHD_get_connection_values(connection, MHD_ValueKind(MHD_POSTDATA_KIND | MHD_GET_ARGUMENT_KIND), &HttpServer::query_params_callback, state);
-		return MHD_YES;
-	}
-	const auto request = state->request;
-
-	if(const auto length = *upload_data_size)
-	{
-		if(state->post_processor || request->content_type == "application/x-www-form-urlencoded") {
-			if(!state->post_processor) {
-				state->post_processor = MHD_create_post_processor(connection, 65536, &HttpServer::post_data_iterator, state);
-			}
-			MHD_post_process(state->post_processor, upload_data, length);
-		}
-		auto& payload = request->payload;
-		const size_t offset = payload.size();
-		if(self->max_payload_size >= 0 && offset + length > self->max_payload_size) {
-			return MHD_NO;
-		}
-		payload.resize(offset + length);
-		::memcpy(payload.data(offset), upload_data, length);
-		*upload_data_size = 0;
-	} else {
-		if(self->add_task(std::bind(&HttpServer::process, self, state))) {
-			MHD_suspend_connection(connection);
-		} else {
-			return MHD_NO;
-		}
-	}
-	return MHD_YES;
-}
-
-ssize_t HttpServer::chunked_transfer_callback(void *userdata, uint64_t offset, char *dest, size_t length)
-{
-	request_state_t *state = (request_state_t *)userdata;
-	if(!state->http_client) {
-		return MHD_CONTENT_READER_END_OF_STREAM;
-	}
-	std::shared_ptr<const HttpResponse> response = state->http_client->http_request_chunk(state->request, state->sub_path, offset, length);
-	const size_t size = response->payload.size();
-	if(size == 0){
-		return MHD_CONTENT_READER_END_OF_STREAM;
-	}
-	::memcpy(dest, response->payload.data(), size);
-	return size;
-}
-
 std::shared_ptr<HttpServer::state_t> HttpServer::find_state_by_id(uint64_t id) const
 {
 	auto iter = m_request_map.find(id);
@@ -823,9 +795,48 @@ void HttpServer::on_request(std::shared_ptr<state_t> state)
 	m_request_map[state->request->id] = state;
 }
 
+void HttpServer::on_resume(std::shared_ptr<state_t> state)
+{
+	llhttp_resume(&state->parser);
+	on_parse(state);
+}
+
+void HttpServer::on_parse(std::shared_ptr<state_t> state)
+{
+	const auto ret = llhttp_execute(&state->parser, state->buffer, state->offset);
+	switch(ret) {
+		case HPE_OK:
+			state->offset = 0;
+			state->poll_bits |= POLL_BIT_READ;
+			break;
+		case HPE_PAUSED:
+			break;
+		default:
+			if(show_warnings) {
+				log(WARN) << "HTTP parsing failed with: " << llhttp_errno_name(ret);
+			}
+			on_disconnect(state);
+	}
+}
+
 void HttpServer::on_read(std::shared_ptr<state_t> state)
 {
-	// TODO: read + parse
+	const auto max_bytes = sizeof(state->buffer) - state->offset;
+	const auto num_bytes = ::recv(state->fd, state->buffer + state->offset, max_bytes, 0);
+	if(num_bytes < 0) {
+		if(errno != EAGAIN) {
+			on_disconnect(state);	// broken connection
+			return;
+		}
+	}
+	else if(num_bytes > 0) {
+		state->offset += num_bytes;
+	}
+	else if(max_bytes > 0) {
+		on_disconnect(state);		// normal disconnect
+		return;
+	}
+	on_parse(state);
 }
 
 void HttpServer::on_write(std::shared_ptr<state_t> state)
@@ -837,11 +848,11 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 		const auto chunk = iter->first;
 		const void* data = chunk->data.data(iter->second);
 		const size_t num_bytes = chunk->data.size() - iter->second;
-		#ifdef _WIN32
-			ssize_t res = ::send(state->fd, data, num_bytes, 0);
-		#else
+#ifdef MSG_NOSIGNAL
 			ssize_t res = ::send(state->fd, data, num_bytes, MSG_NOSIGNAL);
-		#endif
+#else
+			ssize_t res = ::send(state->fd, data, num_bytes, 0);
+#endif
 		if(res >= 0) {
 			if(size_t(res) >= num_bytes) {
 				state->write_queue.erase(iter);
@@ -858,6 +869,14 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			break;	// cannot write to socket, wait for on_read() to close connection
 		}
 	}
+	if(state->pipe) {
+		if(is_blocked && !state->is_blocked) {
+			state->pipe->pause();
+		}
+		if(!is_blocked && state->is_blocked) {
+			state->pipe->resume();
+		}
+	}
 	state->is_blocked = is_blocked;
 
 	if(is_blocked) {
@@ -872,7 +891,33 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 		}
 	}
 	else if(state->is_chunked_reply) {
-		// TODO: request more data
+		if(auto client = state->module) {
+			client->http_request_chunk(state->request, state->sub_path, state->payload_size, chunk_size,
+					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1),
+					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
+		}
+		else {
+			on_disconnect(state);
+		}
+	}
+}
+
+void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk)
+{
+	if(auto state = find_state_by_id(id)) {
+		state->payload_size += chunk->data.size();
+		state->write_queue.emplace_back(chunk, 0);
+		on_write(state);
+	}
+}
+
+void HttpServer::on_write_error(uint64_t id, const vnx::exception& ex)
+{
+	if(show_warnings) {
+		log(WARN) << "http_request_chunk() failed with: " << ex.what();
+	}
+	if(auto state = find_state_by_id(id)) {
+		on_disconnect(state);
 	}
 }
 
@@ -881,13 +926,19 @@ void HttpServer::on_finish(std::shared_ptr<state_t> state)
 	if(auto request = state->request) {
 		m_request_map.erase(request->id);
 	}
+	llhttp_reset(&state->parser);
+
+	const auto fd = state->fd;
+	*state = state_t();
+	state->fd = fd;
+	state->server = this;
 }
 
 void HttpServer::on_disconnect(std::shared_ptr<state_t> state)
 {
 	on_finish(state);
 	m_state_map.erase(state->fd);
-	::close(state->fd);
+	closesocket(state->fd);
 }
 
 int HttpServer::set_socket_nonblocking(int fd)

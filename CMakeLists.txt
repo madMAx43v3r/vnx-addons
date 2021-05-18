@@ -19,8 +19,17 @@ target_include_directories(url_cpp PUBLIC lib/url-cpp/include)
 
 target_include_directories(llhttp PUBLIC lib/pyllhttp/lib)
 
+if(WIN32)
+	#list(APPEND PLATFORM_SOURCES)
+else()
+	list(APPEND PLATFORM_SOURCES
+		src/linux/HttpServer.cpp
+	)
+endif()
+
 add_library(vnx_addons SHARED
 	${GENERATED_SOURCE_FILES}
+	${PLATFORM_SOURCES}
 	src/CompressedValue.cpp
 	src/DeflatedValue.cpp
 	src/DeflateInputStream.cpp

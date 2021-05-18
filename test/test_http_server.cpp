@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 		module.start_detached();
 	}
 
-	vnx::Handle<addons::HttpServerBase> module = vnx::addons::new_HttpServer("HttpServer");
+	vnx::Handle<addons::HttpServer> module = new vnx::addons::HttpServer("HttpServer");
 	module->output_request = "test.http_request";
 	module->output_response = "test.http_response";
 	module->components["/test/"] = "HttpServer";
