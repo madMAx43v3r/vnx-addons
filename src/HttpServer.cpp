@@ -343,15 +343,10 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 		return;
 	}
 	else {
-		std::ostringstream out;
-		out << "<html><body><ul><li>/?"
-				<< login_path << "</li><li>/?"
-				<< logout_path << "</li><li>/?"
-				<< session_path << "</li></ul></body></html>";
 		response = HttpResponse::create();
 		response->status = 404;
-		response->data = out.str();
-		response->content_type = "text/html";
+		response->data = vnx::to_string(std::vector<std::string>{login_path, logout_path, session_path});
+		response->content_type = "application/json";
 	}
 
 	if(response) {
@@ -603,13 +598,7 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 
 	std::vector<std::pair<std::string, std::string>> headers;
 	headers.emplace_back("Server", "vnx.addons.HttpServer");
-
-	if(!access_control_allow_origin.empty()) {
-		headers.emplace_back("Access-Control-Allow-Origin", access_control_allow_origin);
-	}
-	if(!content_security_policy.empty()) {
-		headers.emplace_back("Content-Security-Policy", content_security_policy);
-	}
+	headers.insert(headers.end(), add_headers.begin(), add_headers.end());
 	headers.insert(headers.end(), response->headers.begin(), response->headers.end());
 
 	if(!response->content_type.empty())

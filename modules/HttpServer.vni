@@ -26,11 +26,11 @@ module HttpServer implements HttpComponent {
 	map<string, string> components;			// [url path => module name]
 	map<string, string> charset;			// [mime type => default charset]
 	
-	string access_control_allow_origin = "*";		// "Access-Control-Allow-Origin" HTTP header
-	string content_security_policy = "";			// "Content-Security-Policy" HTTP header
+	vector<pair<string, string>> add_headers;		// [key => value]
+	
+	string default_access = "VIEWER";				// default access role for anonymous clients
 	string cookie_policy = "SameSite=Strict;";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/
 	string session_coookie_name = "hsid";
-	string default_access = "VIEWER";		// default access role for anonymous clients
 	
 	
 	/* Possible GET/POST parameters:
