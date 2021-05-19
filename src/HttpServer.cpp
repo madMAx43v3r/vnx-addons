@@ -610,6 +610,8 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 	if(!content_security_policy.empty()) {
 		headers.emplace_back("Content-Security-Policy", content_security_policy);
 	}
+	headers.insert(headers.end(), response->headers.begin(), response->headers.end());
+
 	if(!response->content_type.empty())
 	{
 		auto content_type = response->content_type;
@@ -628,26 +630,29 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		add_session(session);
 		headers.emplace_back("Set-Cookie", get_session_cookie(session));
 	}
+	const bool is_head = state->request->method == "HEAD";
 
 	std::shared_ptr<const HttpData> payload;
 	if(response->stream) {
-		if(auto pipe = vnx::get_pipe(response->stream)) {
+		const auto pipe = vnx::get_pipe(response->stream);
+		if(!pipe || is_head) {
+			payload = response;
+		} else {
 			vnx::connect(pipe, this, 100, 100);
 			state->pipe = pipe;
 			on_resume(state);		// resume reading & parsing body
 		}
-		else {
-			payload = response;
-		}
 	}
 	else if(response->is_chunked) {
-		state->payload_size = 0;	// reset offset
-		state->is_chunked_reply = true;
 		if(response->total_size >= 0) {
 			headers.emplace_back("Content-Length", std::to_string(response->total_size));
 		} else {
 			state->is_chunked_encoding = true;
 			headers.emplace_back("Transfer-Encoding", "chunked");
+		}
+		if(!is_head) {
+			state->payload_size = 0;	// reset offset
+			state->is_chunked_reply = true;
 		}
 	}
 	else {
@@ -666,10 +671,10 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 	{
 		auto data = HttpData::create();
 		data->data = out.str();
-		data->is_eof = false;
+		data->is_eof = is_head;
 		state->write_queue.emplace_back(data, 0);
 	}
-	if(payload) {
+	if(payload && !is_head) {
 		state->write_queue.emplace_back(payload, 0);
 	}
 	on_write(state);
@@ -874,7 +879,12 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 				break;
 			}
 		} else {
-			break;	// cannot write to socket, wait for on_read() to close connection
+			if(errno == EAGAIN || errno == EWOULDBLOCK) {
+				is_blocked = true;
+			} else {
+				on_disconnect(state);	// broken connection
+				return;
+			}
 		}
 	}
 	if(state->pipe) {
@@ -903,8 +913,7 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			client->http_request_chunk(state->request, state->sub_path, state->payload_size, chunk_size,
 					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1),
 					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
-		}
-		else {
+		} else {
 			on_disconnect(state);
 		}
 	}

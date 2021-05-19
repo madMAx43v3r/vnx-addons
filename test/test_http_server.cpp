@@ -30,8 +30,8 @@ int main(int argc, char** argv)
 	vnx::Handle<addons::HttpServer> module = new vnx::addons::HttpServer("HttpServer");
 	module->output_request = "test.http_request";
 	module->output_response = "test.http_response";
-	module->components["/test/"] = "HttpServer";
 	module->components["/file/"] = "FileServer";
+	module->components["/server/"] = "HttpServer";
 	module.start();
 
 	vnx::wait();
