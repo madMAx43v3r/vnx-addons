@@ -17,6 +17,7 @@ module HttpServer implements HttpComponent {
 	int session_size = 3;					// number of 64-bit values for session ids
 	int listen_queue_size = 1000;
 	int stats_interval_ms = 10000;			// -1 = disable [ms]
+	int connection_timeout_ms = 30000;		// -1 = disable [ms]
 	
 	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]

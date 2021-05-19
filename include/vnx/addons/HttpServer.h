@@ -32,10 +32,12 @@ protected:
 		bool is_chunked_reply = false;
 		bool is_chunked_encoding = false;
 		bool do_keep_alive = false;
+		bool do_timeout = true;
 		char poll_bits = 0;
 		char buffer[4096];
 		int fd = -1;
 		uint32_t offset = 0;					// offset into buffer
+		int64_t waiting_since = -1;				// time since waiting on connection [usec]
 		HttpServer* server = nullptr;
 		llhttp_t parser = {};
 		struct {
@@ -106,6 +108,8 @@ private:
 
 	void on_finish(std::shared_ptr<state_t> state);
 
+	void on_timeout(std::shared_ptr<state_t> state);
+
 	void on_disconnect(std::shared_ptr<state_t> state);
 
 	void on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk);
@@ -141,6 +145,7 @@ private:
 	mutable std::multimap<int64_t, std::string> m_session_timeout_queue;						// [deadline => http session id]
 
 	mutable size_t m_error_counter = 0;
+	mutable size_t m_timeout_counter = 0;
 	mutable size_t m_request_counter = 0;
 	mutable size_t m_connect_counter = 0;
 	mutable std::map<int, size_t> m_error_map;

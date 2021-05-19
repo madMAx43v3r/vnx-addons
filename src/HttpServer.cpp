@@ -752,7 +752,7 @@ void HttpServer::update()
 			break;
 		}
 	}
-	log(INFO) << m_request_counter << " requests, " << m_error_counter << " failed, "
+	log(INFO) << m_request_counter << " requests, " << m_error_counter << " failed, " << m_timeout_counter << " timeout, "
 			<< m_session_map.size() << " sessions, errors=" << vnx::to_string(m_error_map);
 }
 
@@ -833,6 +833,7 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 	}
 	else if(num_bytes > 0) {
 		state->offset += num_bytes;
+		state->waiting_since = -1;
 	}
 	else if(max_bytes > 0) {
 		on_disconnect(state);		// normal disconnect
@@ -856,6 +857,9 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			ssize_t res = ::send(state->fd, data, num_bytes, 0);
 #endif
 		if(res >= 0) {
+			if(res > 0) {
+				state->waiting_since = -1;
+			}
 			if(size_t(res) >= num_bytes) {
 				state->write_queue.erase(iter);
 				if(chunk->is_eof) {
@@ -933,8 +937,39 @@ void HttpServer::on_write_error(uint64_t id, const vnx::exception& ex)
 	}
 }
 
+void HttpServer::on_finish(std::shared_ptr<state_t> state)
+{
+	if(auto request = state->request) {
+		m_request_map.erase(request->id);
+	}
+	llhttp_reset(&state->parser);
+
+	const auto fd = state->fd;
+	*state = state_t();
+	state->fd = fd;
+	state->server = this;
+}
+
+void HttpServer::on_timeout(std::shared_ptr<state_t> state)
+{
+	if(state->do_timeout) {
+		m_timeout_counter++;
+		on_disconnect(state);
+	}
+}
+
+void HttpServer::on_disconnect(std::shared_ptr<state_t> state)
+{
+	on_finish(state);
+	m_state_map.erase(state->fd);
+	closesocket(state->fd);
+	state->fd = -1;
+}
+
 void HttpServer::do_poll(int timeout_ms) noexcept
 {
+	const auto now = vnx::get_wall_time_micros();
+
 	std::vector<::pollfd> fds;
 	std::vector<std::shared_ptr<state_t>> states;
 	fds.reserve(2 + m_state_map.size());
@@ -954,10 +989,21 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 		states.push_back(nullptr);
 	}
 
+	std::vector<std::shared_ptr<state_t>> timeout_list;
 	for(const auto& entry : m_state_map)
 	{
-		::pollfd set = {};
 		const auto& state = entry.second;
+		if(state->waiting_since < 0) {
+			state->waiting_since = now;
+		}
+		else if(connection_timeout_ms > 0) {
+			const auto delta = now - state->waiting_since;
+			if(delta / 1000 > connection_timeout_ms) {
+				timeout_list.push_back(state);
+			}
+		}
+
+		::pollfd set = {};
 		if(state->poll_bits & POLL_BIT_READ) {
 			set.events |= POLLIN;
 		}
@@ -970,7 +1016,7 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 			states.push_back(state);
 		}
 	}
-	if(::poll(fds.data(), fds.size(), timeout_ms) < 0) {
+	if(::poll(fds.data(), fds.size(), std::min(timeout_ms, 1000)) < 0) {
 		log(ERROR) << "poll() failed with: " << std::strerror(errno);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
@@ -1006,26 +1052,9 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 			on_write(state);
 		}
 	}
-}
-
-void HttpServer::on_finish(std::shared_ptr<state_t> state)
-{
-	if(auto request = state->request) {
-		m_request_map.erase(request->id);
+	for(const auto& state : timeout_list) {
+		on_timeout(state);
 	}
-	llhttp_reset(&state->parser);
-
-	const auto fd = state->fd;
-	*state = state_t();
-	state->fd = fd;
-	state->server = this;
-}
-
-void HttpServer::on_disconnect(std::shared_ptr<state_t> state)
-{
-	on_finish(state);
-	m_state_map.erase(state->fd);
-	closesocket(state->fd);
 }
 
 
