@@ -21,8 +21,7 @@ module HttpServer implements HttpComponent {
 	
 	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]
-	
-	ulong chunk_size = 1048576;				// maximum chunk size for chunked transfer encoding [bytes]
+	long max_chunk_size = 1048576;			// maximum chunk size for chunked transfer encoding [bytes]
 	
 	map<string, string> components;			// [url path => module name]
 	map<string, string> charset;			// [mime type => default charset]

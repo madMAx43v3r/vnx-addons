@@ -250,6 +250,7 @@ void FileServer::http_request_chunk_async(std::shared_ptr<const HttpRequest> req
 		response->data = read_file_range(file_path, offset, max_bytes);
 		response->content_type = detect_mime_type(file_path);
 		response->is_chunked = true;
+		response->is_eof = response->data.size() < max_bytes;
 	}
 	http_request_chunk_async_return(_request_id, response);
 }

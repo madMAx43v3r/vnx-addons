@@ -890,6 +890,28 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 	}
 	state->is_blocked = is_blocked;
 
+	if(state->is_chunked_reply) {
+		int64_t max_bytes = max_chunk_size;
+		if(auto response = state->response) {
+			if(response->total_size >= 0) {
+				max_bytes = std::min(max_bytes, response->total_size - int64_t(state->payload_size));
+			}
+		}
+		if(max_bytes <= 0) {
+			is_eof = true;
+		}
+		if(!is_blocked && !is_eof) {
+			if(auto client = state->module) {
+				client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_bytes,
+						std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1),
+						std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
+			} else {
+				on_disconnect(state);
+				return;
+			}
+		}
+	}
+
 	if(is_blocked) {
 		state->poll_bits |= POLL_BIT_WRITE;
 	}
@@ -897,15 +919,6 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 		if(state->do_keep_alive) {
 			on_finish(state);
 			on_request(state);
-		} else {
-			on_disconnect(state);
-		}
-	}
-	else if(state->is_chunked_reply) {
-		if(auto client = state->module) {
-			client->http_request_chunk(state->request, state->sub_path, state->payload_size, chunk_size,
-					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1),
-					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
 		} else {
 			on_disconnect(state);
 		}
@@ -922,6 +935,21 @@ void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chun
 			state->write_queue.emplace_back(data, 0);
 		}
 		state->payload_size += chunk->data.size();
+
+		if(auto response = state->response) {
+			if(response->total_size >= 0) {
+				if(state->payload_size > size_t(response->total_size)) {
+					log(WARN) << "Response payload overflow, payload_size=" << state->payload_size << ", total_size=" << response->total_size;
+					on_disconnect(state);
+					return;
+				}
+				if(chunk->is_eof && state->payload_size != size_t(response->total_size)) {
+					log(WARN) << "Response payload underflow, payload_size=" << state->payload_size << ", total_size=" << response->total_size;
+					on_disconnect(state);
+					return;
+				}
+			}
+		}
 		state->write_queue.emplace_back(chunk, 0);
 		on_write(state);
 	}
@@ -1002,18 +1030,19 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 				timeout_list.push_back(state);
 			}
 		}
-
-		::pollfd set = {};
-		if(state->poll_bits & POLL_BIT_READ) {
-			set.events |= POLLIN;
-		}
-		if(state->poll_bits & POLL_BIT_WRITE) {
-			set.events |= POLLOUT;
-		}
-		if(set.events) {
-			set.fd = entry.first;
-			fds.push_back(set);
-			states.push_back(state);
+		if(state->fd >= 0) {
+			::pollfd set = {};
+			if(state->poll_bits & POLL_BIT_READ) {
+				set.events |= POLLIN;
+			}
+			if(state->poll_bits & POLL_BIT_WRITE) {
+				set.events |= POLLOUT;
+			}
+			if(set.events) {
+				set.fd = state->fd;
+				fds.push_back(set);
+				states.push_back(state);
+			}
 		}
 	}
 	if(::poll(fds.data(), fds.size(), std::min(timeout_ms, 1000)) < 0) {
