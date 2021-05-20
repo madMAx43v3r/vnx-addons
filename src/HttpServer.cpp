@@ -299,12 +299,7 @@ void HttpServer::main()
 
 void HttpServer::handle(std::shared_ptr<const HttpChunk> value)
 {
-	if(auto state = find_state_by_id(value->id)) {
-		state->write_queue.emplace_back(value, 0);
-	}
-	else if(show_warnings) {
-		log(WARN) << "Invalid chunk id: " << value->id;
-	}
+	on_write_data(value->id, value);
 }
 
 void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
@@ -669,14 +664,19 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		if(!pipe || is_head) {
 			payload = response;
 		} else {
+			if(state->stream) {
+				try {
+					state->stream->open();
+					on_resume(state);
+				} catch(const std::exception& ex) {
+					log(WARN) << ex.what();
+				}
+			}
 			vnx::connect(pipe, this, 100, 100);
 			pipe->resume();
 			state->pipe = pipe;
 			state->is_chunked_encoding = true;
 			headers.emplace_back("Connection", "keep-alive");
-			if(state->stream) {
-				on_resume(state);		// resume reading & parsing body
-			}
 		}
 	}
 	else if(response->is_chunked) {
@@ -976,13 +976,8 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 
 void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk)
 {
-	if(auto state = find_state_by_id(id)) {
-		if(state->is_chunked_encoding) {
-			auto data = HttpData::create();
-			data->data = vnx::to_hex_string(chunk->data.size()) + "\r\n";
-			data->is_eof = false;
-			state->write_queue.emplace_back(data, 0);
-		}
+	if(auto state = find_state_by_id(id))
+	{
 		state->payload_size += chunk->data.size();
 
 		if(auto response = state->response) {
@@ -999,8 +994,21 @@ void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chun
 				}
 			}
 		}
+		if(state->is_chunked_encoding) {
+			auto data = HttpData::create();
+			std::ostringstream out;
+			out << std::hex << chunk->data.size() << "\r\n";
+			out.write((const char*)chunk->data.data(), chunk->data.size());
+			out << "\r\n";
+			data->data = out.str();
+			data->is_eof = chunk->is_eof;
+			chunk = data;
+		}
 		state->write_queue.emplace_back(chunk, 0);
 		on_write(state);
+	}
+	else if(show_warnings) {
+		log(WARN) << "Invalid request id: " << id;
 	}
 }
 
@@ -1018,6 +1026,9 @@ void HttpServer::on_finish(std::shared_ptr<state_t> state)
 {
 	if(auto request = state->request) {
 		m_request_map.erase(request->id);
+	}
+	if(auto pipe = state->pipe) {
+		pipe->close();
 	}
 	llhttp_reset(&state->parser);
 
