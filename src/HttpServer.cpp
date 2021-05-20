@@ -150,7 +150,7 @@ void HttpServer::notify(std::shared_ptr<vnx::Pipe> pipe)
 	// trigger poll() to wake up
 	char dummy = 0;
 #ifdef _WIN32
-	if(::send(m_notify_socket, &dummy, 1) != 1)
+	if(::send(m_notify_socket, &dummy, 1, 0) != 1)
 #else
 	if(::write(m_notify_pipe[1], &dummy, 1) != 1)
 #endif
@@ -891,9 +891,9 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 		const void* data = chunk->data.data(iter->second);
 		const size_t num_bytes = chunk->data.size() - iter->second;
 #ifdef MSG_NOSIGNAL
-			ssize_t res = ::send(state->fd, data, num_bytes, MSG_NOSIGNAL);
+			ssize_t res = ::send(state->fd, (const char *)data, num_bytes, MSG_NOSIGNAL);
 #else
-			ssize_t res = ::send(state->fd, data, num_bytes, 0);
+			ssize_t res = ::send(state->fd, (const char *)data, num_bytes, 0);
 #endif
 		if(res >= 0) {
 			if(res > 0) {
@@ -1044,7 +1044,7 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 	{
 		::pollfd set = {};
 #ifdef _WIN32
-		set.fd = m_socket_notify;
+		set.fd = m_notify_socket;
 #else
 		set.fd = m_notify_pipe[0];
 #endif
@@ -1102,7 +1102,7 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 	if(fds[0].revents & POLLIN) {
 		char buf[1024];
 #ifdef _WIN32
-		while(::recv(m_notify_socket, buf, sizeof(buf)) >= sizeof(buf));
+		while(::recv(m_notify_socket, buf, sizeof(buf), 0) >= sizeof(buf));
 #else
 		while(::read(m_notify_pipe[0], buf, sizeof(buf)) >= sizeof(buf));
 #endif
