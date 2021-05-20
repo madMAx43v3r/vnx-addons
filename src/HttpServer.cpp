@@ -1000,6 +1000,9 @@ void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chun
 			out << std::hex << chunk->data.size() << "\r\n";
 			out.write((const char*)chunk->data.data(), chunk->data.size());
 			out << "\r\n";
+			if(chunk->is_eof) {
+				out << "0\r\n\r\n";
+			}
 			data->data = out.str();
 			data->is_eof = chunk->is_eof;
 			chunk = data;
