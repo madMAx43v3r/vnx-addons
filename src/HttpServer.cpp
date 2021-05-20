@@ -20,7 +20,6 @@
 #include <unistd.h>
 #ifdef _WIN32
 #include <winsock2.h>
-#include <win32-compat/poll.h>
 #else
 #include <fcntl.h>
 #include <netdb.h>
@@ -150,7 +149,12 @@ void HttpServer::notify(std::shared_ptr<vnx::Pipe> pipe)
 
 	// trigger poll() to wake up
 	char dummy = 0;
-	if(::write(m_notify_pipe[1], &dummy, 1) != 1) {
+#ifdef _WIN32
+	if(::send(m_notify_socket, &dummy, 1) != 1)
+#else
+	if(::write(m_notify_pipe[1], &dummy, 1) != 1)
+#endif
+	{
 		// file a bug report
 	}
 }
@@ -160,12 +164,43 @@ void HttpServer::init()
 	vnx::open_pipe(vnx_name, this, 500);
 
 	// create notify pipe
+#ifdef _WIN32
+	m_notify_socket = socket(AF_INET, SOCK_DGRAM, 0);
+	if(m_notify_socket == -1){
+		throw std::runtime_error("socket() failed with: " + std::string(strerror(errno)));
+	}
+	if(set_socket_nonblocking(m_notify_socket) < 0) {
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+	}
+
+	{
+		sockaddr_in addr = {};
+		addr.sin_family = AF_INET;
+		addr.sin_port = 0;
+		addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+		if(bind(m_notify_socket, (sockaddr *)&addr, sizeof(addr)) == -1){
+			throw std::runtime_error("bind() failed with: " + std::string(strerror(errno)));
+		}
+	}
+
+	{
+		sockaddr_in addr = {};
+		int length = sizeof(addr);
+		if(getsockname(m_notify_socket, (sockaddr*)&addr, &length) == -1){
+			throw std::runtime_error("getsockname() failed with: " + std::string(strerror(errno)));
+		}
+		if(connect(m_notify_socket, (sockaddr*)&addr, length) < 0){
+			throw std::runtime_error("connect() failed with: " + std::string(strerror(errno)));
+		}
+	}
+#else
 	if(::pipe(m_notify_pipe) < 0) {
 		throw std::runtime_error("pipe() failed with: " + std::string(strerror(errno)));
 	}
 	if(set_socket_nonblocking(m_notify_pipe[0]) < 0) {
 		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
 	}
+#endif
 }
 
 void HttpServer::main()
@@ -250,8 +285,12 @@ void HttpServer::main()
 	m_state_map.clear();
 
 	closesocket(m_socket);
+#ifdef _WIN32
+	closesocket(m_notify_socket);
+#else
 	closesocket(m_notify_pipe[0]);
 	closesocket(m_notify_pipe[1]);
+#endif
 
 	if(m_default_session) {
 		vnx::get_auth_server()->logout(m_default_session->vsid);
@@ -1004,7 +1043,11 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 	states.reserve(fds.capacity());
 	{
 		::pollfd set = {};
+#ifdef _WIN32
+		set.fd = m_socket_notify;
+#else
 		set.fd = m_notify_pipe[0];
+#endif
 		set.events = POLLIN;
 		fds.push_back(set);
 		states.push_back(nullptr);
@@ -1045,13 +1088,24 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 			}
 		}
 	}
+#ifdef _WIN32
+	if(WSAPoll(fds.data(), fds.size(), timeout_ms) == SOCKET_ERROR) {
+		log(ERROR) << "WSAPoll() failed with: " << WSAGetLastError();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+	}
+#else
 	if(::poll(fds.data(), fds.size(), std::min(timeout_ms, 1000)) < 0) {
 		log(ERROR) << "poll() failed with: " << std::strerror(errno);
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
+#endif
 	if(fds[0].revents & POLLIN) {
 		char buf[1024];
+#ifdef _WIN32
+		while(::recv(m_notify_socket, buf, sizeof(buf)) >= sizeof(buf));
+#else
 		while(::read(m_notify_pipe[0], buf, sizeof(buf)) >= sizeof(buf));
+#endif
 	}
 	if(fds[1].revents & POLLIN) {
 		while(true) {

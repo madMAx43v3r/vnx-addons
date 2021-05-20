@@ -131,7 +131,11 @@ private:
 
 private:
 	int m_socket = -1;
+#ifdef _WIN32
+	int m_notify_socket = -1;
+#else
 	int m_notify_pipe[2] = {-1, -1};
+#endif
 
 	uint64_t m_next_id = 1;
 	llhttp_settings_t m_settings = {};

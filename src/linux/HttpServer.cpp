@@ -7,12 +7,7 @@
 
 #include <vnx/addons/HttpServer.h>
 
-#include <chrono>
-
-#include <poll.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/socket.h>
 
 
 namespace vnx {
