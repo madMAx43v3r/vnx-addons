@@ -637,6 +637,7 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 
 	std::vector<std::pair<std::string, std::string>> headers;
 	headers.emplace_back("Server", "vnx.addons.HttpServer");
+	headers.emplace_back("Date", vnx::get_date_string_ex("%a, %d %b %Y %H:%M:%S %Z", true));
 	headers.insert(headers.end(), add_headers.begin(), add_headers.end());
 	headers.insert(headers.end(), response->headers.begin(), response->headers.end());
 
