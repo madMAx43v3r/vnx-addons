@@ -742,14 +742,19 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 			state->is_chunked_transfer = true;
 			headers.emplace_back("Content-Encoding", "deflate");
 			break;
+		case IDENTITY:
+			if(payload) {
+				headers.emplace_back("Content-Length", std::to_string(payload->data.size()));
+			}
+			break;
+		default:
+			on_disconnect(state);
+			return;
 	}
-
 	if(state->is_chunked_transfer) {
 		headers.emplace_back("Transfer-Encoding", "chunked");
 	}
-	if(payload && state->output_encoding == IDENTITY) {
-		headers.emplace_back("Content-Length", std::to_string(payload->data.size()));
-	}
+
 	std::ostringstream out;
 	out << "HTTP/1.1 " << response->status << " " << get_http_status_string(response->status) << "\r\n";
 	for(const auto& entry : headers) {
