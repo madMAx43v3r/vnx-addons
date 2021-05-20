@@ -19,19 +19,25 @@ namespace addons {
 
 class DeflateOutputStream : public OutputStream {
 public:
-	DeflateOutputStream(Buffer* buffer_, int level = 9);
+	DeflateOutputStream(Buffer* buffer, int level = 9, int chunk_size = -1);
 	
 	~DeflateOutputStream();
 	
+	void set_output(Buffer* buffer);
+
 	void write(const void* buf, size_t len) override;
 	
 	void flush();
 	
+	void finish();
+
 private:
-	int compress_loop(bool flush);
+	int compress_loop(int flag);
 	
 private:
-	Buffer* buffer = 0;
+	bool is_finished = false;
+	Buffer* buffer = nullptr;
+	size_t chunk_size = 262144;
 	z_stream strm = {};
 	
 };

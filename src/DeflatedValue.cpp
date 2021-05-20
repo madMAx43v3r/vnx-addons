@@ -39,7 +39,7 @@ std::shared_ptr<const DeflatedValue> DeflatedValue::compress_ex(std::shared_ptr<
 		TypeOutput out(&stream);
 		vnx::write(out, value);
 		out.flush();
-		stream.flush();
+		stream.finish();
 	}
 	return out;
 }
