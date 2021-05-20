@@ -10,6 +10,9 @@
 
 #include <vnx/addons/HttpServerBase.hxx>
 #include <vnx/addons/HttpComponentAsyncClient.hxx>
+#include <vnx/addons/DeflateOutputStream.h>
+
+#include <vnx/ThreadPool.h>
 
 #include <llhttp.h>
 
@@ -27,17 +30,25 @@ protected:
 		POLL_BIT_WRITE = 2
 	};
 
+	enum encoding_type_e : char {
+		IDENTITY,
+		DEFLATE
+	};
+
 	struct state_t {
 		bool is_blocked = false;
 		bool is_chunked_reply = false;
-		bool is_chunked_encoding = false;
+		bool is_chunked_transfer = false;
 		bool do_keep_alive = false;
 		bool do_timeout = true;
 		char poll_bits = 0;
-		char buffer[4096];
+		encoding_type_e input_encoding = IDENTITY;
+		encoding_type_e output_encoding = IDENTITY;
+		char buffer[16384];
 		int fd = -1;
 		uint32_t offset = 0;					// offset into buffer
 		int64_t waiting_since = -1;				// time since waiting on connection [usec]
+		size_t payload_size = 0;
 		HttpServer* server = nullptr;
 		llhttp_t parser = {};
 		struct {
@@ -45,12 +56,12 @@ protected:
 			std::string value;
 		} header;
 		vnx::Memory payload;
-		size_t payload_size = 0;
 		std::string sub_path;
 		std::shared_ptr<vnx::Pipe> pipe;
 		std::shared_ptr<vnx::Stream> stream;
 		std::shared_ptr<HttpRequest> request;
 		std::shared_ptr<const HttpResponse> response;
+		std::shared_ptr<DeflateOutputStream> deflate;
 		std::shared_ptr<HttpComponentAsyncClient> module;
 		std::list<std::pair<std::shared_ptr<const HttpData>, size_t>> write_queue;
 	};
@@ -106,17 +117,25 @@ private:
 
 	void on_write(std::shared_ptr<state_t> state);
 
+	void on_deflate(std::shared_ptr<state_t> state);
+
 	void on_finish(std::shared_ptr<state_t> state);
 
 	void on_timeout(std::shared_ptr<state_t> state);
 
 	void on_disconnect(std::shared_ptr<state_t> state);
 
-	void on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk);
+	void on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode = true, bool is_eof = false);
+
+	void do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<const HttpData> chunk, bool encode = true);
 
 	void on_write_error(uint64_t id, const vnx::exception& ex);
 
 	void do_poll(int timeout_ms) noexcept;
+
+	void deflate_write_task(uint64_t id,
+							std::shared_ptr<DeflateOutputStream> stream,
+							std::shared_ptr<const HttpData> chunk) noexcept;
 
 	int set_socket_nonblocking(int fd);
 
@@ -143,6 +162,7 @@ private:
 	std::unordered_map<int, std::shared_ptr<state_t>> m_state_map;								// [fd => state]
 	std::unordered_map<uint64_t, std::shared_ptr<state_t>> m_request_map;						// [request id => state]
 	std::map<std::string, std::shared_ptr<HttpComponentAsyncClient>> m_client_map;				// [url path => clients]
+	std::vector<std::shared_ptr<vnx::ThreadPool>> m_threads;
 
 	std::shared_ptr<const HttpSession> m_default_session;
 	mutable std::unordered_map<std::string, std::shared_ptr<const HttpSession>> m_session_map;	// [http session id => session]

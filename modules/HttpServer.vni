@@ -14,6 +14,7 @@ module HttpServer implements HttpComponent {
 	bool error_payload = true;				// if to enable error message replies (text/plain)
 	bool auto_session = false;				// if to create sessions automatically
 	
+	int num_threads = 4;					// number of threads for compression etc
 	int session_size = 3;					// number of 64-bit values for session ids
 	int listen_queue_size = 1000;
 	int stats_interval_ms = 10000;			// -1 = disable [ms]
@@ -22,6 +23,8 @@ module HttpServer implements HttpComponent {
 	long session_timeout = 86400;			// (timeout < zero) = infinite [sec]
 	long max_payload_size = 16777216;		// -1 = unlimited [bytes]
 	long max_chunk_size = 1048576;			// maximum chunk size for chunked transfer encoding [bytes]
+	
+	set<string> do_compress;				// mime types to compress
 	
 	map<string, string> components;			// [url path => module name]
 	map<string, string> charset;			// [mime type => default charset]

@@ -9,6 +9,8 @@
 #include <vnx/addons/HttpChunk.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
+#include <vnx/addons/DeflateOutputStream.h>
+
 #include <vnx/OverflowException.hxx>
 #include <vnx/PermissionDenied.hxx>
 #include <vnx/SHA256.h>
@@ -133,6 +135,10 @@ HttpServer::HttpServer(const std::string& _vnx_name)
 {
 	vnx_clean_exit = true;		// process remaining requests on exit
 
+	do_compress.insert("text");
+	do_compress.insert("application/json");
+	do_compress.insert("application/javascript");
+
 	charset.emplace("text/html", "utf-8");
 	charset.emplace("text/css", "utf-8");
 	charset.emplace("text/plain", "utf-8");
@@ -205,6 +211,9 @@ void HttpServer::init()
 
 void HttpServer::main()
 {
+	if(num_threads <= 0) {
+		throw std::logic_error("num_threads <= 0");
+	}
 	if(show_info) {
 		show_warnings = true;
 	}
@@ -271,11 +280,17 @@ void HttpServer::main()
 	if(stats_interval_ms > 0) {
 		set_timer_millis(stats_interval_ms, std::bind(&HttpServer::update, this));
 	}
+	for(int i = 0; i < num_threads; ++i) {
+		m_threads.push_back(std::make_shared<vnx::ThreadPool>(1, 10));
+	}
 
 	while(vnx_do_run())
 	{
 		const auto timeout_us = vnx_process(false);
 		do_poll(timeout_us >= 0 ? timeout_us / 1000 : 1000);
+	}
+	for(auto thread : m_threads) {
+		thread->close();
 	}
 
 	// close all sockets
@@ -629,6 +644,35 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		}
 	}
 
+	bool do_compress_ = false;
+	{
+		auto content_type = response->content_type;
+		{
+			const auto pos = content_type.find(';');
+			if(pos != std::string::npos) {
+				content_type = content_type.substr(0, pos);
+			}
+		}
+		for(const auto& type : do_compress) {
+			if(content_type == type
+				|| (content_type.size() > type.size()
+					&& content_type[type.size()] == '/'
+					&& content_type.substr(0, type.size()) == type))
+			{
+				do_compress_ = true;
+				break;
+			}
+		}
+	}
+	if(do_compress_) {
+		for(const auto& entry : vnx::string_split(state->request->get_header_value("Accept-Encoding"), ',', true)) {
+			const auto encoding = trim(entry);
+			if(encoding == "deflate") {
+				state->output_encoding = DEFLATE;
+			}
+		}
+	}
+
 	std::vector<std::pair<std::string, std::string>> headers;
 	headers.emplace_back("Server", "vnx.addons.HttpServer");
 	headers.emplace_back("Date", vnx::get_date_string_ex("%a, %d %b %Y %H:%M:%S %Z", true));
@@ -653,7 +697,7 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		add_session(session);
 		headers.emplace_back("Set-Cookie", get_session_cookie(session));
 	}
-	const bool is_head = state->request->method == "HEAD";
+	const bool skip_body = state->request->method == "HEAD";
 
 	std::shared_ptr<const HttpData> payload;
 	if(response->stream) {
@@ -661,9 +705,7 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		if(!pipe) {
 			log(WARN) << "Response stream not found!";
 		}
-		if(!pipe || is_head) {
-			payload = response;
-		} else {
+		if(pipe && !skip_body) {
 			if(state->stream) {
 				try {
 					state->stream->open();
@@ -675,29 +717,37 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 			vnx::connect(pipe, this, 100, 100);
 			pipe->resume();
 			state->pipe = pipe;
-			state->is_chunked_encoding = true;
+			state->is_chunked_transfer = true;
 			headers.emplace_back("Connection", "keep-alive");
+		}
+		else {
+			payload = response;
 		}
 	}
 	else if(response->is_chunked) {
-		if(response->total_size >= 0) {
+		if(response->total_size >= 0 && state->output_encoding == IDENTITY) {
 			headers.emplace_back("Content-Length", std::to_string(response->total_size));
 		} else {
-			state->is_chunked_encoding = true;
+			state->is_chunked_transfer = true;
 		}
-		if(!is_head) {
-			state->payload_size = 0;	// reset offset
-			state->is_chunked_reply = true;
-		}
+		state->payload_size = 0;	// reset offset
+		state->is_chunked_reply = true;
 	}
 	else {
 		payload = response;
 	}
 
-	if(state->is_chunked_encoding) {
+	switch(state->output_encoding) {
+		case DEFLATE:
+			state->is_chunked_transfer = true;
+			headers.emplace_back("Content-Encoding", "deflate");
+			break;
+	}
+
+	if(state->is_chunked_transfer) {
 		headers.emplace_back("Transfer-Encoding", "chunked");
 	}
-	if(payload) {
+	if(payload && state->output_encoding == IDENTITY) {
 		headers.emplace_back("Content-Length", std::to_string(payload->data.size()));
 	}
 	std::ostringstream out;
@@ -709,13 +759,14 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 	{
 		auto data = HttpData::create();
 		data->data = out.str();
-		data->is_eof = is_head;
+		data->is_eof = skip_body;
 		state->write_queue.emplace_back(data, 0);
 	}
-	if(payload && !is_head) {
-		state->write_queue.emplace_back(payload, 0);
+	if(payload && !skip_body) {
+		do_write_data(state, payload);
+	} else {
+		on_write(state);
 	}
-	on_write(state);
 }
 
 void HttpServer::reply_error(uint64_t id, const vnx::exception& ex)
@@ -901,9 +952,9 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 		const void* data = chunk->data.data(iter->second);
 		const size_t num_bytes = chunk->data.size() - iter->second;
 #ifdef MSG_NOSIGNAL
-			ssize_t res = ::send(state->fd, (const char *)data, num_bytes, MSG_NOSIGNAL);
+			ssize_t res = ::send(state->fd, (const char*)data, num_bytes, MSG_NOSIGNAL);
 #else
-			ssize_t res = ::send(state->fd, (const char *)data, num_bytes, 0);
+			ssize_t res = ::send(state->fd, (const char*)data, num_bytes, 0);
 #endif
 		if(res >= 0) {
 			if(res > 0) {
@@ -939,28 +990,6 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 	}
 	state->is_blocked = is_blocked;
 
-	if(state->is_chunked_reply) {
-		int64_t max_bytes = max_chunk_size;
-		if(auto response = state->response) {
-			if(response->total_size >= 0) {
-				max_bytes = std::min(max_bytes, response->total_size - int64_t(state->payload_size));
-			}
-		}
-		if(max_bytes <= 0) {
-			is_eof = true;
-		}
-		if(!is_blocked && !is_eof) {
-			if(auto client = state->module) {
-				client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_bytes,
-						std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1),
-						std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
-			} else {
-				on_disconnect(state);
-				return;
-			}
-		}
-	}
-
 	if(is_blocked) {
 		state->poll_bits |= POLL_BIT_WRITE;
 	}
@@ -972,14 +1001,48 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			on_disconnect(state);
 		}
 	}
+	else if(state->is_chunked_reply) {
+		bool last_chunk = false;
+		int64_t max_bytes = max_chunk_size;
+		if(auto response = state->response) {
+			if(response->total_size >= 0) {
+				const auto num_left = response->total_size - int64_t(state->payload_size);
+				if(num_left <= max_bytes) {
+					max_bytes = num_left;
+					last_chunk = true;
+				}
+			}
+		}
+		if(auto client = state->module) {
+			client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_bytes,
+					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1, true, last_chunk),
+					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
+		} else {
+			on_disconnect(state);
+			return;
+		}
+	}
 }
 
-void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk)
+void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode, bool is_eof)
 {
-	if(auto state = find_state_by_id(id))
-	{
-		state->payload_size += chunk->data.size();
+	if(is_eof) {
+		auto copy = vnx::clone(chunk);
+		copy->is_eof = true;
+		chunk = copy;
+	}
+	if(auto state = find_state_by_id(id)) {
+		do_write_data(state, chunk, encode);
+	}
+	else if(show_warnings) {
+		log(WARN) << "Invalid request id: " << id;
+	}
+}
 
+void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<const HttpData> chunk, bool encode)
+{
+	if(encode) {
+		state->payload_size += chunk->data.size();
 		if(auto response = state->response) {
 			if(response->total_size >= 0) {
 				if(state->payload_size > size_t(response->total_size)) {
@@ -994,25 +1057,35 @@ void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chun
 				}
 			}
 		}
-		if(state->is_chunked_encoding) {
-			auto data = HttpData::create();
-			std::ostringstream out;
-			out << std::hex << chunk->data.size() << "\r\n";
-			out.write((const char*)chunk->data.data(), chunk->data.size());
-			out << "\r\n";
-			if(chunk->is_eof) {
-				out << "0\r\n\r\n";
-			}
-			data->data = out.str();
-			data->is_eof = chunk->is_eof;
-			chunk = data;
+		switch(state->output_encoding) {
+			case DEFLATE:
+				if(!state->deflate) {
+					state->deflate = std::make_shared<DeflateOutputStream>(nullptr, 6, 32768);
+				}
+				m_threads[state->fd % num_threads]->add_task(std::bind(&HttpServer::deflate_write_task, this, state->request->id, state->deflate, chunk));
+				return;
+			case IDENTITY:
+				break;
+			default:
+				on_disconnect(state);
+				return;
 		}
-		state->write_queue.emplace_back(chunk, 0);
-		on_write(state);
 	}
-	else if(show_warnings) {
-		log(WARN) << "Invalid request id: " << id;
+	if(state->is_chunked_transfer) {
+		auto data = HttpData::create();
+		std::ostringstream out;
+		out << std::hex << chunk->data.size() << "\r\n";
+		out.write((const char*)chunk->data.data(), chunk->data.size());
+		out << "\r\n";
+		if(chunk->is_eof) {
+			out << "0\r\n\r\n";
+		}
+		data->data = out.str();
+		data->is_eof = chunk->is_eof;
+		chunk = data;
 	}
+	state->write_queue.emplace_back(chunk, 0);
+	on_write(state);
 }
 
 void HttpServer::on_write_error(uint64_t id, const vnx::exception& ex)
@@ -1162,6 +1235,22 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 	for(const auto& state : timeout_list) {
 		on_timeout(state);
 	}
+}
+
+void HttpServer::deflate_write_task(const uint64_t id,
+									std::shared_ptr<DeflateOutputStream> stream,
+									std::shared_ptr<const HttpData> chunk) noexcept
+{
+	auto data = HttpData::create();
+	stream->set_output(&data->data);
+	stream->write(chunk->data.data(), chunk->data.size());
+	if(chunk->is_eof) {
+		stream->finish();
+	} else {
+		stream->flush();
+	}
+	data->is_eof = chunk->is_eof;
+	add_task(std::bind(&HttpServer::on_write_data, this, id, data, false, false));
 }
 
 

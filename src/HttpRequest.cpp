@@ -20,7 +20,7 @@ std::string HttpRequest::get_header_value(const std::string& key) const
 			return entry.second;
 		}
 	}
-	throw std::runtime_error("http header not found: '" + key + "'");
+	return std::string();
 }
 
 
