@@ -534,7 +534,6 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 		chunk->id = state->request->id;
 		chunk->is_eof = true;
 		state->stream->send(chunk);
-		state->stream = nullptr;
 	}
 	else {
 		auto request = state->request;
@@ -663,13 +662,21 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 
 	std::shared_ptr<const HttpData> payload;
 	if(response->stream) {
-		const auto pipe = vnx::get_pipe(response->stream);
+		auto pipe = vnx::get_pipe(response->stream);
+		if(!pipe) {
+			log(WARN) << "Response stream not found!";
+		}
 		if(!pipe || is_head) {
 			payload = response;
 		} else {
 			vnx::connect(pipe, this, 100, 100);
+			pipe->resume();
 			state->pipe = pipe;
-			on_resume(state);		// resume reading & parsing body
+			state->is_chunked_encoding = true;
+			headers.emplace_back("Connection", "keep-alive");
+			if(state->stream) {
+				on_resume(state);		// resume reading & parsing body
+			}
 		}
 	}
 	else if(response->is_chunked) {
@@ -677,7 +684,6 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 			headers.emplace_back("Content-Length", std::to_string(response->total_size));
 		} else {
 			state->is_chunked_encoding = true;
-			headers.emplace_back("Transfer-Encoding", "chunked");
 		}
 		if(!is_head) {
 			state->payload_size = 0;	// reset offset
@@ -688,6 +694,9 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		payload = response;
 	}
 
+	if(state->is_chunked_encoding) {
+		headers.emplace_back("Transfer-Encoding", "chunked");
+	}
 	if(payload) {
 		headers.emplace_back("Content-Length", std::to_string(payload->data.size()));
 	}
