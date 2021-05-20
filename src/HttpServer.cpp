@@ -969,7 +969,7 @@ void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chun
 	if(auto state = find_state_by_id(id)) {
 		if(state->is_chunked_encoding) {
 			auto data = HttpData::create();
-			data->data = std::to_string(chunk->data.size()) + "\r\n";
+			data->data = vnx::to_hex_string(chunk->data.size()) + "\r\n";
 			data->is_eof = false;
 			state->write_queue.emplace_back(data, 0);
 		}
