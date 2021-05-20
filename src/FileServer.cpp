@@ -267,7 +267,7 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 		file_path = "/";
 	}
 	try {
-		if(request->method == "GET") {
+		if(request->method == "GET" || request->method == "HEAD") {
 			if(file_path.back() == '/') {
 				for(const auto& file_name : directory_files) {
 					const vnx::File file(www_root + file_path + file_name);
