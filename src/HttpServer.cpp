@@ -646,35 +646,6 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		}
 	}
 
-	bool do_compress_ = false;
-	{
-		auto content_type = response->content_type;
-		{
-			const auto pos = content_type.find(';');
-			if(pos != std::string::npos) {
-				content_type = content_type.substr(0, pos);
-			}
-		}
-		for(const auto& type : do_compress) {
-			if(content_type == type
-				|| (content_type.size() > type.size()
-					&& content_type[type.size()] == '/'
-					&& content_type.substr(0, type.size()) == type))
-			{
-				do_compress_ = true;
-				break;
-			}
-		}
-	}
-	if(do_compress_) {
-		for(const auto& entry : vnx::string_split(state->request->get_header_value("Accept-Encoding"), ',', true)) {
-			const auto encoding = trim(entry);
-			if(encoding == "deflate") {
-				state->output_encoding = DEFLATE;
-			}
-		}
-	}
-
 	std::vector<std::pair<std::string, std::string>> headers;
 	headers.emplace_back("Server", "vnx.addons.HttpServer");
 	headers.emplace_back("Date", vnx::get_date_string_ex("%a, %d %b %Y %H:%M:%S %Z", true));
@@ -727,11 +698,6 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		}
 	}
 	else if(response->is_chunked) {
-		if(response->total_size >= 0 && state->output_encoding == IDENTITY) {
-			headers.emplace_back("Content-Length", std::to_string(response->total_size));
-		} else {
-			state->is_chunked_transfer = true;
-		}
 		state->payload_size = 0;	// reset offset
 		state->is_chunked_reply = true;
 	}
@@ -739,13 +705,49 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		payload = response;
 	}
 
+	bool do_compress_ = false;
+	if(!payload || payload->data.size() > min_compress_size)
+	{
+		auto content_type = response->content_type;
+		{
+			const auto pos = content_type.find(';');
+			if(pos != std::string::npos) {
+				content_type = content_type.substr(0, pos);
+			}
+		}
+		for(const auto& type : do_compress) {
+			if(content_type == type
+				|| (content_type.size() > type.size()
+					&& content_type[type.size()] == '/'
+					&& content_type.substr(0, type.size()) == type))
+			{
+				do_compress_ = true;
+				break;
+			}
+		}
+	}
+	if(do_compress_) {
+		for(const auto& entry : vnx::string_split(state->request->get_header_value("Accept-Encoding"), ',', true)) {
+			const auto encoding = trim(entry);
+			if(enable_deflate && encoding == "deflate") {
+				state->output_encoding = DEFLATE;
+			}
+		}
+	}
 	switch(state->output_encoding) {
 		case DEFLATE:
 			state->is_chunked_transfer = true;
 			headers.emplace_back("Content-Encoding", "deflate");
 			break;
 		case IDENTITY:
-			if(payload) {
+			if(response->is_chunked) {
+				if(response->total_size >= 0) {
+					headers.emplace_back("Content-Length", std::to_string(response->total_size));
+				} else {
+					state->is_chunked_transfer = true;
+				}
+			}
+			else if(payload) {
 				headers.emplace_back("Content-Length", std::to_string(payload->data.size()));
 			}
 			break;
