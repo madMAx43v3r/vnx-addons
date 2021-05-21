@@ -133,8 +133,6 @@ namespace addons {
 HttpServer::HttpServer(const std::string& _vnx_name)
 	:	HttpServerBase(_vnx_name)
 {
-	vnx_clean_exit = true;		// process remaining requests on exit
-
 	do_compress.insert("text");
 	do_compress.insert("application/json");
 	do_compress.insert("application/javascript");
