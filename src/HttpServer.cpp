@@ -601,6 +601,7 @@ void HttpServer::process(state_t* state)
 		}
 		state->module = client;
 		state->sub_path = sub_path;
+		state->is_pending = true;
 		client->http_request(request, sub_path,
 				std::bind(&HttpServer::reply, this, request->id, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, request->id, std::placeholders::_1));
@@ -620,6 +621,7 @@ void HttpServer::reply(uint64_t id, std::shared_ptr<const HttpResponse> response
 		}
 		return;
 	}
+	state->is_pending = false;
 	state->response = response;
 
 	if(response->status >= 400) {

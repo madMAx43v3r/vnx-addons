@@ -37,6 +37,7 @@ protected:
 
 	struct state_t {
 		bool is_blocked = false;
+		bool is_pending = false;
 		bool is_chunked_reply = false;
 		bool is_chunked_transfer = false;
 		bool do_keep_alive = false;
