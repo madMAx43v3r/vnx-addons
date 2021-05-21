@@ -289,6 +289,8 @@ void HttpServer::main()
 		const auto timeout_us = vnx_process(false);
 		do_poll(timeout_us >= 0 ? timeout_us / 1000 : 1000);
 	}
+
+	// stop all threads
 	for(auto thread : m_threads) {
 		thread->close();
 	}
@@ -1067,7 +1069,7 @@ void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<c
 				if(!state->deflate) {
 					state->deflate = std::make_shared<DeflateOutputStream>(nullptr, 6, 32768);
 				}
-				m_threads[state->fd % num_threads]->add_task(std::bind(&HttpServer::deflate_write_task, this, state->request->id, state->deflate, chunk));
+				m_threads[state->fd % m_threads.size()]->add_task(std::bind(&HttpServer::deflate_write_task, this, state->request->id, state->deflate, chunk));
 				return;
 			case IDENTITY:
 				break;
