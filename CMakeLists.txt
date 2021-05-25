@@ -13,6 +13,7 @@ add_library(url_cpp SHARED
 
 add_library(llhttp SHARED
 	${LLHTTP_SOURCE_FILES}
+	src/llhttp.c
 )
 
 target_include_directories(url_cpp PUBLIC lib/url-cpp/include)
@@ -40,7 +41,6 @@ add_library(vnx_addons SHARED
 	src/HttpResponse.cpp
 	src/HttpServer.cpp
 	src/FileServer.cpp
-	src/llhttp.c
 )
 
 target_include_directories(vnx_addons
