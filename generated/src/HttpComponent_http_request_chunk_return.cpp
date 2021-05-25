@@ -4,7 +4,7 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpComponent_http_request_chunk_return.hxx>
 #include <vnx/Value.h>
-#include <vnx/addons/HttpResponse.hxx>
+#include <vnx/addons/HttpData.hxx>
 
 #include <vnx/vnx.h>
 

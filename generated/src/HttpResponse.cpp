@@ -3,9 +3,10 @@
 
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/HttpResponse.hxx>
-#include <vnx/Buffer.hpp>
+#include <vnx/Hash64.hpp>
 #include <vnx/Object.hpp>
 #include <vnx/Value.h>
+#include <vnx/addons/HttpData.hxx>
 
 #include <vnx/vnx.h>
 
@@ -15,7 +16,7 @@ namespace addons {
 
 
 const vnx::Hash64 HttpResponse::VNX_TYPE_HASH(0xb907701490f0e0feull);
-const vnx::Hash64 HttpResponse::VNX_CODE_HASH(0x6e7b125da86d3d3aull);
+const vnx::Hash64 HttpResponse::VNX_CODE_HASH(0x2e6469cf3378424bull);
 
 vnx::Hash64 HttpResponse::get_type_hash() const {
 	return VNX_TYPE_HASH;
@@ -48,24 +49,28 @@ void HttpResponse::write(vnx::TypeOutput& _out, const vnx::TypeCode* _type_code,
 void HttpResponse::accept(vnx::Visitor& _visitor) const {
 	const vnx::TypeCode* _type_code = vnx::addons::vnx_native_type_code_HttpResponse;
 	_visitor.type_begin(*_type_code);
-	_visitor.type_field(_type_code->fields[0], 0); vnx::accept(_visitor, status);
-	_visitor.type_field(_type_code->fields[1], 1); vnx::accept(_visitor, content_type);
-	_visitor.type_field(_type_code->fields[2], 2); vnx::accept(_visitor, headers);
-	_visitor.type_field(_type_code->fields[3], 3); vnx::accept(_visitor, payload);
-	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, is_chunked);
-	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, chunked_total_size);
-	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, error_text);
+	_visitor.type_field(_type_code->fields[0], 0); vnx::accept(_visitor, data);
+	_visitor.type_field(_type_code->fields[1], 1); vnx::accept(_visitor, is_eof);
+	_visitor.type_field(_type_code->fields[2], 2); vnx::accept(_visitor, is_chunked);
+	_visitor.type_field(_type_code->fields[3], 3); vnx::accept(_visitor, status);
+	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, content_type);
+	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, headers);
+	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, stream);
+	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, total_size);
+	_visitor.type_field(_type_code->fields[8], 8); vnx::accept(_visitor, error_text);
 	_visitor.type_end(*_type_code);
 }
 
 void HttpResponse::write(std::ostream& _out) const {
 	_out << "{\"__type\": \"vnx.addons.HttpResponse\"";
+	_out << ", \"data\": "; vnx::write(_out, data);
+	_out << ", \"is_eof\": "; vnx::write(_out, is_eof);
+	_out << ", \"is_chunked\": "; vnx::write(_out, is_chunked);
 	_out << ", \"status\": "; vnx::write(_out, status);
 	_out << ", \"content_type\": "; vnx::write(_out, content_type);
 	_out << ", \"headers\": "; vnx::write(_out, headers);
-	_out << ", \"payload\": "; vnx::write(_out, payload);
-	_out << ", \"is_chunked\": "; vnx::write(_out, is_chunked);
-	_out << ", \"chunked_total_size\": "; vnx::write(_out, chunked_total_size);
+	_out << ", \"stream\": "; vnx::write(_out, stream);
+	_out << ", \"total_size\": "; vnx::write(_out, total_size);
 	_out << ", \"error_text\": "; vnx::write(_out, error_text);
 	_out << "}";
 }
@@ -79,37 +84,52 @@ void HttpResponse::read(std::istream& _in) {
 vnx::Object HttpResponse::to_object() const {
 	vnx::Object _object;
 	_object["__type"] = "vnx.addons.HttpResponse";
+	_object["data"] = data;
+	_object["is_eof"] = is_eof;
+	_object["is_chunked"] = is_chunked;
 	_object["status"] = status;
 	_object["content_type"] = content_type;
 	_object["headers"] = headers;
-	_object["payload"] = payload;
-	_object["is_chunked"] = is_chunked;
-	_object["chunked_total_size"] = chunked_total_size;
+	_object["stream"] = stream;
+	_object["total_size"] = total_size;
 	_object["error_text"] = error_text;
 	return _object;
 }
 
 void HttpResponse::from_object(const vnx::Object& _object) {
 	for(const auto& _entry : _object.field) {
-		if(_entry.first == "chunked_total_size") {
-			_entry.second.to(chunked_total_size);
-		} else if(_entry.first == "content_type") {
+		if(_entry.first == "content_type") {
 			_entry.second.to(content_type);
+		} else if(_entry.first == "data") {
+			_entry.second.to(data);
 		} else if(_entry.first == "error_text") {
 			_entry.second.to(error_text);
 		} else if(_entry.first == "headers") {
 			_entry.second.to(headers);
 		} else if(_entry.first == "is_chunked") {
 			_entry.second.to(is_chunked);
-		} else if(_entry.first == "payload") {
-			_entry.second.to(payload);
+		} else if(_entry.first == "is_eof") {
+			_entry.second.to(is_eof);
 		} else if(_entry.first == "status") {
 			_entry.second.to(status);
+		} else if(_entry.first == "stream") {
+			_entry.second.to(stream);
+		} else if(_entry.first == "total_size") {
+			_entry.second.to(total_size);
 		}
 	}
 }
 
 vnx::Variant HttpResponse::get_field(const std::string& _name) const {
+	if(_name == "data") {
+		return vnx::Variant(data);
+	}
+	if(_name == "is_eof") {
+		return vnx::Variant(is_eof);
+	}
+	if(_name == "is_chunked") {
+		return vnx::Variant(is_chunked);
+	}
 	if(_name == "status") {
 		return vnx::Variant(status);
 	}
@@ -119,14 +139,11 @@ vnx::Variant HttpResponse::get_field(const std::string& _name) const {
 	if(_name == "headers") {
 		return vnx::Variant(headers);
 	}
-	if(_name == "payload") {
-		return vnx::Variant(payload);
+	if(_name == "stream") {
+		return vnx::Variant(stream);
 	}
-	if(_name == "is_chunked") {
-		return vnx::Variant(is_chunked);
-	}
-	if(_name == "chunked_total_size") {
-		return vnx::Variant(chunked_total_size);
+	if(_name == "total_size") {
+		return vnx::Variant(total_size);
 	}
 	if(_name == "error_text") {
 		return vnx::Variant(error_text);
@@ -135,18 +152,22 @@ vnx::Variant HttpResponse::get_field(const std::string& _name) const {
 }
 
 void HttpResponse::set_field(const std::string& _name, const vnx::Variant& _value) {
-	if(_name == "status") {
+	if(_name == "data") {
+		_value.to(data);
+	} else if(_name == "is_eof") {
+		_value.to(is_eof);
+	} else if(_name == "is_chunked") {
+		_value.to(is_chunked);
+	} else if(_name == "status") {
 		_value.to(status);
 	} else if(_name == "content_type") {
 		_value.to(content_type);
 	} else if(_name == "headers") {
 		_value.to(headers);
-	} else if(_name == "payload") {
-		_value.to(payload);
-	} else if(_name == "is_chunked") {
-		_value.to(is_chunked);
-	} else if(_name == "chunked_total_size") {
-		_value.to(chunked_total_size);
+	} else if(_name == "stream") {
+		_value.to(stream);
+	} else if(_name == "total_size") {
+		_value.to(total_size);
 	} else if(_name == "error_text") {
 		_value.to(error_text);
 	} else {
@@ -178,50 +199,66 @@ std::shared_ptr<vnx::TypeCode> HttpResponse::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpResponse";
 	type_code->type_hash = vnx::Hash64(0xb907701490f0e0feull);
-	type_code->code_hash = vnx::Hash64(0x6e7b125da86d3d3aull);
+	type_code->code_hash = vnx::Hash64(0x2e6469cf3378424bull);
 	type_code->is_native = true;
 	type_code->is_class = true;
 	type_code->native_size = sizeof(::vnx::addons::HttpResponse);
+	type_code->parents.resize(1);
+	type_code->parents[0] = ::vnx::addons::HttpData::static_get_type_code();
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpResponse>(); };
-	type_code->fields.resize(7);
+	type_code->fields.resize(9);
 	{
 		auto& field = type_code->fields[0];
-		field.data_size = 4;
-		field.name = "status";
-		field.code = {7};
-	}
-	{
-		auto& field = type_code->fields[1];
 		field.is_extended = true;
-		field.name = "content_type";
-		field.code = {32};
-	}
-	{
-		auto& field = type_code->fields[2];
-		field.is_extended = true;
-		field.name = "headers";
-		field.code = {12, 23, 2, 4, 5, 32, 32};
-	}
-	{
-		auto& field = type_code->fields[3];
-		field.is_extended = true;
-		field.name = "payload";
+		field.name = "data";
 		field.code = {12, 1};
 	}
 	{
-		auto& field = type_code->fields[4];
+		auto& field = type_code->fields[1];
+		field.data_size = 1;
+		field.name = "is_eof";
+		field.value = vnx::to_string(true);
+		field.code = {31};
+	}
+	{
+		auto& field = type_code->fields[2];
 		field.data_size = 1;
 		field.name = "is_chunked";
 		field.code = {31};
 	}
 	{
+		auto& field = type_code->fields[3];
+		field.data_size = 4;
+		field.name = "status";
+		field.code = {7};
+	}
+	{
+		auto& field = type_code->fields[4];
+		field.is_extended = true;
+		field.name = "content_type";
+		field.code = {32};
+	}
+	{
 		auto& field = type_code->fields[5];
-		field.data_size = 8;
-		field.name = "chunked_total_size";
-		field.code = {8};
+		field.is_extended = true;
+		field.name = "headers";
+		field.code = {12, 23, 2, 4, 5, 32, 32};
 	}
 	{
 		auto& field = type_code->fields[6];
+		field.is_extended = true;
+		field.name = "stream";
+		field.code = {4};
+	}
+	{
+		auto& field = type_code->fields[7];
+		field.data_size = 8;
+		field.name = "total_size";
+		field.value = vnx::to_string(-1);
+		field.code = {8};
+	}
+	{
+		auto& field = type_code->fields[8];
 		field.is_extended = true;
 		field.name = "error_text";
 		field.code = {32};
@@ -269,22 +306,26 @@ void read(TypeInput& in, ::vnx::addons::HttpResponse& value, const TypeCode* typ
 	}
 	const char* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
-		if(const auto* const _field = type_code->field_map[0]) {
-			vnx::read_value(_buf + _field->offset, value.status, _field->code.data());
+		if(const auto* const _field = type_code->field_map[1]) {
+			vnx::read_value(_buf + _field->offset, value.is_eof, _field->code.data());
 		}
-		if(const auto* const _field = type_code->field_map[4]) {
+		if(const auto* const _field = type_code->field_map[2]) {
 			vnx::read_value(_buf + _field->offset, value.is_chunked, _field->code.data());
 		}
-		if(const auto* const _field = type_code->field_map[5]) {
-			vnx::read_value(_buf + _field->offset, value.chunked_total_size, _field->code.data());
+		if(const auto* const _field = type_code->field_map[3]) {
+			vnx::read_value(_buf + _field->offset, value.status, _field->code.data());
+		}
+		if(const auto* const _field = type_code->field_map[7]) {
+			vnx::read_value(_buf + _field->offset, value.total_size, _field->code.data());
 		}
 	}
 	for(const auto* _field : type_code->ext_fields) {
 		switch(_field->native_index) {
-			case 1: vnx::read(in, value.content_type, type_code, _field->code.data()); break;
-			case 2: vnx::read(in, value.headers, type_code, _field->code.data()); break;
-			case 3: vnx::read(in, value.payload, type_code, _field->code.data()); break;
-			case 6: vnx::read(in, value.error_text, type_code, _field->code.data()); break;
+			case 0: vnx::read(in, value.data, type_code, _field->code.data()); break;
+			case 4: vnx::read(in, value.content_type, type_code, _field->code.data()); break;
+			case 5: vnx::read(in, value.headers, type_code, _field->code.data()); break;
+			case 6: vnx::read(in, value.stream, type_code, _field->code.data()); break;
+			case 8: vnx::read(in, value.error_text, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
 	}
@@ -303,14 +344,16 @@ void write(TypeOutput& out, const ::vnx::addons::HttpResponse& value, const Type
 	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(13);
-	vnx::write_value(_buf + 0, value.status);
-	vnx::write_value(_buf + 4, value.is_chunked);
-	vnx::write_value(_buf + 5, value.chunked_total_size);
-	vnx::write(out, value.content_type, type_code, type_code->fields[1].code.data());
-	vnx::write(out, value.headers, type_code, type_code->fields[2].code.data());
-	vnx::write(out, value.payload, type_code, type_code->fields[3].code.data());
-	vnx::write(out, value.error_text, type_code, type_code->fields[6].code.data());
+	char* const _buf = out.write(14);
+	vnx::write_value(_buf + 0, value.is_eof);
+	vnx::write_value(_buf + 1, value.is_chunked);
+	vnx::write_value(_buf + 2, value.status);
+	vnx::write_value(_buf + 6, value.total_size);
+	vnx::write(out, value.data, type_code, type_code->fields[0].code.data());
+	vnx::write(out, value.content_type, type_code, type_code->fields[4].code.data());
+	vnx::write(out, value.headers, type_code, type_code->fields[5].code.data());
+	vnx::write(out, value.stream, type_code, type_code->fields[6].code.data());
+	vnx::write(out, value.error_text, type_code, type_code->fields[8].code.data());
 }
 
 void read(std::istream& in, ::vnx::addons::HttpResponse& value) {

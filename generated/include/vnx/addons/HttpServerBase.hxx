@@ -7,6 +7,8 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/Module.h>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/addons/HttpChunk.hxx>
+#include <vnx/addons/HttpData.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
 
@@ -20,23 +22,29 @@ public:
 	::vnx::TopicPtr output_request;
 	::vnx::TopicPtr output_response;
 	int32_t port = 8080;
-	vnx::bool_t use_epoll = false;
+	std::string host = "localhost";
 	vnx::bool_t non_blocking = true;
 	vnx::bool_t show_info = false;
 	vnx::bool_t show_warnings = false;
 	vnx::bool_t error_payload = true;
 	vnx::bool_t auto_session = false;
+	vnx::bool_t enable_deflate = true;
+	int32_t num_threads = 4;
 	int32_t session_size = 3;
+	int32_t listen_queue_size = 1000;
+	int32_t stats_interval_ms = 10000;
+	int32_t connection_timeout_ms = 30000;
 	int64_t session_timeout = 86400;
 	int64_t max_payload_size = 16777216;
-	uint64_t chunk_size = 1048576;
+	int64_t max_chunk_size = 1048576;
+	int64_t min_compress_size = 4096;
+	std::set<std::string> do_compress;
 	std::map<std::string, std::string> components;
 	std::map<std::string, std::string> charset;
-	std::string access_control_allow_origin = "*";
-	std::string content_security_policy = "";
+	std::vector<std::pair<std::string, std::string>> add_headers;
+	std::string default_access = "VIEWER";
 	std::string cookie_policy = "SameSite=Strict;";
 	std::string session_coookie_name = "hsid";
-	std::string default_access = "VIEWER";
 	std::string login_path = "/login";
 	std::string logout_path = "/logout";
 	std::string session_path = "/session";
@@ -74,10 +82,11 @@ public:
 protected:
 	using Super::handle;
 	
+	virtual void handle(std::shared_ptr<const ::vnx::addons::HttpChunk> _value) {}
 	virtual void http_request_async(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const vnx::request_id_t& _request_id) const = 0;
 	void http_request_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
 	virtual void http_request_chunk_async(std::shared_ptr<const ::vnx::addons::HttpRequest> request, const std::string& sub_path, const int64_t& offset, const int64_t& max_bytes, const vnx::request_id_t& _request_id) const = 0;
-	void http_request_chunk_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
+	void http_request_chunk_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpData>& _ret_0) const;
 	
 	void vnx_handle_switch(std::shared_ptr<const vnx::Value> _value) override;
 	std::shared_ptr<vnx::Value> vnx_call_switch(std::shared_ptr<const vnx::Value> _method, const vnx::request_id_t& _request_id) override;

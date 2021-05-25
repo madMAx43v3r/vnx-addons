@@ -6,7 +6,7 @@
 
 #include <vnx/addons/package.hxx>
 #include <vnx/Value.h>
-#include <vnx/addons/HttpResponse.hxx>
+#include <vnx/addons/HttpData.hxx>
 
 
 namespace vnx {
@@ -15,7 +15,7 @@ namespace addons {
 class HttpComponent_http_request_chunk_return : public ::vnx::Value {
 public:
 	
-	std::shared_ptr<const ::vnx::addons::HttpResponse> _ret_0;
+	std::shared_ptr<const ::vnx::addons::HttpData> _ret_0;
 	
 	typedef ::vnx::Value Super;
 	

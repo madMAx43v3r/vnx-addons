@@ -6,6 +6,7 @@
 
 #include <vnx/Type.h>
 #include <vnx/addons/package.hxx>
+#include <vnx/addons/HttpData.hxx>
 #include <vnx/addons/HttpRequest.hxx>
 #include <vnx/addons/HttpResponse.hxx>
 

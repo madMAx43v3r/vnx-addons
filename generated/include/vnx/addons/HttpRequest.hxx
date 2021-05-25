@@ -6,6 +6,7 @@
 
 #include <vnx/addons/package.hxx>
 #include <vnx/Buffer.hpp>
+#include <vnx/Hash64.hpp>
 #include <vnx/Value.h>
 #include <vnx/addons/HttpSession.hxx>
 
@@ -25,6 +26,7 @@ public:
 	std::map<std::string, std::string> query_params;
 	std::vector<std::pair<std::string, std::string>> headers;
 	::vnx::Buffer payload;
+	::vnx::Hash64 stream;
 	std::shared_ptr<const ::vnx::addons::HttpSession> session;
 	
 	typedef ::vnx::Value Super;
@@ -38,7 +40,7 @@ public:
 	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
 	
-	virtual std::string get_header_value(const std::string& key) const;
+	virtual std::string get_header_value(const std::string& key = "") const;
 	
 	static std::shared_ptr<HttpRequest> create();
 	std::shared_ptr<vnx::Value> clone() const override;
