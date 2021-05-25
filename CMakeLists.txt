@@ -5,7 +5,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -pthread -Wall -Wno-unu
 
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
-file(GLOB LLHTTP_SOURCE_FILES lib/pyllhttp/lib/*.c)
+file(GLOB LLHTTP_SOURCE_FILES lib/llhttp/src/native/*.c)
 
 add_library(url_cpp SHARED
 	${URL_CPP_SOURCE_FILES}
@@ -17,7 +17,7 @@ add_library(llhttp SHARED
 
 target_include_directories(url_cpp PUBLIC lib/url-cpp/include)
 
-target_include_directories(llhttp PUBLIC lib/pyllhttp/lib)
+target_include_directories(llhttp PUBLIC include lib/llhttp/src/native)
 
 if(WIN32)
 	list(APPEND PLATFORM_SOURCES
@@ -40,6 +40,7 @@ add_library(vnx_addons SHARED
 	src/HttpResponse.cpp
 	src/HttpServer.cpp
 	src/FileServer.cpp
+	src/llhttp.c
 )
 
 target_include_directories(vnx_addons
