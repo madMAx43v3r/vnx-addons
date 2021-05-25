@@ -7,7 +7,7 @@ file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
 file(GLOB LLHTTP_SOURCE_FILES lib/llhttp/src/native/*.c)
 
-add_library(url_cpp STATIC
+add_library(url_cpp SHARED
 	${URL_CPP_SOURCE_FILES}
 )
 
