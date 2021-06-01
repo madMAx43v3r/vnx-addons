@@ -19,6 +19,7 @@ public:
 	std::string hsid;
 	::vnx::Hash64 vsid;
 	int64_t login_time = 0;
+	int64_t session_timeout = 0;
 	
 	typedef ::vnx::Value Super;
 	

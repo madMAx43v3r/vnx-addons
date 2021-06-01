@@ -39,8 +39,8 @@ class HttpRequest;
 class HttpResponse;
 class HttpServerBase;
 class HttpSession;
-class file_info_t;
-class permission_e;
+struct file_info_t;
+struct permission_e;
 
 extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue; ///< \private
