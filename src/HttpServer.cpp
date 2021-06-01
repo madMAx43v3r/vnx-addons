@@ -800,6 +800,7 @@ std::shared_ptr<HttpSession> HttpServer::create_session() const
 {
 	auto session = HttpSession::create();
 	session->login_time = vnx::get_time_seconds();
+	session->session_timeout = session_timeout;
 	for(int i = 0; i < session_size; ++i) {
 		if(i) { session->hsid += "-"; }
 		session->hsid += vnx::to_hex_string(vnx::rand64());

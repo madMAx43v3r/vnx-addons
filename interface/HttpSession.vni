@@ -10,4 +10,6 @@ class HttpSession {
 	
 	long login_time;					// posix [sec]
 	
+	long session_timeout;				// starting at login_time (-1 = infinite) [sec]
+	
 }
