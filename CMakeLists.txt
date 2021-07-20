@@ -13,7 +13,7 @@ add_library(url_cpp SHARED
 
 add_library(llhttp SHARED
 	${LLHTTP_SOURCE_FILES}
-	src/llhttp.c
+	lib/src/llhttp.c
 )
 
 target_include_directories(url_cpp PUBLIC lib/url-cpp/include)
