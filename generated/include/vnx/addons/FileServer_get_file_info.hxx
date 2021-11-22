@@ -23,6 +23,8 @@ public:
 	
 	static constexpr uint64_t VNX_TYPE_ID = 0xd0dde082f276b7f1ull;
 	
+	FileServer_get_file_info() {}
+	
 	vnx::Hash64 get_type_hash() const override;
 	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;

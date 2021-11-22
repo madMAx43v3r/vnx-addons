@@ -25,6 +25,8 @@ struct file_info_t {
 	
 	static constexpr uint64_t VNX_TYPE_ID = 0x7a1208fc71e8e919ull;
 	
+	file_info_t() {}
+	
 	vnx::Hash64 get_type_hash() const;
 	std::string get_type_name() const;
 	const vnx::TypeCode* get_type_code() const;

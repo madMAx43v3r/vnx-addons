@@ -28,6 +28,7 @@ struct permission_e {
 	static constexpr uint64_t VNX_TYPE_ID = 0x50d90a32b3efd091ull;
 	
 	permission_e() {}
+	
 	permission_e(const enum_t& _value) { value = _value; }
 	permission_e(const ::vnx::addons::permission_e& _other) { value = _other.value; }
 	

@@ -23,6 +23,8 @@ struct HttpComponent {
 	
 	static constexpr uint64_t VNX_TYPE_ID = 0x6ddcddab3925b2efull;
 	
+	HttpComponent() {}
+	
 };
 
 
