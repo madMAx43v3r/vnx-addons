@@ -985,6 +985,9 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			if(errno == EAGAIN || errno == EWOULDBLOCK) {
 				is_blocked = true;
 			} else {
+				if(show_warnings) {
+					log(WARN) << "Error when writing to socket: " << std::strerror(errno);
+				}
 				on_disconnect(state);	// broken connection
 				return;
 			}
@@ -1018,6 +1021,7 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
 			state->is_chunked_reply_pending = true;
 		} else {
+			log(WARN) << "Unable to make client request!";
 			on_disconnect(state);
 			return;
 		}
@@ -1066,6 +1070,7 @@ void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<c
 			case IDENTITY:
 				break;
 			default:
+				log(WARN) << "Invalid output encoding: " << state->output_encoding;
 				on_disconnect(state);
 				return;
 		}
