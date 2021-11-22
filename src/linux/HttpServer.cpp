@@ -23,6 +23,11 @@ int HttpServer::set_socket_nonblocking(int fd)
 	return res;
 }
 
+std::string HttpServer::get_socket_error_text()
+{
+	return std::string(std::strerror(errno)) + " (" + std::to_string(errno) + ")";
+}
+
 
 } // addons
 } // vnx

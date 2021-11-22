@@ -171,10 +171,10 @@ void HttpServer::init()
 #ifdef _WIN32
 	m_notify_socket = socket(AF_INET, SOCK_DGRAM, 0);
 	if(m_notify_socket == -1){
-		throw std::runtime_error("socket() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("socket() failed with: " + get_socket_error_text());
 	}
 	if(set_socket_nonblocking(m_notify_socket) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + get_socket_error_text());
 	}
 
 	{
@@ -183,7 +183,7 @@ void HttpServer::init()
 		addr.sin_port = 0;
 		addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
 		if(bind(m_notify_socket, (sockaddr *)&addr, sizeof(addr)) == -1){
-			throw std::runtime_error("bind() failed with: " + std::string(strerror(errno)));
+			throw std::runtime_error("bind() failed with: " + get_socket_error_text());
 		}
 	}
 
@@ -191,18 +191,18 @@ void HttpServer::init()
 		sockaddr_in addr = {};
 		int length = sizeof(addr);
 		if(getsockname(m_notify_socket, (sockaddr*)&addr, &length) == -1){
-			throw std::runtime_error("getsockname() failed with: " + std::string(strerror(errno)));
+			throw std::runtime_error("getsockname() failed with: " + get_socket_error_text());
 		}
 		if(connect(m_notify_socket, (sockaddr*)&addr, length) < 0){
-			throw std::runtime_error("connect() failed with: " + std::string(strerror(errno)));
+			throw std::runtime_error("connect() failed with: " + get_socket_error_text());
 		}
 	}
 #else
 	if(::pipe(m_notify_pipe) < 0) {
-		throw std::runtime_error("pipe() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("pipe() failed with: " + get_socket_error_text());
 	}
 	if(set_socket_nonblocking(m_notify_pipe[0]) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + get_socket_error_text());
 	}
 #endif
 }
@@ -235,25 +235,25 @@ void HttpServer::main()
 	// create server socket
 	m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
 	if(m_socket < 0) {
-		throw std::runtime_error("socket() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("socket() failed with: " + get_socket_error_text());
 	}
 	if(set_socket_nonblocking(m_socket) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("set_socket_nonblocking() failed with: " + get_socket_error_text());
 	}
 	{
 		int enable = 1;
 		if(::setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(int)) < 0) {
-			log(WARN) << "setsockopt(SO_REUSEADDR) failed with: " << strerror(errno);
+			log(WARN) << "setsockopt(SO_REUSEADDR) failed with: " << get_socket_error_text();
 		}
 	}
 	{
 		::sockaddr_in addr = get_sockaddr_byname(host, port);
 		if(::bind(m_socket, (::sockaddr*)&addr, sizeof(addr)) < 0) {
-			throw std::runtime_error("bind() failed with: " + std::string(strerror(errno)));
+			throw std::runtime_error("bind() failed with: " + get_socket_error_text());
 		}
 	}
 	if(::listen(m_socket, listen_queue_size) < 0) {
-		throw std::runtime_error("listen() failed with: " + std::string(strerror(errno)));
+		throw std::runtime_error("listen() failed with: " + get_socket_error_text());
 	}
 	log(INFO) << "Running on " << host << ":" << port;
 
@@ -986,7 +986,7 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 				is_blocked = true;
 			} else {
 				if(show_warnings) {
-					log(WARN) << "Error when writing to socket: " << std::strerror(errno) << " (" << errno << ")";
+					log(WARN) << "Error when writing to socket: " << get_socket_error_text();
 				}
 				on_disconnect(state);	// broken connection
 				return;
@@ -1194,12 +1194,12 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 	}
 #ifdef _WIN32
 	if(WSAPoll(fds.data(), fds.size(), timeout_ms) == SOCKET_ERROR) {
-		log(ERROR) << "WSAPoll() failed with: " << WSAGetLastError();
+		log(WARN) << "WSAPoll() failed with: " << WSAGetLastError();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 #else
 	if(::poll(fds.data(), fds.size(), std::min(timeout_ms, 1000)) < 0) {
-		log(ERROR) << "poll() failed with: " << std::strerror(errno);
+		log(WARN) << "poll() failed with: " << get_socket_error_text();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 #endif

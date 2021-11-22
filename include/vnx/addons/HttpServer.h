@@ -141,6 +141,8 @@ private:
 
 	int set_socket_nonblocking(int fd);
 
+	static std::string get_socket_error_text();
+
 	static int on_url(llhttp_t* parser, const char* at, size_t length);
 	static int on_header_field(llhttp_t* parser, const char* at, size_t length);
 	static int on_header_field_complete(llhttp_t* parser);
