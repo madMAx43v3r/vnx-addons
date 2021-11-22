@@ -1027,7 +1027,6 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode)
 {
 	if(auto state = find_state_by_id(id)) {
-		state->is_chunked_reply_pending = false;
 		do_write_data(state, chunk, encode);
 	}
 	else if(show_warnings) {
@@ -1038,6 +1037,10 @@ void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chun
 void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<const HttpData> chunk, bool encode)
 {
 	if(encode) {
+		if(state->is_chunked_reply) {
+			publish(chunk, output_response);
+			state->is_chunked_reply_pending = false;
+		}
 		state->payload_size += chunk->data.size();
 		if(auto response = state->response) {
 			if(response->total_size >= 0) {
@@ -1090,7 +1093,9 @@ void HttpServer::on_write_error(uint64_t id, const vnx::exception& ex)
 		log(WARN) << "http_request_chunk() failed with: " << ex.what();
 	}
 	if(auto state = find_state_by_id(id)) {
-		state->is_chunked_reply_pending = false;
+		if(state->is_chunked_reply) {
+			state->is_chunked_reply_pending = false;
+		}
 		on_disconnect(state);
 	}
 }
