@@ -99,7 +99,7 @@ vnx::Buffer FileServer::read_file_range(const std::string& path, const int64_t& 
 		throw std::logic_error("invalid offset: " + std::to_string(offset));
 	}
 	int64_t length_ = length;
-	if(length_ < 0) {
+	if(length_ < 0 || offset + length_ > file_size) {
 		length_ = file_size - offset_;
 	}
 	if(length_ < 0) {

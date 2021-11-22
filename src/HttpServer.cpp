@@ -1012,20 +1012,9 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 		}
 	}
 	else if(state->is_chunked_reply) {
-		bool last_chunk = false;
-		int64_t max_bytes = max_chunk_size;
-		if(auto response = state->response) {
-			if(response->total_size >= 0) {
-				const auto num_left = response->total_size - int64_t(state->payload_size);
-				if(num_left <= max_bytes) {
-					max_bytes = num_left;
-					last_chunk = true;
-				}
-			}
-		}
 		if(auto client = state->module) {
-			client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_bytes,
-					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1, true, last_chunk),
+			client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_chunk_size,
+					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1, true),
 					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
 		} else {
 			on_disconnect(state);
@@ -1034,13 +1023,8 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 	}
 }
 
-void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode, bool is_eof)
+void HttpServer::on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode)
 {
-	if(is_eof) {
-		auto copy = vnx::clone(chunk);
-		copy->is_eof = true;
-		chunk = copy;
-	}
 	if(auto state = find_state_by_id(id)) {
 		do_write_data(state, chunk, encode);
 	}
@@ -1260,7 +1244,7 @@ void HttpServer::deflate_write_task(const uint64_t id,
 		stream->flush();
 	}
 	data->is_eof = chunk->is_eof;
-	add_task(std::bind(&HttpServer::on_write_data, this, id, data, false, false));
+	add_task(std::bind(&HttpServer::on_write_data, this, id, data, false));
 }
 
 

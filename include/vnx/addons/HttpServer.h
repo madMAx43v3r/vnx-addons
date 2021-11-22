@@ -126,7 +126,7 @@ private:
 
 	void on_disconnect(std::shared_ptr<state_t> state);
 
-	void on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode = true, bool is_eof = false);
+	void on_write_data(uint64_t id, std::shared_ptr<const HttpData> chunk, bool encode = true);
 
 	void do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<const HttpData> chunk, bool encode = true);
 
