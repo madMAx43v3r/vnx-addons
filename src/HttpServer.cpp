@@ -986,7 +986,7 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 				is_blocked = true;
 			} else {
 				if(show_warnings) {
-					log(WARN) << "Error when writing to socket: " << std::strerror(errno);
+					log(WARN) << "Error when writing to socket: " << std::strerror(errno) << " (" << errno << ")";
 				}
 				on_disconnect(state);	// broken connection
 				return;
