@@ -936,7 +936,11 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 	const auto max_bytes = sizeof(state->buffer) - state->offset;
 	const auto num_bytes = ::recv(state->fd, state->buffer + state->offset, max_bytes, 0);
 	if(num_bytes < 0) {
-		if(errno != EAGAIN && errno != EWOULDBLOCK){
+#ifdef _WIN32
+		if(WSAGetLastError() != WSAEWOULDBLOCK) {
+#else
+		if(errno != EAGAIN && errno != EWOULDBLOCK) {
+#endif
 			on_disconnect(state);	// broken connection
 			return;
 		}
@@ -982,7 +986,11 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 				break;
 			}
 		} else {
+#ifdef _WIN32
+			if(WSAGetLastError() == WSAEWOULDBLOCK) {
+#else
 			if(errno == EAGAIN || errno == EWOULDBLOCK) {
+#endif
 				is_blocked = true;
 			} else {
 				if(show_warnings) {

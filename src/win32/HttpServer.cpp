@@ -25,7 +25,7 @@ int HttpServer::set_socket_nonblocking(int fd){
 
 std::string HttpServer::get_socket_error_text()
 {
-	return std::string(std::strerror(errno)) + " (" + std::to_string(WSAGetLastError()) + ")";
+	return std::to_string(WSAGetLastError());
 }
 
 
