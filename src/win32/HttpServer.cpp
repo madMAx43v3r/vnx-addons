@@ -17,7 +17,7 @@ namespace addons {
 int HttpServer::set_socket_nonblocking(int fd){
 	u_long mode = 1;
 	const auto res = ioctlsocket(fd, FIONBIO, &mode);
-	if(res != 0 && show_warnings){
+	if(res != 0){
 		log(WARN) << "ioctlsocket() failed with: " << WSAGetLastError();
 	}
 	return res;
