@@ -1,0 +1,15 @@
+package vnx.addons;
+
+module TcpServer {
+	
+	int port = 8080;
+	string host = "localhost";				// use "0.0.0.0" to listen on all interfaces
+	
+	int max_connections = -1;				// -1 = infinite
+	int listen_queue_size = 1000;
+	int stats_interval_ms = 10000;			// -1 = disable [ms]
+	int connection_timeout_ms = 30000;		// -1 = disable [ms]
+	
+	bool show_warnings = false;				// if to show access failures
+	
+}
