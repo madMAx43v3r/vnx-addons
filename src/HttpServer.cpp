@@ -69,11 +69,16 @@ inline
 	::memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	::hostent* host = ::gethostbyname(endpoint.c_str());
-	if(!host) {
-		throw std::runtime_error("could not resolve: '" + endpoint + "'");
+	{
+		static std::mutex mutex;
+		std::lock_guard<std::mutex> lock(mutex);
+
+		::hostent* host = ::gethostbyname(endpoint.c_str());
+		if(!host) {
+			throw std::runtime_error("could not resolve: '" + endpoint + "'");
+		}
+		memcpy(&addr.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
 	}
-	::memcpy(&addr.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
 	return addr;
 }
 
