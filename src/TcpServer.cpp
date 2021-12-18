@@ -165,7 +165,8 @@ uint64_t TcpServer::add_client(int fd)
 
 void TcpServer::update()
 {
-	log(INFO) << m_state_map.size() << " clients, " << m_error_counter << " failed, " << m_timeout_counter << " timeout";
+	log(INFO) << m_state_map.size() << " clients, " << m_error_counter << " failed, "
+			<< m_timeout_counter << " timeout, " << m_refused_counter << " refused";
 }
 
 std::shared_ptr<TcpServer::state_t> TcpServer::find_state_by_id(uint64_t id) const
@@ -433,6 +434,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 							log(WARN) << "Refused connection due to limit at " << max_connections;
 						}
 						endpoint->close(fd);
+						m_refused_counter++;
 					}
 				} else {
 					break;

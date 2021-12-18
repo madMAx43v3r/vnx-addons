@@ -95,6 +95,7 @@ private:
 	std::unordered_map<uint64_t, std::shared_ptr<state_t>> m_client_map;						// [id => state]
 
 	mutable size_t m_error_counter = 0;
+	mutable size_t m_refused_counter = 0;
 	mutable size_t m_timeout_counter = 0;
 	mutable size_t m_connect_counter = 0;
 
