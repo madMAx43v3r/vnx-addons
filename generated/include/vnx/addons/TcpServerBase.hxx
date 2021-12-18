@@ -20,6 +20,10 @@ public:
 	int32_t listen_queue_size = 1000;
 	int32_t stats_interval_ms = 10000;
 	int32_t connection_timeout_ms = 30000;
+	int32_t send_buffer_size = 0;
+	int32_t receive_buffer_size = 0;
+	vnx::bool_t tcp_no_delay = false;
+	vnx::bool_t tcp_keepalive = true;
 	vnx::bool_t show_warnings = false;
 	
 	typedef ::vnx::Module Super;

@@ -32,7 +32,7 @@ namespace addons {
 
 
 const vnx::Hash64 TcpServerBase::VNX_TYPE_HASH(0x336d98e915472200ull);
-const vnx::Hash64 TcpServerBase::VNX_CODE_HASH(0x5a81bfdcc6a6c625ull);
+const vnx::Hash64 TcpServerBase::VNX_CODE_HASH(0x5adc1c96dbf6bbc6ull);
 
 TcpServerBase::TcpServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
@@ -43,6 +43,10 @@ TcpServerBase::TcpServerBase(const std::string& _vnx_name)
 	vnx::read_config(vnx_name + ".listen_queue_size", listen_queue_size);
 	vnx::read_config(vnx_name + ".stats_interval_ms", stats_interval_ms);
 	vnx::read_config(vnx_name + ".connection_timeout_ms", connection_timeout_ms);
+	vnx::read_config(vnx_name + ".send_buffer_size", send_buffer_size);
+	vnx::read_config(vnx_name + ".receive_buffer_size", receive_buffer_size);
+	vnx::read_config(vnx_name + ".tcp_no_delay", tcp_no_delay);
+	vnx::read_config(vnx_name + ".tcp_keepalive", tcp_keepalive);
 	vnx::read_config(vnx_name + ".show_warnings", show_warnings);
 }
 
@@ -67,7 +71,11 @@ void TcpServerBase::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[3], 3); vnx::accept(_visitor, listen_queue_size);
 	_visitor.type_field(_type_code->fields[4], 4); vnx::accept(_visitor, stats_interval_ms);
 	_visitor.type_field(_type_code->fields[5], 5); vnx::accept(_visitor, connection_timeout_ms);
-	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, show_warnings);
+	_visitor.type_field(_type_code->fields[6], 6); vnx::accept(_visitor, send_buffer_size);
+	_visitor.type_field(_type_code->fields[7], 7); vnx::accept(_visitor, receive_buffer_size);
+	_visitor.type_field(_type_code->fields[8], 8); vnx::accept(_visitor, tcp_no_delay);
+	_visitor.type_field(_type_code->fields[9], 9); vnx::accept(_visitor, tcp_keepalive);
+	_visitor.type_field(_type_code->fields[10], 10); vnx::accept(_visitor, show_warnings);
 	_visitor.type_end(*_type_code);
 }
 
@@ -79,6 +87,10 @@ void TcpServerBase::write(std::ostream& _out) const {
 	_out << ", \"listen_queue_size\": "; vnx::write(_out, listen_queue_size);
 	_out << ", \"stats_interval_ms\": "; vnx::write(_out, stats_interval_ms);
 	_out << ", \"connection_timeout_ms\": "; vnx::write(_out, connection_timeout_ms);
+	_out << ", \"send_buffer_size\": "; vnx::write(_out, send_buffer_size);
+	_out << ", \"receive_buffer_size\": "; vnx::write(_out, receive_buffer_size);
+	_out << ", \"tcp_no_delay\": "; vnx::write(_out, tcp_no_delay);
+	_out << ", \"tcp_keepalive\": "; vnx::write(_out, tcp_keepalive);
 	_out << ", \"show_warnings\": "; vnx::write(_out, show_warnings);
 	_out << "}";
 }
@@ -98,6 +110,10 @@ vnx::Object TcpServerBase::to_object() const {
 	_object["listen_queue_size"] = listen_queue_size;
 	_object["stats_interval_ms"] = stats_interval_ms;
 	_object["connection_timeout_ms"] = connection_timeout_ms;
+	_object["send_buffer_size"] = send_buffer_size;
+	_object["receive_buffer_size"] = receive_buffer_size;
+	_object["tcp_no_delay"] = tcp_no_delay;
+	_object["tcp_keepalive"] = tcp_keepalive;
 	_object["show_warnings"] = show_warnings;
 	return _object;
 }
@@ -114,10 +130,18 @@ void TcpServerBase::from_object(const vnx::Object& _object) {
 			_entry.second.to(max_connections);
 		} else if(_entry.first == "port") {
 			_entry.second.to(port);
+		} else if(_entry.first == "receive_buffer_size") {
+			_entry.second.to(receive_buffer_size);
+		} else if(_entry.first == "send_buffer_size") {
+			_entry.second.to(send_buffer_size);
 		} else if(_entry.first == "show_warnings") {
 			_entry.second.to(show_warnings);
 		} else if(_entry.first == "stats_interval_ms") {
 			_entry.second.to(stats_interval_ms);
+		} else if(_entry.first == "tcp_keepalive") {
+			_entry.second.to(tcp_keepalive);
+		} else if(_entry.first == "tcp_no_delay") {
+			_entry.second.to(tcp_no_delay);
 		}
 	}
 }
@@ -141,6 +165,18 @@ vnx::Variant TcpServerBase::get_field(const std::string& _name) const {
 	if(_name == "connection_timeout_ms") {
 		return vnx::Variant(connection_timeout_ms);
 	}
+	if(_name == "send_buffer_size") {
+		return vnx::Variant(send_buffer_size);
+	}
+	if(_name == "receive_buffer_size") {
+		return vnx::Variant(receive_buffer_size);
+	}
+	if(_name == "tcp_no_delay") {
+		return vnx::Variant(tcp_no_delay);
+	}
+	if(_name == "tcp_keepalive") {
+		return vnx::Variant(tcp_keepalive);
+	}
 	if(_name == "show_warnings") {
 		return vnx::Variant(show_warnings);
 	}
@@ -160,6 +196,14 @@ void TcpServerBase::set_field(const std::string& _name, const vnx::Variant& _val
 		_value.to(stats_interval_ms);
 	} else if(_name == "connection_timeout_ms") {
 		_value.to(connection_timeout_ms);
+	} else if(_name == "send_buffer_size") {
+		_value.to(send_buffer_size);
+	} else if(_name == "receive_buffer_size") {
+		_value.to(receive_buffer_size);
+	} else if(_name == "tcp_no_delay") {
+		_value.to(tcp_no_delay);
+	} else if(_name == "tcp_keepalive") {
+		_value.to(tcp_keepalive);
 	} else if(_name == "show_warnings") {
 		_value.to(show_warnings);
 	} else {
@@ -191,7 +235,7 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.TcpServer";
 	type_code->type_hash = vnx::Hash64(0x336d98e915472200ull);
-	type_code->code_hash = vnx::Hash64(0x5a81bfdcc6a6c625ull);
+	type_code->code_hash = vnx::Hash64(0x5adc1c96dbf6bbc6ull);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::TcpServerBase);
 	type_code->methods.resize(9);
@@ -204,7 +248,7 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 	type_code->methods[6] = ::vnx::ModuleInterface_vnx_restart::static_get_type_code();
 	type_code->methods[7] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
 	type_code->methods[8] = ::vnx::ModuleInterface_vnx_self_test::static_get_type_code();
-	type_code->fields.resize(7);
+	type_code->fields.resize(11);
 	{
 		auto& field = type_code->fields[0];
 		field.data_size = 4;
@@ -249,6 +293,32 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 	}
 	{
 		auto& field = type_code->fields[6];
+		field.data_size = 4;
+		field.name = "send_buffer_size";
+		field.code = {7};
+	}
+	{
+		auto& field = type_code->fields[7];
+		field.data_size = 4;
+		field.name = "receive_buffer_size";
+		field.code = {7};
+	}
+	{
+		auto& field = type_code->fields[8];
+		field.data_size = 1;
+		field.name = "tcp_no_delay";
+		field.value = vnx::to_string(false);
+		field.code = {31};
+	}
+	{
+		auto& field = type_code->fields[9];
+		field.data_size = 1;
+		field.name = "tcp_keepalive";
+		field.value = vnx::to_string(true);
+		field.code = {31};
+	}
+	{
+		auto& field = type_code->fields[10];
 		field.data_size = 1;
 		field.name = "show_warnings";
 		field.value = vnx::to_string(false);
@@ -387,6 +457,18 @@ void read(TypeInput& in, ::vnx::addons::TcpServerBase& value, const TypeCode* ty
 			vnx::read_value(_buf + _field->offset, value.connection_timeout_ms, _field->code.data());
 		}
 		if(const auto* const _field = type_code->field_map[6]) {
+			vnx::read_value(_buf + _field->offset, value.send_buffer_size, _field->code.data());
+		}
+		if(const auto* const _field = type_code->field_map[7]) {
+			vnx::read_value(_buf + _field->offset, value.receive_buffer_size, _field->code.data());
+		}
+		if(const auto* const _field = type_code->field_map[8]) {
+			vnx::read_value(_buf + _field->offset, value.tcp_no_delay, _field->code.data());
+		}
+		if(const auto* const _field = type_code->field_map[9]) {
+			vnx::read_value(_buf + _field->offset, value.tcp_keepalive, _field->code.data());
+		}
+		if(const auto* const _field = type_code->field_map[10]) {
 			vnx::read_value(_buf + _field->offset, value.show_warnings, _field->code.data());
 		}
 	}
@@ -411,13 +493,17 @@ void write(TypeOutput& out, const ::vnx::addons::TcpServerBase& value, const Typ
 	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(21);
+	char* const _buf = out.write(31);
 	vnx::write_value(_buf + 0, value.port);
 	vnx::write_value(_buf + 4, value.max_connections);
 	vnx::write_value(_buf + 8, value.listen_queue_size);
 	vnx::write_value(_buf + 12, value.stats_interval_ms);
 	vnx::write_value(_buf + 16, value.connection_timeout_ms);
-	vnx::write_value(_buf + 20, value.show_warnings);
+	vnx::write_value(_buf + 20, value.send_buffer_size);
+	vnx::write_value(_buf + 24, value.receive_buffer_size);
+	vnx::write_value(_buf + 28, value.tcp_no_delay);
+	vnx::write_value(_buf + 29, value.tcp_keepalive);
+	vnx::write_value(_buf + 30, value.show_warnings);
 	vnx::write(out, value.host, type_code, type_code->fields[1].code.data());
 }
 
