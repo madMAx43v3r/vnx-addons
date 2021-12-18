@@ -24,12 +24,10 @@ target_include_directories(llhttp PUBLIC include lib/llhttp/src/native)
 if(WIN32)
 	list(APPEND PLATFORM_SOURCES
 		src/win32/HttpServer.cpp
-		src/win32/TcpServer.cpp
 	)
 else()
 	list(APPEND PLATFORM_SOURCES
 		src/linux/HttpServer.cpp
-		src/linux/TcpServer.cpp
 	)
 endif()
 

@@ -9,6 +9,7 @@
 #define INCLUDE_VNX_ADDONS_TCPSERVER_H_
 
 #include <vnx/addons/TcpServerBase.hxx>
+#include <vnx/TcpEndpoint.hxx>
 
 
 namespace vnx {
@@ -18,9 +19,9 @@ class TcpServer : public TcpServerBase {
 public:
 	TcpServer(const std::string& _vnx_name);
 
-protected:
 	void notify(std::shared_ptr<vnx::Pipe> pipe) override;
 
+protected:
 	void init() override;
 
 	void main() override;
@@ -75,10 +76,6 @@ private:
 
 	void do_poll(int timeout_ms) noexcept;
 
-	int set_socket_nonblocking(int fd);
-
-	static std::string get_socket_error_text();
-
 private:
 	int m_socket = -1;
 #ifdef _WIN32
@@ -88,6 +85,7 @@ private:
 #endif
 
 	uint64_t m_next_id = 1;
+	std::shared_ptr<TcpEndpoint> endpoint;
 
 	std::unordered_map<int, std::shared_ptr<state_t>> m_state_map;								// [fd => state]
 	std::unordered_map<uint64_t, std::shared_ptr<state_t>> m_client_map;						// [id => state]

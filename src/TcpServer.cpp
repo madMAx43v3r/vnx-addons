@@ -30,26 +30,6 @@ inline void closesocket(int fd) {
 }
 #endif
 
-inline
-::sockaddr_in get_sockaddr_byname(const std::string& endpoint, int port)
-{
-	::sockaddr_in addr;
-	::memset(&addr, 0, sizeof(addr));
-	addr.sin_family = AF_INET;
-	addr.sin_port = htons(port);
-	{
-		static std::mutex mutex;
-		std::lock_guard<std::mutex> lock(mutex);
-
-		::hostent* host = ::gethostbyname(endpoint.c_str());
-		if(!host) {
-			throw std::runtime_error("could not resolve: '" + endpoint + "'");
-		}
-		memcpy(&addr.sin_addr.s_addr, host->h_addr_list[0], host->h_length);
-	}
-	return addr;
-}
-
 
 namespace vnx {
 namespace addons {
@@ -85,9 +65,7 @@ void TcpServer::init()
 	if(m_notify_socket == -1){
 		throw std::runtime_error("socket() failed with: " + get_socket_error_text());
 	}
-	if(set_socket_nonblocking(m_notify_socket) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + get_socket_error_text());
-	}
+	set_socket_nonblocking(m_notify_socket);
 
 	{
 		sockaddr_in addr = {};
@@ -113,37 +91,27 @@ void TcpServer::init()
 	if(::pipe(m_notify_pipe) < 0) {
 		throw std::runtime_error("pipe() failed with: " + get_socket_error_text());
 	}
-	if(set_socket_nonblocking(m_notify_pipe[0]) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + get_socket_error_text());
-	}
+	set_socket_nonblocking(m_notify_pipe[0]);
 #endif
 }
 
 void TcpServer::main()
 {
 	// create server socket
-	m_socket = ::socket(AF_INET, SOCK_STREAM, 0);
-	if(m_socket < 0) {
-		throw std::runtime_error("socket() failed with: " + get_socket_error_text());
-	}
-	if(set_socket_nonblocking(m_socket) < 0) {
-		throw std::runtime_error("set_socket_nonblocking() failed with: " + get_socket_error_text());
-	}
-	{
-		int enable = 1;
-		if(::setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable, sizeof(int)) < 0) {
-			log(WARN) << "setsockopt(SO_REUSEADDR) failed with: " << get_socket_error_text();
-		}
-	}
-	{
-		::sockaddr_in addr = get_sockaddr_byname(host, port);
-		if(::bind(m_socket, (::sockaddr*)&addr, sizeof(addr)) < 0) {
-			throw std::runtime_error("bind() failed with: " + get_socket_error_text());
-		}
-	}
-	if(::listen(m_socket, listen_queue_size) < 0) {
-		throw std::runtime_error("listen() failed with: " + get_socket_error_text());
-	}
+	endpoint = TcpEndpoint::create();
+	endpoint->port = port;
+	endpoint->host_name = host;
+	endpoint->non_blocking = true;
+	endpoint->tcp_no_delay = tcp_no_delay;
+	endpoint->tcp_keepalive = tcp_keepalive;
+	endpoint->send_buffer_size = send_buffer_size;
+	endpoint->receive_buffer_size = receive_buffer_size;
+	endpoint->listen_queue_size = listen_queue_size;
+
+	m_socket = endpoint->open();
+	endpoint->bind(m_socket);
+	endpoint->listen(m_socket);
+
 	log(INFO) << "Running on " << host << ":" << port;
 
 	if(stats_interval_ms > 0) {
@@ -248,6 +216,7 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 		if(errno != EAGAIN && errno != EWOULDBLOCK)
 #endif
 		{
+			m_error_counter++;
 			on_disconnect(state);	// broken connection
 			return;
 		}
@@ -306,6 +275,7 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 				if(show_warnings) {
 					log(WARN) << "Error when writing to socket: " << get_socket_error_text();
 				}
+				m_error_counter++;
 				on_disconnect(state);	// broken connection
 				return;
 			}
@@ -427,14 +397,14 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 	}
 	if(fds[1].revents & POLLIN) {
 		while(true) {
-			const int fd = ::accept(m_socket, 0, 0);
-			if(fd >= 0) {
-				if(set_socket_nonblocking(fd) < 0) {
-					closesocket(fd);
-					continue;
+			try {
+				const auto fd = endpoint->accept(m_socket);
+				if(fd >= 0) {
+					on_connect(fd);
+				} else {
+					break;
 				}
-				on_connect(fd);
-			} else {
+			} catch(...) {
 				break;
 			}
 		}

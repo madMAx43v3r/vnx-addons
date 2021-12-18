@@ -10,6 +10,11 @@ module TcpServer {
 	int stats_interval_ms = 10000;			// -1 = disable [ms]
 	int connection_timeout_ms = 30000;		// -1 = disable [ms]
 	
+	int send_buffer_size;					// 0 = default
+	int receive_buffer_size;				// 0 = default
+	
+	bool tcp_no_delay = false;
+	bool tcp_keepalive = true;
 	bool show_warnings = false;				// if to show access failures
 	
 }
