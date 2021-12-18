@@ -16,18 +16,9 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #else
-#include <fcntl.h>
-#include <netdb.h>
 #include <sys/socket.h>
 #include <netinet/tcp.h>
 #include <poll.h>
-#endif
-
-
-#ifndef _WIN32
-inline void closesocket(int fd) {
-	::close(fd);
-}
 #endif
 
 
@@ -66,7 +57,6 @@ void TcpServer::init()
 		throw std::runtime_error("socket() failed with: " + get_socket_error_text());
 	}
 	set_socket_nonblocking(m_notify_socket);
-
 	{
 		sockaddr_in addr = {};
 		addr.sin_family = AF_INET;
@@ -76,7 +66,6 @@ void TcpServer::init()
 			throw std::runtime_error("bind() failed with: " + get_socket_error_text());
 		}
 	}
-
 	{
 		sockaddr_in addr = {};
 		int length = sizeof(addr);
@@ -126,16 +115,16 @@ void TcpServer::main()
 
 	// close all sockets
 	for(const auto& entry : m_state_map) {
-		closesocket(entry.first);
+		endpoint->close(entry.first);
 	}
 	m_state_map.clear();
 
-	closesocket(m_socket);
+	endpoint->close(m_socket);
 #ifdef _WIN32
 	closesocket(m_notify_socket);
 #else
-	closesocket(m_notify_pipe[0]);
-	closesocket(m_notify_pipe[1]);
+	endpoint->close(m_notify_pipe[0]);
+	endpoint->close(m_notify_pipe[1]);
 #endif
 }
 
@@ -345,7 +334,7 @@ void TcpServer::on_disconnect(std::shared_ptr<state_t> state)
 	m_state_map.erase(state->fd);
 	m_client_map.erase(state->id);
 
-	closesocket(state->fd);
+	endpoint->close(state->fd);
 	state->fd = -1;
 
 	try {
