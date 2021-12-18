@@ -6,9 +6,6 @@
  */
 
 #include <vnx/addons/TcpServer.h>
-
-#include <vnx/OverflowException.hxx>
-#include <vnx/PermissionDenied.hxx>
 #include <vnx/vnx.h>
 
 #include <cstdlib>
