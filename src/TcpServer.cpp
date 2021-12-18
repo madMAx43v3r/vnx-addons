@@ -169,6 +169,10 @@ bool TcpServer::send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data)
 
 uint64_t TcpServer::add_client(int fd)
 {
+	set_socket_nonblocking(fd);
+	set_socket_options(fd, endpoint->send_buffer_size, endpoint->receive_buffer_size);
+	set_tcp_socket_options(fd, endpoint->tcp_keepalive, endpoint->tcp_no_delay);
+
 	if(auto state = on_connect(fd)) {
 		return state->id;
 	}
