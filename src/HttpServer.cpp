@@ -1206,7 +1206,7 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 		}
 	}
 #ifdef _WIN32
-	if(WSAPoll(fds.data(), fds.size(), timeout_ms) == SOCKET_ERROR) {
+	if(WSAPoll(fds.data(), fds.size(), std::min(timeout_ms, 1000)) == SOCKET_ERROR) {
 		log(WARN) << "WSAPoll() failed with: " << WSAGetLastError();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
