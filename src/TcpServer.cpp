@@ -408,7 +408,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 #else
-	if(::poll(fds.data(), fds.size(), std::min(timeout_ms, 1000)) < 0) {
+	if(::poll(fds.data(), fds.size(), std::min(timeout_ms, 100)) < 0) {
 		log(WARN) << "poll() failed with: " << get_socket_error_text();
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
@@ -426,7 +426,14 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 			try {
 				const auto fd = endpoint->accept(m_socket);
 				if(fd >= 0) {
-					on_connect(fd);
+					if(m_state_map.size() < size_t(max_connections)) {
+						on_connect(fd);
+					} else {
+						if(show_warnings) {
+							log(WARN) << "Refused connection due to limit at " << max_connections;
+						}
+						endpoint->close(fd);
+					}
 				} else {
 					break;
 				}
