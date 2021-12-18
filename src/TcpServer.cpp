@@ -104,9 +104,11 @@ void TcpServer::main()
 		set_timer_millis(stats_interval_ms, std::bind(&TcpServer::print_stats, this));
 	}
 
-	while(vnx_do_run())
-	{
+	while(true) {
 		const auto timeout_us = vnx_process(false);
+		if(!vnx_do_run()) {
+			break;
+		}
 		do_poll(timeout_us >= 0 ? timeout_us / 1000 : 1000);
 	}
 

@@ -287,9 +287,11 @@ void HttpServer::main()
 		m_threads.push_back(std::make_shared<vnx::ThreadPool>(1, 10));
 	}
 
-	while(vnx_do_run())
-	{
+	while(true) {
 		const auto timeout_us = vnx_process(false);
+		if(!vnx_do_run()) {
+			break;
+		}
 		do_poll(timeout_us >= 0 ? timeout_us / 1000 : 1000);
 	}
 
