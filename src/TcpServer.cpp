@@ -167,6 +167,14 @@ bool TcpServer::send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data)
 	return false;
 }
 
+uint64_t TcpServer::add_client(int fd)
+{
+	if(auto state = on_connect(fd)) {
+		return state->id;
+	}
+	throw std::runtime_error("failed to add client");
+}
+
 void TcpServer::update()
 {
 	log(INFO) << m_state_map.size() << " clients, " << m_error_counter << " failed, " << m_timeout_counter << " timeout";
@@ -190,7 +198,7 @@ std::shared_ptr<TcpServer::state_t> TcpServer::find_state_by_socket(int fd) cons
 	return nullptr;
 }
 
-void TcpServer::on_connect(int fd)
+std::shared_ptr<TcpServer::state_t> TcpServer::on_connect(int fd)
 {
 	auto state = std::make_shared<state_t>();
 	state->fd = fd;
@@ -200,13 +208,26 @@ void TcpServer::on_connect(int fd)
 	m_state_map[fd] = state;
 	m_client_map[state->id] = state;
 	m_connect_counter++;
+
+	try {
+		on_connect(state->id);
+	} catch(...) {
+		// ignore
+	}
+	return state;
 }
 
 void TcpServer::on_read(std::shared_ptr<state_t> state)
 {
 	void* buffer = nullptr;
 	size_t max_bytes = 0;
-	on_buffer(state->id, buffer, max_bytes);
+	try {
+		on_buffer(state->id, buffer, max_bytes);
+	} catch(...) {
+		m_error_counter++;
+		on_disconnect(state);		// buffer error
+		return;
+	}
 
 	const auto num_bytes = ::recv(state->fd, buffer, max_bytes, 0);
 	if(num_bytes < 0) {
@@ -228,8 +249,13 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 		on_disconnect(state);		// normal disconnect
 		return;
 	}
-	if(on_read(state->id, num_bytes)) {
-		state->poll_bits |= POLL_BIT_READ;
+	try {
+		if(on_read(state->id, num_bytes)) {
+			state->poll_bits |= POLL_BIT_READ;
+		}
+	} catch(...) {
+		m_error_counter++;
+		on_disconnect(state);		// parse error
 	}
 }
 
@@ -318,7 +344,11 @@ void TcpServer::on_disconnect(std::shared_ptr<state_t> state)
 	closesocket(state->fd);
 	state->fd = -1;
 
-	on_disconnect(state->id);
+	try {
+		on_disconnect(state->id);
+	} catch(...) {
+		// ignore
+	}
 }
 
 void TcpServer::do_poll(int timeout_ms) noexcept
