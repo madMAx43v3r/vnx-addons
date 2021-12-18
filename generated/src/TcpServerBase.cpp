@@ -32,7 +32,7 @@ namespace addons {
 
 
 const vnx::Hash64 TcpServerBase::VNX_TYPE_HASH(0x336d98e915472200ull);
-const vnx::Hash64 TcpServerBase::VNX_CODE_HASH(0x5adc1c96dbf6bbc6ull);
+const vnx::Hash64 TcpServerBase::VNX_CODE_HASH(0x40c64c2c18a7a15full);
 
 TcpServerBase::TcpServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
@@ -235,7 +235,7 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.TcpServer";
 	type_code->type_hash = vnx::Hash64(0x336d98e915472200ull);
-	type_code->code_hash = vnx::Hash64(0x5adc1c96dbf6bbc6ull);
+	type_code->code_hash = vnx::Hash64(0x40c64c2c18a7a15full);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::TcpServerBase);
 	type_code->methods.resize(9);
@@ -253,7 +253,7 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 		auto& field = type_code->fields[0];
 		field.data_size = 4;
 		field.name = "port";
-		field.value = vnx::to_string(8080);
+		field.value = vnx::to_string(9090);
 		field.code = {7};
 	}
 	{
@@ -274,7 +274,7 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 		auto& field = type_code->fields[3];
 		field.data_size = 4;
 		field.name = "listen_queue_size";
-		field.value = vnx::to_string(1000);
+		field.value = vnx::to_string(100);
 		field.code = {7};
 	}
 	{
@@ -288,7 +288,7 @@ std::shared_ptr<vnx::TypeCode> TcpServerBase::static_create_type_code() {
 		auto& field = type_code->fields[5];
 		field.data_size = 4;
 		field.name = "connection_timeout_ms";
-		field.value = vnx::to_string(30000);
+		field.value = vnx::to_string(-1);
 		field.code = {7};
 	}
 	{

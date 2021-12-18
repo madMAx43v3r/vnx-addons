@@ -14,12 +14,12 @@ namespace addons {
 class TcpServerBase : public ::vnx::Module {
 public:
 	
-	int32_t port = 8080;
+	int32_t port = 9090;
 	std::string host = "localhost";
 	int32_t max_connections = -1;
-	int32_t listen_queue_size = 1000;
+	int32_t listen_queue_size = 100;
 	int32_t stats_interval_ms = 10000;
-	int32_t connection_timeout_ms = 30000;
+	int32_t connection_timeout_ms = -1;
 	int32_t send_buffer_size = 0;
 	int32_t receive_buffer_size = 0;
 	vnx::bool_t tcp_no_delay = false;
