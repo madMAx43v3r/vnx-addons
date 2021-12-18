@@ -155,9 +155,7 @@ bool TcpServer::send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data)
 
 uint64_t TcpServer::add_client(int fd)
 {
-	set_socket_nonblocking(fd);
-	set_socket_options(fd, endpoint->send_buffer_size, endpoint->receive_buffer_size);
-	set_tcp_socket_options(fd, endpoint->tcp_keepalive, endpoint->tcp_no_delay);
+	endpoint->set_options(fd);
 
 	if(auto state = on_connect(fd)) {
 		return state->id;
@@ -202,7 +200,7 @@ std::shared_ptr<TcpServer::state_t> TcpServer::on_connect(int fd)
 	try {
 		on_connect(state->id);
 	} catch(...) {
-		// ignore
+		on_disconnect(state);
 	}
 	return state;
 }
@@ -213,7 +211,11 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 	size_t max_bytes = 0;
 	try {
 		on_buffer(state->id, buffer, max_bytes);
-	} catch(...) {
+	}
+	catch(const std::exception& ex) {
+		if(show_warnings) {
+			log(WARN) << "on_buffer() failed with: " << ex.what();
+		}
 		m_error_counter++;
 		on_disconnect(state);		// buffer error
 		return;
@@ -243,7 +245,11 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 		if(on_read(state->id, num_bytes)) {
 			state->poll_bits |= POLL_BIT_READ;
 		}
-	} catch(...) {
+	}
+	catch(const std::exception& ex) {
+		if(show_warnings) {
+			log(WARN) << "on_read() failed with: " << ex.what();
+		}
 		m_error_counter++;
 		on_disconnect(state);		// parse error
 	}
@@ -289,7 +295,7 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 				is_blocked = true;
 			} else {
 				if(show_warnings) {
-					log(WARN) << "Error when writing to socket: " << get_socket_error_text();
+					log(WARN) << "send() failed with: " << get_socket_error_text();
 				}
 				m_error_counter++;
 				on_disconnect(state);	// broken connection
