@@ -118,7 +118,7 @@ void TcpServer::main()
 
 	endpoint->close(m_socket);
 #ifdef _WIN32
-	closesocket(m_notify_socket);
+	endpoint->close(m_notify_socket);
 #else
 	endpoint->close(m_notify_pipe[0]);
 	endpoint->close(m_notify_pipe[1]);
