@@ -101,7 +101,7 @@ void TcpServer::main()
 	log(INFO) << "Running on " << host << ":" << port;
 
 	if(stats_interval_ms > 0) {
-		set_timer_millis(stats_interval_ms, std::bind(&TcpServer::update, this));
+		set_timer_millis(stats_interval_ms, std::bind(&TcpServer::print_stats, this));
 	}
 
 	while(vnx_do_run())
@@ -163,7 +163,7 @@ uint64_t TcpServer::add_client(int fd)
 	throw std::runtime_error("failed to add client");
 }
 
-void TcpServer::update()
+void TcpServer::print_stats()
 {
 	log(INFO) << m_state_map.size() << " clients, " << m_error_counter << " failed, "
 			<< m_timeout_counter << " timeout, " << m_refused_counter << " refused";

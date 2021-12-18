@@ -62,7 +62,7 @@ private:
 		std::list<std::pair<std::shared_ptr<vnx::Buffer>, size_t>> write_queue;
 	};
 
-	void update();
+	void print_stats();
 
 	std::shared_ptr<state_t> find_state_by_id(uint64_t id) const;
 
