@@ -444,7 +444,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 				if(fd >= 0) {
 					::sockaddr_in sock_addr = {};
 					::socklen_t addr_len = sizeof(sock_addr);
-					::getsockname(fd, (::sockaddr*)&sock_addr, &addr_len);
+					::getpeername(fd, (::sockaddr*)&sock_addr, &addr_len);
 
 					char address[INET_ADDRSTRLEN] = {};
 					::inet_ntop(AF_INET, &sock_addr.sin_addr, address, INET_ADDRSTRLEN);
