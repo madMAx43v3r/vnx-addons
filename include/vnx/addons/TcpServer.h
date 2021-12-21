@@ -32,7 +32,7 @@ protected:
 
 	bool send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data);
 
-	uint64_t add_client(int fd);
+	uint64_t add_client(int fd, const std::string& address);
 
 	virtual void on_buffer(uint64_t client, void*& buffer, size_t& max_bytes) = 0;
 
@@ -51,7 +51,7 @@ protected:
 	 */
 	virtual void on_resume(uint64_t client) = 0;
 
-	virtual void on_connect(uint64_t client) = 0;
+	virtual void on_connect(uint64_t client, const std::string& address) = 0;
 
 	virtual void on_disconnect(uint64_t client) = 0;
 
@@ -78,7 +78,7 @@ private:
 
 	std::shared_ptr<state_t> find_state_by_socket(int fd) const;
 
-	std::shared_ptr<TcpServer::state_t> on_connect(int fd);
+	std::shared_ptr<state_t> on_connect(int fd, const std::string& address);
 
 	void on_read(std::shared_ptr<state_t> state);
 

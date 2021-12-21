@@ -14,6 +14,7 @@
 #include <winsock2.h>
 #else
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <netinet/tcp.h>
 #include <poll.h>
 #endif
@@ -155,11 +156,11 @@ bool TcpServer::send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data)
 	return false;
 }
 
-uint64_t TcpServer::add_client(int fd)
+uint64_t TcpServer::add_client(int fd, const std::string& address)
 {
 	endpoint->set_options(fd);
 
-	if(auto state = on_connect(fd)) {
+	if(auto state = on_connect(fd, address)) {
 		return state->id;
 	}
 	throw std::runtime_error("failed to add client");
@@ -189,7 +190,7 @@ std::shared_ptr<TcpServer::state_t> TcpServer::find_state_by_socket(int fd) cons
 	return nullptr;
 }
 
-std::shared_ptr<TcpServer::state_t> TcpServer::on_connect(int fd)
+std::shared_ptr<TcpServer::state_t> TcpServer::on_connect(int fd, const std::string& address)
 {
 	auto state = std::make_shared<state_t>();
 	state->fd = fd;
@@ -201,7 +202,7 @@ std::shared_ptr<TcpServer::state_t> TcpServer::on_connect(int fd)
 	m_connect_counter++;
 
 	try {
-		on_connect(state->id);
+		on_connect(state->id, address);
 	} catch(...) {
 		on_disconnect(state);
 	}
@@ -441,8 +442,15 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 			try {
 				const auto fd = endpoint->accept(m_socket);
 				if(fd >= 0) {
+					::sockaddr_in sock_addr = {};
+					::socklen_t addr_len = sizeof(sock_addr);
+					::getsockname(fd, (::sockaddr*)&sock_addr, &addr_len);
+
+					char address[INET_ADDRSTRLEN] = {};
+					::inet_ntop(AF_INET, &sock_addr, address, INET_ADDRSTRLEN);
+
 					if(m_state_map.size() < size_t(max_connections)) {
-						on_connect(fd);
+						on_connect(fd, std::string(address));
 					} else {
 						if(show_warnings) {
 							log(WARN) << "Refused connection due to limit at " << max_connections;
