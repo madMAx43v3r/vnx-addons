@@ -306,12 +306,24 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 			}
 		}
 	}
-	if(state->pipe) {
-		if(is_blocked && !state->is_blocked) {
+	if(is_blocked && !state->is_blocked) {
+		try {
+			on_pause(state->id);
+		} catch(...) {
+			on_disconnect(state);
+		}
+		if(state->pipe) {
 			state->pipe->pause();
 		}
-		if(!is_blocked && state->is_blocked) {
+	}
+	if(!is_blocked && state->is_blocked) {
+		if(state->pipe) {
 			state->pipe->resume();
+		}
+		try {
+			on_resume(state->id);
+		} catch(...) {
+			on_disconnect(state);
 		}
 	}
 	state->is_blocked = is_blocked;

@@ -41,6 +41,16 @@ protected:
 	 */
 	virtual bool on_read(uint64_t client, size_t num_bytes) = 0;
 
+	/**
+	 * Called when write is blocking.
+	 */
+	virtual void on_pause(uint64_t client) = 0;
+
+	/**
+	 * Called when writing can be resumed.
+	 */
+	virtual void on_resume(uint64_t client) = 0;
+
 	virtual void on_connect(uint64_t client) = 0;
 
 	virtual void on_disconnect(uint64_t client) = 0;
