@@ -447,7 +447,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 					::getsockname(fd, (::sockaddr*)&sock_addr, &addr_len);
 
 					char address[INET_ADDRSTRLEN] = {};
-					::inet_ntop(AF_INET, &sock_addr, address, INET_ADDRSTRLEN);
+					::inet_ntop(AF_INET, &sock_addr.sin_addr, address, INET_ADDRSTRLEN);
 
 					if(m_state_map.size() < size_t(max_connections)) {
 						on_connect(fd, std::string(address));
