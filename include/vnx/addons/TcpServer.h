@@ -57,6 +57,8 @@ protected:
 
 	virtual void on_disconnect(uint64_t client) = 0;
 
+	virtual void print_stats();
+
 private:
 	enum poll_bits_e : char {
 		POLL_BIT_READ = 1,
@@ -73,8 +75,6 @@ private:
 		std::shared_ptr<vnx::Pipe> pipe;
 		std::list<std::pair<std::shared_ptr<vnx::Buffer>, size_t>> write_queue;
 	};
-
-	void print_stats();
 
 	std::shared_ptr<state_t> find_state_by_id(uint64_t id) const;
 
