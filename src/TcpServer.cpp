@@ -128,6 +128,15 @@ void TcpServer::main()
 #endif
 }
 
+bool TcpServer::pause(uint64_t client)
+{
+	if(auto state = find_state_by_id(client)) {
+		state->poll_bits &= ~POLL_BIT_READ;
+		return true;
+	}
+	return false;
+}
+
 bool TcpServer::resume(uint64_t client)
 {
 	if(auto state = find_state_by_id(client)) {

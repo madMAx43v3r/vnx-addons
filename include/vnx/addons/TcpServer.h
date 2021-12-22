@@ -26,6 +26,8 @@ protected:
 
 	void main() override;
 
+	bool pause(uint64_t client);
+
 	bool resume(uint64_t client);
 
 	bool disconnect(uint64_t client);
@@ -47,7 +49,7 @@ protected:
 	virtual void on_pause(uint64_t client) = 0;
 
 	/**
-	 * Called when writing can be resumed.
+	 * Called when writing has resumed.
 	 */
 	virtual void on_resume(uint64_t client) = 0;
 
