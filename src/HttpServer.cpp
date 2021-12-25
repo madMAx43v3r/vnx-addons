@@ -966,7 +966,7 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 void HttpServer::on_write(std::shared_ptr<state_t> state)
 {
 	bool is_eof = false;
-	bool is_blocked = state->is_blocked;
+	bool is_blocked = false;
 	while(!is_blocked && !state->write_queue.empty())
 	{
 		const auto iter = state->write_queue.begin();
