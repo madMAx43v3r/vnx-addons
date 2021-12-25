@@ -966,8 +966,9 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 void HttpServer::on_write(std::shared_ptr<state_t> state)
 {
 	bool is_eof = false;
-	bool is_blocked = false;
-	while(!state->write_queue.empty()) {
+	bool is_blocked = state->is_blocked;
+	while(!is_blocked && !state->write_queue.empty())
+	{
 		const auto iter = state->write_queue.begin();
 		const auto chunk = iter->first;
 		const void* data = chunk->data.data(iter->second);
@@ -990,14 +991,14 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			} else {
 				iter->second += res;
 				is_blocked = true;
-				break;
 			}
 		} else {
 #ifdef _WIN32
-			if(WSAGetLastError() == WSAEWOULDBLOCK) {
+			if(WSAGetLastError() == WSAEWOULDBLOCK)
 #else
-			if(errno == EAGAIN || errno == EWOULDBLOCK) {
+			if(errno == EAGAIN || errno == EWOULDBLOCK)
 #endif
+			{
 				is_blocked = true;
 			} else {
 				if(show_warnings) {
