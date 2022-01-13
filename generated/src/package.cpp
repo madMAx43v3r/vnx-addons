@@ -37,12 +37,20 @@
 
 namespace vnx {
 
+const TypeCode* type<::vnx::addons::CompressedValue>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_CompressedValue;
+}
+
 void type<::vnx::addons::CompressedValue>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::CompressedValue());
 }
 
 void type<::vnx::addons::CompressedValue>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::DeflatedValue>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_DeflatedValue;
 }
 
 void type<::vnx::addons::DeflatedValue>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -53,12 +61,20 @@ void type<::vnx::addons::DeflatedValue>::create_dynamic_code(std::vector<uint16_
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::FileServer_delete_file>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_delete_file;
+}
+
 void type<::vnx::addons::FileServer_delete_file>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_delete_file());
 }
 
 void type<::vnx::addons::FileServer_delete_file>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::FileServer_delete_file_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_delete_file_return;
 }
 
 void type<::vnx::addons::FileServer_delete_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -69,12 +85,20 @@ void type<::vnx::addons::FileServer_delete_file_return>::create_dynamic_code(std
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::FileServer_get_file_info>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_get_file_info;
+}
+
 void type<::vnx::addons::FileServer_get_file_info>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_get_file_info());
 }
 
 void type<::vnx::addons::FileServer_get_file_info>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::FileServer_get_file_info_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_get_file_info_return;
 }
 
 void type<::vnx::addons::FileServer_get_file_info_return>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -85,12 +109,20 @@ void type<::vnx::addons::FileServer_get_file_info_return>::create_dynamic_code(s
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::FileServer_read_directory>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_read_directory;
+}
+
 void type<::vnx::addons::FileServer_read_directory>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_directory());
 }
 
 void type<::vnx::addons::FileServer_read_directory>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::FileServer_read_directory_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_read_directory_return;
 }
 
 void type<::vnx::addons::FileServer_read_directory_return>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -101,12 +133,20 @@ void type<::vnx::addons::FileServer_read_directory_return>::create_dynamic_code(
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::FileServer_read_file>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_read_file;
+}
+
 void type<::vnx::addons::FileServer_read_file>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_file());
 }
 
 void type<::vnx::addons::FileServer_read_file>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::FileServer_read_file_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_read_file_return;
 }
 
 void type<::vnx::addons::FileServer_read_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -117,12 +157,20 @@ void type<::vnx::addons::FileServer_read_file_return>::create_dynamic_code(std::
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::FileServer_read_file_range>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_read_file_range;
+}
+
 void type<::vnx::addons::FileServer_read_file_range>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_read_file_range());
 }
 
 void type<::vnx::addons::FileServer_read_file_range>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::FileServer_read_file_range_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_read_file_range_return;
 }
 
 void type<::vnx::addons::FileServer_read_file_range_return>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -133,12 +181,20 @@ void type<::vnx::addons::FileServer_read_file_range_return>::create_dynamic_code
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::FileServer_write_file>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_write_file;
+}
+
 void type<::vnx::addons::FileServer_write_file>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::FileServer_write_file());
 }
 
 void type<::vnx::addons::FileServer_write_file>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::FileServer_write_file_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_FileServer_write_file_return;
 }
 
 void type<::vnx::addons::FileServer_write_file_return>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -149,12 +205,20 @@ void type<::vnx::addons::FileServer_write_file_return>::create_dynamic_code(std:
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::HttpChunk>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpChunk;
+}
+
 void type<::vnx::addons::HttpChunk>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpChunk());
 }
 
 void type<::vnx::addons::HttpChunk>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpChunk& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpComponent_http_request>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpComponent_http_request;
 }
 
 void type<::vnx::addons::HttpComponent_http_request>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -165,12 +229,20 @@ void type<::vnx::addons::HttpComponent_http_request>::create_dynamic_code(std::v
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::HttpComponent_http_request_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpComponent_http_request_return;
+}
+
 void type<::vnx::addons::HttpComponent_http_request_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpComponent_http_request_return());
 }
 
 void type<::vnx::addons::HttpComponent_http_request_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_return& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpComponent_http_request_chunk>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpComponent_http_request_chunk;
 }
 
 void type<::vnx::addons::HttpComponent_http_request_chunk>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -181,12 +253,20 @@ void type<::vnx::addons::HttpComponent_http_request_chunk>::create_dynamic_code(
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::HttpComponent_http_request_chunk_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpComponent_http_request_chunk_return;
+}
+
 void type<::vnx::addons::HttpComponent_http_request_chunk_return>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpComponent_http_request_chunk_return());
 }
 
 void type<::vnx::addons::HttpComponent_http_request_chunk_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk_return& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpData>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpData;
 }
 
 void type<::vnx::addons::HttpData>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -197,12 +277,20 @@ void type<::vnx::addons::HttpData>::create_dynamic_code(std::vector<uint16_t>& c
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::HttpRequest>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpRequest;
+}
+
 void type<::vnx::addons::HttpRequest>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpRequest());
 }
 
 void type<::vnx::addons::HttpRequest>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpResponse>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpResponse;
 }
 
 void type<::vnx::addons::HttpResponse>::create_dynamic_code(std::vector<uint16_t>& code) {
@@ -213,6 +301,10 @@ void type<::vnx::addons::HttpResponse>::create_dynamic_code(std::vector<uint16_t
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::HttpSession>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpSession;
+}
+
 void type<::vnx::addons::HttpSession>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::HttpSession());
 }
@@ -221,12 +313,20 @@ void type<::vnx::addons::HttpSession>::create_dynamic_code(std::vector<uint16_t>
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::file_info_t>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_file_info_t;
+}
+
 void type<::vnx::addons::file_info_t>::create_dynamic_code(std::vector<uint16_t>& code) {
 	create_dynamic_code(code, ::vnx::addons::file_info_t());
 }
 
 void type<::vnx::addons::file_info_t>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::file_info_t& value, bool special) {
 	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::permission_e>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_permission_e;
 }
 
 void type<::vnx::addons::permission_e>::create_dynamic_code(std::vector<uint16_t>& code) {

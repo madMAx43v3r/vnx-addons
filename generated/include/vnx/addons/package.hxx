@@ -246,6 +246,7 @@ struct type<::vnx::addons::CompressedValue> {
 	void accept(Visitor& visitor, const ::vnx::addons::CompressedValue& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue& value, bool special = false);
 };
@@ -268,6 +269,7 @@ struct type<::vnx::addons::DeflatedValue> {
 	void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue& value, bool special = false);
 };
@@ -310,6 +312,7 @@ struct type<::vnx::addons::FileServer_delete_file> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file& value, bool special = false);
 };
@@ -332,6 +335,7 @@ struct type<::vnx::addons::FileServer_delete_file_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_delete_file_return& value, bool special = false);
 };
@@ -354,6 +358,7 @@ struct type<::vnx::addons::FileServer_get_file_info> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_get_file_info& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info& value, bool special = false);
 };
@@ -376,6 +381,7 @@ struct type<::vnx::addons::FileServer_get_file_info_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_get_file_info_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_get_file_info_return& value, bool special = false);
 };
@@ -398,6 +404,7 @@ struct type<::vnx::addons::FileServer_read_directory> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_directory& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory& value, bool special = false);
 };
@@ -420,6 +427,7 @@ struct type<::vnx::addons::FileServer_read_directory_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_directory_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_directory_return& value, bool special = false);
 };
@@ -442,6 +450,7 @@ struct type<::vnx::addons::FileServer_read_file> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_file& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file& value, bool special = false);
 };
@@ -464,6 +473,7 @@ struct type<::vnx::addons::FileServer_read_file_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_file_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_return& value, bool special = false);
 };
@@ -486,6 +496,7 @@ struct type<::vnx::addons::FileServer_read_file_range> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_file_range& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range& value, bool special = false);
 };
@@ -508,6 +519,7 @@ struct type<::vnx::addons::FileServer_read_file_range_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_file_range_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_read_file_range_return& value, bool special = false);
 };
@@ -530,6 +542,7 @@ struct type<::vnx::addons::FileServer_write_file> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_write_file& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file& value, bool special = false);
 };
@@ -552,6 +565,7 @@ struct type<::vnx::addons::FileServer_write_file_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::FileServer_write_file_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file_return& value, bool special = false);
 };
@@ -574,6 +588,7 @@ struct type<::vnx::addons::HttpChunk> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpChunk& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpChunk& value, bool special = false);
 };
@@ -616,6 +631,7 @@ struct type<::vnx::addons::HttpComponent_http_request> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request& value, bool special = false);
 };
@@ -638,6 +654,7 @@ struct type<::vnx::addons::HttpComponent_http_request_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_return& value, bool special = false);
 };
@@ -660,6 +677,7 @@ struct type<::vnx::addons::HttpComponent_http_request_chunk> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request_chunk& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk& value, bool special = false);
 };
@@ -682,6 +700,7 @@ struct type<::vnx::addons::HttpComponent_http_request_chunk_return> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request_chunk_return& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpComponent_http_request_chunk_return& value, bool special = false);
 };
@@ -704,6 +723,7 @@ struct type<::vnx::addons::HttpData> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpData& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpData& value, bool special = false);
 };
@@ -726,6 +746,7 @@ struct type<::vnx::addons::HttpRequest> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpRequest& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest& value, bool special = false);
 };
@@ -748,6 +769,7 @@ struct type<::vnx::addons::HttpResponse> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpResponse& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpResponse& value, bool special = false);
 };
@@ -790,6 +812,7 @@ struct type<::vnx::addons::HttpSession> {
 	void accept(Visitor& visitor, const ::vnx::addons::HttpSession& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpSession& value, bool special = false);
 };
@@ -832,6 +855,7 @@ struct type<::vnx::addons::file_info_t> {
 	void accept(Visitor& visitor, const ::vnx::addons::file_info_t& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::file_info_t& value, bool special = false);
 };
@@ -854,6 +878,7 @@ struct type<::vnx::addons::permission_e> {
 	void accept(Visitor& visitor, const ::vnx::addons::permission_e& value) {
 		vnx::accept(visitor, value);
 	}
+	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::permission_e& value, bool special = false);
 };
