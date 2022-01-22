@@ -39,6 +39,7 @@ class HttpRequest;
 class HttpResponse;
 class HttpServerBase;
 class HttpSession;
+class MsgServerBase;
 class TcpServerBase;
 struct file_info_t;
 struct permission_e;
@@ -68,6 +69,7 @@ extern const vnx::TypeCode* const vnx_native_type_code_HttpRequest; ///< \privat
 extern const vnx::TypeCode* const vnx_native_type_code_HttpResponse; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_HttpServerBase; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_HttpSession; ///< \private
+extern const vnx::TypeCode* const vnx_native_type_code_MsgServerBase; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_TcpServerBase; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_file_info_t; ///< \private
 extern const vnx::TypeCode* const vnx_native_type_code_permission_e; ///< \private
@@ -104,6 +106,7 @@ void read(TypeInput& in, ::vnx::addons::HttpRequest& value, const TypeCode* type
 void read(TypeInput& in, ::vnx::addons::HttpResponse& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpSession& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::MsgServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::TcpServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::file_info_t& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::permission_e& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -134,6 +137,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpRequest& value, const TypeC
 void write(TypeOutput& out, const ::vnx::addons::HttpResponse& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpSession& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::MsgServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::TcpServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::file_info_t& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::permission_e& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -164,6 +168,7 @@ void read(std::istream& in, ::vnx::addons::HttpRequest& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpResponse& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpServerBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpSession& value); ///< \private
+void read(std::istream& in, ::vnx::addons::MsgServerBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::TcpServerBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::file_info_t& value); ///< \private
 void read(std::istream& in, ::vnx::addons::permission_e& value); ///< \private
@@ -194,6 +199,7 @@ void write(std::ostream& out, const ::vnx::addons::HttpRequest& value); ///< \pr
 void write(std::ostream& out, const ::vnx::addons::HttpResponse& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpServerBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpSession& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::MsgServerBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::TcpServerBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::file_info_t& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::permission_e& value); ///< \private
@@ -224,6 +230,7 @@ void accept(Visitor& visitor, const ::vnx::addons::HttpRequest& value); ///< \pr
 void accept(Visitor& visitor, const ::vnx::addons::HttpResponse& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpServerBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpSession& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::MsgServerBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::TcpServerBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::file_info_t& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::permission_e& value); ///< \private
@@ -815,6 +822,26 @@ struct type<::vnx::addons::HttpSession> {
 	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpSession& value, bool special = false);
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::MsgServerBase> {
+	void read(TypeInput& in, ::vnx::addons::MsgServerBase& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::MsgServerBase& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::MsgServerBase& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::MsgServerBase& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::MsgServerBase& value) {
+		vnx::accept(visitor, value);
+	}
 };
 
 /// \private

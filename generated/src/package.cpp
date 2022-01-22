@@ -26,6 +26,7 @@
 #include <vnx/addons/HttpResponse.hxx>
 #include <vnx/addons/HttpServerBase.hxx>
 #include <vnx/addons/HttpSession.hxx>
+#include <vnx/addons/MsgServerBase.hxx>
 #include <vnx/addons/TcpServerBase.hxx>
 #include <vnx/addons/file_info_t.hxx>
 #include <vnx/addons/permission_e.hxx>
@@ -375,6 +376,7 @@ static void register_all_types() {
 	vnx::register_type_code(::vnx::addons::HttpResponse::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpServerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpSession::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::MsgServerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::TcpServerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::file_info_t::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::permission_e::static_create_type_code());
@@ -411,6 +413,7 @@ const vnx::TypeCode* const vnx_native_type_code_HttpRequest = vnx::get_type_code
 const vnx::TypeCode* const vnx_native_type_code_HttpResponse = vnx::get_type_code(vnx::Hash64(0xb907701490f0e0feull));
 const vnx::TypeCode* const vnx_native_type_code_HttpServerBase = vnx::get_type_code(vnx::Hash64(0xf05b2d0ac45a8a7bull));
 const vnx::TypeCode* const vnx_native_type_code_HttpSession = vnx::get_type_code(vnx::Hash64(0xaf1b568d83351450ull));
+const vnx::TypeCode* const vnx_native_type_code_MsgServerBase = vnx::get_type_code(vnx::Hash64(0x869f9aab4c662096ull));
 const vnx::TypeCode* const vnx_native_type_code_TcpServerBase = vnx::get_type_code(vnx::Hash64(0x336d98e915472200ull));
 const vnx::TypeCode* const vnx_native_type_code_file_info_t = vnx::get_type_code(vnx::Hash64(0x7a1208fc71e8e919ull));
 const vnx::TypeCode* const vnx_native_type_code_permission_e = vnx::get_type_code(vnx::Hash64(0x50d90a32b3efd091ull));
