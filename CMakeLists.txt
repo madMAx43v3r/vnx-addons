@@ -1,7 +1,12 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.11)
 project(vnx-addons)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -pthread -Wall -Wno-unused-variable -Wno-sign-compare")
+if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall" )
+else()
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -pthread -Wall -Wno-unused-variable -Wno-sign-compare")
+endif()
+
 add_compile_options(-DNOGDI)
 
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
@@ -51,13 +56,51 @@ target_include_directories(vnx_addons
 		include
 		generated/include
 )
+
+if(MSVC)
+	target_include_directories(vnx_addons PUBLIC ${VNXBASE_BINARY_DIR})
+
+	#include(GenerateExportHeader)
+
+	#GENERATE_EXPORT_HEADER(url_cpp)
+	#include_directories("${CMAKE_CURRENT_BINARY_DIR}")	
+
+	set_target_properties(url_cpp PROPERTIES ENABLE_EXPORTS 1)
+	set_target_properties(url_cpp PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)	
+
+	#GENERATE_EXPORT_HEADER(llhttp)
+	#include_directories("${CMAKE_CURRENT_BINARY_DIR}")	
+
+	set_target_properties(llhttp PROPERTIES ENABLE_EXPORTS 1)
+	set_target_properties(llhttp PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)	
+
+	#GENERATE_EXPORT_HEADER(vnx_addons)
+	#include_directories("${CMAKE_CURRENT_BINARY_DIR}")	
+
+	set_target_properties(vnx_addons PROPERTIES ENABLE_EXPORTS 1)
+	set_target_properties(vnx_addons PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS 1)
+
+
+	find_library(ZLIB_LIBRARY zlib HINTS ${ZLIB_LIBRARIES})
+	add_library(z INTERFACE IMPORTED)
+	set_target_properties(z PROPERTIES INTERFACE_LINK_LIBRARIES "${ZLIB_LIBRARY}")
+	
+	set_target_properties(vnx_addons PROPERTIES LINK_OPTIONS "/NODEFAULTLIB:LIBCMT")
+	target_include_directories(vnx_addons PRIVATE ${ZLIB_INCLUDE_DIR})
+
+endif()
+
 target_link_libraries(vnx_addons vnx_base url_cpp llhttp z)
+
+if(VNX_ADDONS_BUILD_TESTS)
 
 add_executable(test_deflate test/test_deflate.cpp)
 target_link_libraries(test_deflate vnx_addons)
 
 add_executable(test_http_server test/test_http_server.cpp)
 target_link_libraries(test_http_server vnx_addons)
+
+endif()
 
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY generated/include/ DESTINATION include)
