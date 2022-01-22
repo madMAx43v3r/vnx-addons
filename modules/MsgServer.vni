@@ -1,0 +1,7 @@
+package vnx.addons;
+
+module MsgServer extends TcpServer {
+	
+	uint max_msg_size = 67108864;			// bytes
+	
+}

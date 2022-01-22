@@ -43,6 +43,7 @@ add_library(vnx_addons SHARED
 	src/HttpServer.cpp
 	src/TcpServer.cpp
 	src/FileServer.cpp
+	src/MsgServer.cpp
 )
 
 target_include_directories(vnx_addons
