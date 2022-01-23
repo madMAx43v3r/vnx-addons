@@ -55,13 +55,11 @@ target_include_directories(vnx_addons
 	PUBLIC
 		include
 		generated/include
+		${VNXBASE_BINARY_DIR}
 )
 
-if(MSVC)
-	target_include_directories(vnx_addons PUBLIC ${VNXBASE_BINARY_DIR})
-
+if(MSVC)	
 	#include(GenerateExportHeader)
-
 	#GENERATE_EXPORT_HEADER(url_cpp)
 	#include_directories("${CMAKE_CURRENT_BINARY_DIR}")	
 
