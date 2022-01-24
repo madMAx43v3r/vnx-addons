@@ -40,7 +40,7 @@ protected:
 
 	void send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx::Value> msg);
 
-	virtual std::shared_ptr<peer_t> get_peer_base(uint64_t client) = 0;
+	virtual std::shared_ptr<peer_t> get_peer_base(uint64_t client) const = 0;
 
 	virtual void on_msg(uint64_t client, std::shared_ptr<const vnx::Value> msg) = 0;
 
