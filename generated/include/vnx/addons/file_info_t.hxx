@@ -40,6 +40,8 @@ struct file_info_t {
 	void read(std::istream& _in);
 	void write(std::ostream& _out) const;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const;
 	
 	vnx::Object to_object() const;
@@ -55,6 +57,17 @@ struct file_info_t {
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 };
+
+template<typename T>
+void file_info_t::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<file_info_t>(5);
+	_visitor.type_field("name", 0); _visitor.accept(name);
+	_visitor.type_field("mime_type", 1); _visitor.accept(mime_type);
+	_visitor.type_field("size", 2); _visitor.accept(size);
+	_visitor.type_field("last_modified", 3); _visitor.accept(last_modified);
+	_visitor.type_field("is_directory", 4); _visitor.accept(is_directory);
+	_visitor.template type_end<file_info_t>(5);
+}
 
 
 } // namespace vnx

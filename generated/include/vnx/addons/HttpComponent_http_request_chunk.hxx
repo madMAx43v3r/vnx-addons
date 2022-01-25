@@ -42,6 +42,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -57,6 +59,16 @@ public:
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 };
+
+template<typename T>
+void HttpComponent_http_request_chunk::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<HttpComponent_http_request_chunk>(4);
+	_visitor.type_field("request", 0); _visitor.accept(request);
+	_visitor.type_field("sub_path", 1); _visitor.accept(sub_path);
+	_visitor.type_field("offset", 2); _visitor.accept(offset);
+	_visitor.type_field("max_bytes", 3); _visitor.accept(max_bytes);
+	_visitor.template type_end<HttpComponent_http_request_chunk>(4);
+}
 
 
 } // namespace vnx

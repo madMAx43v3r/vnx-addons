@@ -40,6 +40,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -55,6 +57,14 @@ public:
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 };
+
+template<typename T>
+void FileServer_write_file::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<FileServer_write_file>(2);
+	_visitor.type_field("path", 0); _visitor.accept(path);
+	_visitor.type_field("data", 1); _visitor.accept(data);
+	_visitor.template type_end<FileServer_write_file>(2);
+}
 
 
 } // namespace vnx

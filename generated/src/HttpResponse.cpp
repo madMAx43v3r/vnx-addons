@@ -6,6 +6,7 @@
 #include <vnx/Hash64.hpp>
 #include <vnx/Object.hpp>
 #include <vnx/Value.h>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpData.hxx>
 
 #include <vnx/vnx.h>

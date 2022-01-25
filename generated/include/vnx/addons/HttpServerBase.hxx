@@ -65,6 +65,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -92,6 +94,41 @@ protected:
 	std::shared_ptr<vnx::Value> vnx_call_switch(std::shared_ptr<const vnx::Value> _method, const vnx::request_id_t& _request_id) override;
 	
 };
+
+template<typename T>
+void HttpServerBase::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<HttpServerBase>(29);
+	_visitor.type_field("output_request", 0); _visitor.accept(output_request);
+	_visitor.type_field("output_response", 1); _visitor.accept(output_response);
+	_visitor.type_field("port", 2); _visitor.accept(port);
+	_visitor.type_field("host", 3); _visitor.accept(host);
+	_visitor.type_field("non_blocking", 4); _visitor.accept(non_blocking);
+	_visitor.type_field("show_info", 5); _visitor.accept(show_info);
+	_visitor.type_field("show_warnings", 6); _visitor.accept(show_warnings);
+	_visitor.type_field("error_payload", 7); _visitor.accept(error_payload);
+	_visitor.type_field("auto_session", 8); _visitor.accept(auto_session);
+	_visitor.type_field("enable_deflate", 9); _visitor.accept(enable_deflate);
+	_visitor.type_field("num_threads", 10); _visitor.accept(num_threads);
+	_visitor.type_field("session_size", 11); _visitor.accept(session_size);
+	_visitor.type_field("listen_queue_size", 12); _visitor.accept(listen_queue_size);
+	_visitor.type_field("stats_interval_ms", 13); _visitor.accept(stats_interval_ms);
+	_visitor.type_field("connection_timeout_ms", 14); _visitor.accept(connection_timeout_ms);
+	_visitor.type_field("session_timeout", 15); _visitor.accept(session_timeout);
+	_visitor.type_field("max_payload_size", 16); _visitor.accept(max_payload_size);
+	_visitor.type_field("max_chunk_size", 17); _visitor.accept(max_chunk_size);
+	_visitor.type_field("min_compress_size", 18); _visitor.accept(min_compress_size);
+	_visitor.type_field("do_compress", 19); _visitor.accept(do_compress);
+	_visitor.type_field("components", 20); _visitor.accept(components);
+	_visitor.type_field("charset", 21); _visitor.accept(charset);
+	_visitor.type_field("add_headers", 22); _visitor.accept(add_headers);
+	_visitor.type_field("default_access", 23); _visitor.accept(default_access);
+	_visitor.type_field("cookie_policy", 24); _visitor.accept(cookie_policy);
+	_visitor.type_field("session_coookie_name", 25); _visitor.accept(session_coookie_name);
+	_visitor.type_field("login_path", 26); _visitor.accept(login_path);
+	_visitor.type_field("logout_path", 27); _visitor.accept(logout_path);
+	_visitor.type_field("session_path", 28); _visitor.accept(session_path);
+	_visitor.template type_end<HttpServerBase>(29);
+}
 
 
 } // namespace vnx

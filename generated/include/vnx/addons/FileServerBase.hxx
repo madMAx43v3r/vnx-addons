@@ -46,6 +46,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -78,6 +80,22 @@ protected:
 	std::shared_ptr<vnx::Value> vnx_call_switch(std::shared_ptr<const vnx::Value> _method, const vnx::request_id_t& _request_id) override;
 	
 };
+
+template<typename T>
+void FileServerBase::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<FileServerBase>(10);
+	_visitor.type_field("www_root", 0); _visitor.accept(www_root);
+	_visitor.type_field("mime_type_map", 1); _visitor.accept(mime_type_map);
+	_visitor.type_field("directory_files", 2); _visitor.accept(directory_files);
+	_visitor.type_field("redirect_not_found", 3); _visitor.accept(redirect_not_found);
+	_visitor.type_field("allow_directory_list", 4); _visitor.accept(allow_directory_list);
+	_visitor.type_field("read_only", 5); _visitor.accept(read_only);
+	_visitor.type_field("show_hidden", 6); _visitor.accept(show_hidden);
+	_visitor.type_field("max_queue_ms", 7); _visitor.accept(max_queue_ms);
+	_visitor.type_field("max_queue_size", 8); _visitor.accept(max_queue_size);
+	_visitor.type_field("limit_no_chunk", 9); _visitor.accept(limit_no_chunk);
+	_visitor.template type_end<FileServerBase>(10);
+}
 
 
 } // namespace vnx

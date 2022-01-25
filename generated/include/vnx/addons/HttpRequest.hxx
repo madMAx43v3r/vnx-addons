@@ -53,6 +53,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -68,6 +70,23 @@ public:
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 };
+
+template<typename T>
+void HttpRequest::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<HttpRequest>(11);
+	_visitor.type_field("id", 0); _visitor.accept(id);
+	_visitor.type_field("url", 1); _visitor.accept(url);
+	_visitor.type_field("path", 2); _visitor.accept(path);
+	_visitor.type_field("method", 3); _visitor.accept(method);
+	_visitor.type_field("content_type", 4); _visitor.accept(content_type);
+	_visitor.type_field("cookies", 5); _visitor.accept(cookies);
+	_visitor.type_field("query_params", 6); _visitor.accept(query_params);
+	_visitor.type_field("headers", 7); _visitor.accept(headers);
+	_visitor.type_field("payload", 8); _visitor.accept(payload);
+	_visitor.type_field("stream", 9); _visitor.accept(stream);
+	_visitor.type_field("session", 10); _visitor.accept(session);
+	_visitor.template type_end<HttpRequest>(11);
+}
 
 
 } // namespace vnx

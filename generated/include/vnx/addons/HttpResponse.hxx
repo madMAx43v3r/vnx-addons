@@ -8,6 +8,7 @@
 #include <vnx/Hash64.hpp>
 #include <vnx/Object.hpp>
 #include <vnx/Value.h>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpData.hxx>
 
 
@@ -45,6 +46,8 @@ public:
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string_ex(const std::string& content = "", const std::string& mime_type = "", const int32_t& status = 0);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string_json(const std::string& content = "");
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_string_json_ex(const std::string& content = "", const int32_t& status = 0);
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_variant_json(const ::vnx::Variant& value = ::vnx::Variant());
+	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_variant_json_ex(const ::vnx::Variant& value = ::vnx::Variant(), const int32_t& status = 0);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_object_json(const ::vnx::Object& value = ::vnx::Object());
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_object_json_ex(const ::vnx::Object& value = ::vnx::Object(), const int32_t& status = 0);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_value_json(std::shared_ptr<const ::vnx::Value> value = nullptr);
@@ -61,6 +64,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -76,6 +81,21 @@ public:
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 };
+
+template<typename T>
+void HttpResponse::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<HttpResponse>(9);
+	_visitor.type_field("data", 0); _visitor.accept(data);
+	_visitor.type_field("is_eof", 1); _visitor.accept(is_eof);
+	_visitor.type_field("is_chunked", 2); _visitor.accept(is_chunked);
+	_visitor.type_field("status", 3); _visitor.accept(status);
+	_visitor.type_field("content_type", 4); _visitor.accept(content_type);
+	_visitor.type_field("headers", 5); _visitor.accept(headers);
+	_visitor.type_field("stream", 6); _visitor.accept(stream);
+	_visitor.type_field("total_size", 7); _visitor.accept(total_size);
+	_visitor.type_field("error_text", 8); _visitor.accept(error_text);
+	_visitor.template type_end<HttpResponse>(9);
+}
 
 
 } // namespace vnx

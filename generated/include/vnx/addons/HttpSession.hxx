@@ -43,6 +43,8 @@ public:
 	void read(std::istream& _in) override;
 	void write(std::ostream& _out) const override;
 	
+	template<typename T>
+	void accept_generic(T& _visitor) const;
 	void accept(vnx::Visitor& _visitor) const override;
 	
 	vnx::Object to_object() const override;
@@ -58,6 +60,17 @@ public:
 	static std::shared_ptr<vnx::TypeCode> static_create_type_code();
 	
 };
+
+template<typename T>
+void HttpSession::accept_generic(T& _visitor) const {
+	_visitor.template type_begin<HttpSession>(5);
+	_visitor.type_field("user", 0); _visitor.accept(user);
+	_visitor.type_field("hsid", 1); _visitor.accept(hsid);
+	_visitor.type_field("vsid", 2); _visitor.accept(vsid);
+	_visitor.type_field("login_time", 3); _visitor.accept(login_time);
+	_visitor.type_field("session_timeout", 4); _visitor.accept(session_timeout);
+	_visitor.template type_end<HttpSession>(5);
+}
 
 
 } // namespace vnx
