@@ -60,6 +60,20 @@ std::shared_ptr<const HttpResponse> HttpResponse::from_string_json_ex(const std:
 	return result;
 }
 
+std::shared_ptr<const HttpResponse> HttpResponse::from_variant_json(const vnx::Variant& value)
+{
+	return from_variant_json_ex(value, 200);
+}
+
+std::shared_ptr<const HttpResponse> HttpResponse::from_variant_json_ex(const vnx::Variant& value, const int32_t& status)
+{
+	auto result = HttpResponse::create();
+	result->status = status;
+	result->content_type = "application/json";
+	result->data = vnx::to_string(value);
+	return result;
+}
+
 std::shared_ptr<const HttpResponse> HttpResponse::from_object_json(const vnx::Object& value)
 {
 	return from_object_json_ex(value, 200);

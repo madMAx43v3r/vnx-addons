@@ -28,6 +28,9 @@ class HttpResponse extends HttpData {
 	static HttpResponse* from_string_json(string content);
 	static HttpResponse* from_string_json_ex(string content, int status);
 	
+	static HttpResponse* from_variant_json(vnx.Variant value);
+	static HttpResponse* from_variant_json_ex(vnx.Variant value, int status);
+	
 	static HttpResponse* from_object_json(vnx.Object value);
 	static HttpResponse* from_object_json_ex(vnx.Object value, int status);
 	
