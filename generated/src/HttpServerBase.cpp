@@ -413,8 +413,6 @@ void HttpServerBase::set_field(const std::string& _name, const vnx::Variant& _va
 		_value.to(logout_path);
 	} else if(_name == "session_path") {
 		_value.to(session_path);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

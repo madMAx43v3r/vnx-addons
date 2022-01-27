@@ -99,8 +99,6 @@ void FileServer_write_file::set_field(const std::string& _name, const vnx::Varia
 		_value.to(path);
 	} else if(_name == "data") {
 		_value.to(data);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

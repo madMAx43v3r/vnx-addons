@@ -206,8 +206,6 @@ void MsgServerBase::set_field(const std::string& _name, const vnx::Variant& _val
 		_value.to(show_warnings);
 	} else if(_name == "max_msg_size") {
 		_value.to(max_msg_size);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

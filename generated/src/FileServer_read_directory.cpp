@@ -88,8 +88,6 @@ vnx::Variant FileServer_read_directory::get_field(const std::string& _name) cons
 void FileServer_read_directory::set_field(const std::string& _name, const vnx::Variant& _value) {
 	if(_name == "path") {
 		_value.to(path);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

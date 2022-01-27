@@ -74,7 +74,6 @@ vnx::Variant FileServer_delete_file_return::get_field(const std::string& _name) 
 }
 
 void FileServer_delete_file_return::set_field(const std::string& _name, const vnx::Variant& _value) {
-	throw std::logic_error("no such field: '" + _name + "'");
 }
 
 /// \private

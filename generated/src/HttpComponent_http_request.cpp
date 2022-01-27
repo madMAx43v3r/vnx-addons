@@ -99,8 +99,6 @@ void HttpComponent_http_request::set_field(const std::string& _name, const vnx::
 		_value.to(request);
 	} else if(_name == "sub_path") {
 		_value.to(sub_path);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

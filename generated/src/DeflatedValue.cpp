@@ -89,8 +89,6 @@ vnx::Variant DeflatedValue::get_field(const std::string& _name) const {
 void DeflatedValue::set_field(const std::string& _name, const vnx::Variant& _value) {
 	if(_name == "data") {
 		_value.to(data);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

@@ -74,7 +74,6 @@ vnx::Variant CompressedValue::get_field(const std::string& _name) const {
 }
 
 void CompressedValue::set_field(const std::string& _name, const vnx::Variant& _value) {
-	throw std::logic_error("no such field: '" + _name + "'");
 }
 
 /// \private

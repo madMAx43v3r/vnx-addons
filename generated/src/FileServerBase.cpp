@@ -216,8 +216,6 @@ void FileServerBase::set_field(const std::string& _name, const vnx::Variant& _va
 		_value.to(max_queue_size);
 	} else if(_name == "limit_no_chunk") {
 		_value.to(limit_no_chunk);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

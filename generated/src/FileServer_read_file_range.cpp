@@ -108,8 +108,6 @@ void FileServer_read_file_range::set_field(const std::string& _name, const vnx::
 		_value.to(offset);
 	} else if(_name == "length") {
 		_value.to(length);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

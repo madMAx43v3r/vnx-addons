@@ -206,8 +206,6 @@ void TcpServerBase::set_field(const std::string& _name, const vnx::Variant& _val
 		_value.to(tcp_keepalive);
 	} else if(_name == "show_warnings") {
 		_value.to(show_warnings);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

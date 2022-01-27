@@ -119,8 +119,6 @@ void HttpComponent_http_request_chunk::set_field(const std::string& _name, const
 		_value.to(offset);
 	} else if(_name == "max_bytes") {
 		_value.to(max_bytes);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 

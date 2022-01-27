@@ -98,8 +98,6 @@ void HttpData::set_field(const std::string& _name, const vnx::Variant& _value) {
 		_value.to(data);
 	} else if(_name == "is_eof") {
 		_value.to(is_eof);
-	} else {
-		throw std::logic_error("no such field: '" + _name + "'");
 	}
 }
 
