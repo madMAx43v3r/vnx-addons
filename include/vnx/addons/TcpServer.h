@@ -8,11 +8,6 @@
 #ifndef INCLUDE_VNX_ADDONS_TCPSERVER_H_
 #define INCLUDE_VNX_ADDONS_TCPSERVER_H_
 
-#ifdef _MSC_VER
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
-
 #include <vnx/addons/TcpServerBase.hxx>
 #include <vnx/TcpEndpoint.hxx>
 
@@ -100,7 +95,7 @@ private:
 private:
 	int m_socket = -1;
 #ifdef _WIN32
-	SOCKET m_notify_socket = INVALID_SOCKET;
+	int m_notify_socket = -1;
 #else
 	int m_notify_pipe[2] = {-1, -1};
 #endif
