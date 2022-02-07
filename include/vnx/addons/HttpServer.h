@@ -17,12 +17,6 @@
 #include <llhttp.h>
 
 
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
-
-
 namespace vnx {
 namespace addons {
 
@@ -161,7 +155,7 @@ private:
 private:
 	int m_socket = -1;
 #ifdef _WIN32
-	SOCKET m_notify_socket = INVALID_SOCKET;
+	int m_notify_socket = -1;
 #else
 	int m_notify_pipe[2] = {-1, -1};
 #endif
