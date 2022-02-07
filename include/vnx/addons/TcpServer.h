@@ -8,14 +8,13 @@
 #ifndef INCLUDE_VNX_ADDONS_TCPSERVER_H_
 #define INCLUDE_VNX_ADDONS_TCPSERVER_H_
 
-#ifdef _MSC_VER
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
-
 #include <vnx/addons/TcpServerBase.hxx>
 #include <vnx/TcpEndpoint.hxx>
 
+#ifdef _WIN32
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
 
 namespace vnx {
 namespace addons {
