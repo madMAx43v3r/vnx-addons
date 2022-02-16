@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-class FileServer_write_file_return : public ::vnx::Value {
+class VNX_EXPORT FileServer_write_file_return : public ::vnx::Value {
 public:
 	
 	

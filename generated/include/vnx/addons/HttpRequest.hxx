@@ -14,7 +14,7 @@
 namespace vnx {
 namespace addons {
 
-class HttpRequest : public ::vnx::Value {
+class VNX_EXPORT HttpRequest : public ::vnx::Value {
 public:
 	
 	uint64_t id = 0;

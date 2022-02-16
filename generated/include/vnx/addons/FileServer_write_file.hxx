@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-class FileServer_write_file : public ::vnx::Value {
+class VNX_EXPORT FileServer_write_file : public ::vnx::Value {
 public:
 	
 	std::string path;

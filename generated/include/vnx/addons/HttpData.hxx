@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-class HttpData : public ::vnx::Value {
+class VNX_EXPORT HttpData : public ::vnx::Value {
 public:
 	
 	::vnx::Buffer data;

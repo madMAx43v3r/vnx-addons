@@ -16,7 +16,7 @@
 namespace vnx {
 namespace addons {
 
-class HttpServerBase : public ::vnx::Module {
+class VNX_EXPORT HttpServerBase : public ::vnx::Module {
 public:
 	
 	::vnx::TopicPtr output_request;

@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-class FileServer_read_file_range : public ::vnx::Value {
+class VNX_EXPORT FileServer_read_file_range : public ::vnx::Value {
 public:
 	
 	std::string path;

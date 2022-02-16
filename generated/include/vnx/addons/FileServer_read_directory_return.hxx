@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-class FileServer_read_directory_return : public ::vnx::Value {
+class VNX_EXPORT FileServer_read_directory_return : public ::vnx::Value {
 public:
 	
 	std::vector<::vnx::addons::file_info_t> _ret_0;

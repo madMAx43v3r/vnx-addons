@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-struct file_info_t {
+struct VNX_EXPORT file_info_t {
 	
 	
 	std::string name;

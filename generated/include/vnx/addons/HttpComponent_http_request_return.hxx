@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-class HttpComponent_http_request_return : public ::vnx::Value {
+class VNX_EXPORT HttpComponent_http_request_return : public ::vnx::Value {
 public:
 	
 	std::shared_ptr<const ::vnx::addons::HttpResponse> _ret_0;

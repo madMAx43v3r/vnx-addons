@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-class HttpChunk : public ::vnx::addons::HttpData {
+class VNX_EXPORT HttpChunk : public ::vnx::addons::HttpData {
 public:
 	
 	uint64_t id = 0;

@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-class TcpServerBase : public ::vnx::Module {
+class VNX_EXPORT TcpServerBase : public ::vnx::Module {
 public:
 	
 	int32_t port = 9090;

@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-struct permission_e {
+struct VNX_EXPORT permission_e {
 	
 	enum enum_t : uint32_t {
 		FILE_DELETE = 2726888155l,
