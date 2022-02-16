@@ -1,8 +1,19 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 project(vnx-addons)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -fPIC -pthread -Wall -Wno-unused-variable -Wno-sign-compare")
-add_compile_options(-DNOGDI)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_ENABLE_EXPORTS ON)
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unused-variable -Wno-sign-compare")
+endif()
+
+add_compile_definitions(NOGDI NOMINMAX)
+
+find_package(ZLIB REQUIRED)
 
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
@@ -51,13 +62,20 @@ target_include_directories(vnx_addons
 		include
 		generated/include
 )
-target_link_libraries(vnx_addons vnx_base url_cpp llhttp z)
 
-add_executable(test_deflate test/test_deflate.cpp)
-target_link_libraries(test_deflate vnx_addons)
+target_link_libraries(vnx_addons vnx_base url_cpp llhttp ZLIB::ZLIB)
 
-add_executable(test_http_server test/test_http_server.cpp)
-target_link_libraries(test_http_server vnx_addons)
+if(MSVC)
+	set_target_properties(vnx_addons PROPERTIES LINK_OPTIONS "/NODEFAULTLIB:LIBCMT")
+endif()
+
+if(VNX_ADDONS_BUILD_TESTS)
+	add_executable(test_deflate test/test_deflate.cpp)
+	target_link_libraries(test_deflate vnx_addons)
+	
+	add_executable(test_http_server test/test_http_server.cpp)
+	target_link_libraries(test_http_server vnx_addons)
+endif()
 
 install(DIRECTORY include/ DESTINATION include)
 install(DIRECTORY generated/include/ DESTINATION include)

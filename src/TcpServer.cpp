@@ -9,7 +9,7 @@
 #include <vnx/vnx.h>
 
 #include <cstdlib>
-#include <unistd.h>
+
 #ifdef _WIN32
 #include <winsock2.h>
 #else
@@ -234,7 +234,7 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 		return;
 	}
 
-	const auto num_bytes = ::recv(state->fd, buffer, max_bytes, 0);
+	const auto num_bytes = ::recv(state->fd, (char*)buffer, max_bytes, 0);
 	if(num_bytes < 0) {
 #ifdef _WIN32
 		if(WSAGetLastError() != WSAEWOULDBLOCK)

@@ -17,9 +17,8 @@
 #include <vnx/vnx.h>
 
 #include <url.h>
-
 #include <cstdlib>
-#include <unistd.h>
+
 #ifdef _WIN32
 #include <winsock2.h>
 #else
