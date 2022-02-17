@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT MsgServerBase : public ::vnx::addons::TcpServer {
+class VNX_ADDONS_EXPORT MsgServerBase : public ::vnx::addons::TcpServer {
 public:
 	
 	uint32_t max_msg_size = 67108864;

@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT CompressedValue : public ::vnx::Value {
+class VNX_ADDONS_EXPORT CompressedValue : public ::vnx::Value {
 public:
 	
 	

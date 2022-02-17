@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT FileServer_read_file_return : public ::vnx::Value {
+class VNX_ADDONS_EXPORT FileServer_read_file_return : public ::vnx::Value {
 public:
 	
 	::vnx::Buffer _ret_0;

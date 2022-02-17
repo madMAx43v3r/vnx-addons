@@ -14,7 +14,7 @@
 namespace vnx {
 namespace addons {
 
-struct VNX_EXPORT HttpComponent {
+struct VNX_ADDONS_EXPORT HttpComponent {
 	
 	
 	

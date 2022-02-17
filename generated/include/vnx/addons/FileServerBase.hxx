@@ -16,7 +16,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT FileServerBase : public ::vnx::Module {
+class VNX_ADDONS_EXPORT FileServerBase : public ::vnx::Module {
 public:
 	
 	std::string www_root;

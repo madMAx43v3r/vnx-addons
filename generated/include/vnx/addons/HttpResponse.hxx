@@ -15,7 +15,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT HttpResponse : public ::vnx::addons::HttpData {
+class VNX_ADDONS_EXPORT HttpResponse : public ::vnx::addons::HttpData {
 public:
 	
 	vnx::bool_t is_chunked = 0;

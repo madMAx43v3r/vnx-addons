@@ -13,7 +13,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT DeflatedValue : public ::vnx::addons::CompressedValue {
+class VNX_ADDONS_EXPORT DeflatedValue : public ::vnx::addons::CompressedValue {
 public:
 	
 	::vnx::Buffer data;

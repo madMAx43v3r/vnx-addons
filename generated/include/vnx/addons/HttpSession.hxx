@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-class VNX_EXPORT HttpSession : public ::vnx::Value {
+class VNX_ADDONS_EXPORT HttpSession : public ::vnx::Value {
 public:
 	
 	std::string user;

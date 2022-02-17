@@ -12,6 +12,10 @@
 namespace vnx {
 namespace addons {
 
+#ifndef VNX_ADDONS_EXPORT
+#define VNX_ADDONS_EXPORT
+#endif
+
 
 class CompressedValue;
 class DeflatedValue;
@@ -44,35 +48,35 @@ class TcpServerBase;
 struct file_info_t;
 struct permission_e;
 
-extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServerBase; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_directory; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_directory_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpChunk; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_chunk; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_chunk_return; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpData; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpRequest; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpResponse; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpServerBase; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_HttpSession; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_MsgServerBase; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_TcpServerBase; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_file_info_t; ///< \private
-extern const vnx::TypeCode* const vnx_native_type_code_permission_e; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServerBase; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_get_file_info_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_directory; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_directory_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpChunk; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_chunk; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_chunk_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpData; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpRequest; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpResponse; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpServerBase; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpSession; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_MsgServerBase; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_TcpServerBase; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_file_info_t; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_permission_e; ///< \private
 
 } // namespace vnx
 } // namespace addons
