@@ -8,13 +8,15 @@
 
 #include <vnx/package.hxx>
 
+#ifdef VNX_ADDONS_EXPORT_ENABLE
+#include <vnx_addons_export.h>
+#else
+#define VNX_ADDONS_EXPORT
+#endif
+
 
 namespace vnx {
 namespace addons {
-
-#ifndef VNX_ADDONS_EXPORT
-#define VNX_ADDONS_EXPORT
-#endif
 
 
 class CompressedValue;
