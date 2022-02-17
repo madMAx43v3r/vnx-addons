@@ -11,7 +11,9 @@
 #ifdef VNX_ADDONS_EXPORT_ENABLE
 #include <vnx_addons_export.h>
 #else
+#ifndef VNX_ADDONS_EXPORT
 #define VNX_ADDONS_EXPORT
+#endif
 #endif
 
 
