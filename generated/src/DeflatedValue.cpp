@@ -6,6 +6,12 @@
 #include <vnx/Buffer.hpp>
 #include <vnx/Value.h>
 #include <vnx/addons/CompressedValue.hxx>
+#include <vnx/addons/CompressedValue_decompress.hxx>
+#include <vnx/addons/CompressedValue_decompress_return.hxx>
+#include <vnx/addons/CompressedValue_vnx_decompress.hxx>
+#include <vnx/addons/CompressedValue_vnx_decompress_return.hxx>
+#include <vnx/addons/DeflatedValue_decompress.hxx>
+#include <vnx/addons/DeflatedValue_decompress_return.hxx>
 
 #include <vnx/vnx.h>
 
@@ -123,6 +129,10 @@ std::shared_ptr<vnx::TypeCode> DeflatedValue::static_create_type_code() {
 	type_code->parents.resize(1);
 	type_code->parents[0] = ::vnx::addons::CompressedValue::static_get_type_code();
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<DeflatedValue>(); };
+	type_code->methods.resize(3);
+	type_code->methods[0] = ::vnx::addons::CompressedValue_decompress::static_get_type_code();
+	type_code->methods[1] = ::vnx::addons::CompressedValue_vnx_decompress::static_get_type_code();
+	type_code->methods[2] = ::vnx::addons::DeflatedValue_decompress::static_get_type_code();
 	type_code->fields.resize(1);
 	{
 		auto& field = type_code->fields[0];
@@ -132,6 +142,30 @@ std::shared_ptr<vnx::TypeCode> DeflatedValue::static_create_type_code() {
 	}
 	type_code->build();
 	return type_code;
+}
+
+std::shared_ptr<vnx::Value> DeflatedValue::vnx_call_switch(std::shared_ptr<const vnx::Value> _method) {
+	switch(_method->get_type_hash()) {
+		case 0x46eb7f9563805f83ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::CompressedValue_decompress>(_method);
+			auto _return_value = ::vnx::addons::CompressedValue_decompress_return::create();
+			_return_value->_ret_0 = decompress();
+			return _return_value;
+		}
+		case 0xf90e352a977e7f9cull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::CompressedValue_vnx_decompress>(_method);
+			auto _return_value = ::vnx::addons::CompressedValue_vnx_decompress_return::create();
+			_return_value->_ret_0 = vnx_decompress();
+			return _return_value;
+		}
+		case 0x77db9a2569c776b5ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::DeflatedValue_decompress>(_method);
+			auto _return_value = ::vnx::addons::DeflatedValue_decompress_return::create();
+			_return_value->_ret_0 = decompress();
+			return _return_value;
+		}
+	}
+	return nullptr;
 }
 
 

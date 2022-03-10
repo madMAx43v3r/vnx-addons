@@ -247,21 +247,21 @@ std::shared_ptr<vnx::TypeCode> FileServerBase::static_create_type_code() {
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::FileServerBase);
 	type_code->methods.resize(17);
-	type_code->methods[0] = ::vnx::ModuleInterface_vnx_get_config_object::static_get_type_code();
-	type_code->methods[1] = ::vnx::ModuleInterface_vnx_get_config::static_get_type_code();
-	type_code->methods[2] = ::vnx::ModuleInterface_vnx_set_config_object::static_get_type_code();
-	type_code->methods[3] = ::vnx::ModuleInterface_vnx_set_config::static_get_type_code();
-	type_code->methods[4] = ::vnx::ModuleInterface_vnx_get_type_code::static_get_type_code();
-	type_code->methods[5] = ::vnx::ModuleInterface_vnx_get_module_info::static_get_type_code();
-	type_code->methods[6] = ::vnx::ModuleInterface_vnx_restart::static_get_type_code();
-	type_code->methods[7] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
-	type_code->methods[8] = ::vnx::ModuleInterface_vnx_self_test::static_get_type_code();
-	type_code->methods[9] = ::vnx::addons::FileServer_read_file::static_get_type_code();
-	type_code->methods[10] = ::vnx::addons::FileServer_read_file_range::static_get_type_code();
-	type_code->methods[11] = ::vnx::addons::FileServer_get_file_info::static_get_type_code();
-	type_code->methods[12] = ::vnx::addons::FileServer_read_directory::static_get_type_code();
-	type_code->methods[13] = ::vnx::addons::FileServer_write_file::static_get_type_code();
-	type_code->methods[14] = ::vnx::addons::FileServer_delete_file::static_get_type_code();
+	type_code->methods[0] = ::vnx::ModuleInterface_vnx_get_config::static_get_type_code();
+	type_code->methods[1] = ::vnx::ModuleInterface_vnx_get_config_object::static_get_type_code();
+	type_code->methods[2] = ::vnx::ModuleInterface_vnx_get_module_info::static_get_type_code();
+	type_code->methods[3] = ::vnx::ModuleInterface_vnx_get_type_code::static_get_type_code();
+	type_code->methods[4] = ::vnx::ModuleInterface_vnx_restart::static_get_type_code();
+	type_code->methods[5] = ::vnx::ModuleInterface_vnx_self_test::static_get_type_code();
+	type_code->methods[6] = ::vnx::ModuleInterface_vnx_set_config::static_get_type_code();
+	type_code->methods[7] = ::vnx::ModuleInterface_vnx_set_config_object::static_get_type_code();
+	type_code->methods[8] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
+	type_code->methods[9] = ::vnx::addons::FileServer_delete_file::static_get_type_code();
+	type_code->methods[10] = ::vnx::addons::FileServer_get_file_info::static_get_type_code();
+	type_code->methods[11] = ::vnx::addons::FileServer_read_directory::static_get_type_code();
+	type_code->methods[12] = ::vnx::addons::FileServer_read_file::static_get_type_code();
+	type_code->methods[13] = ::vnx::addons::FileServer_read_file_range::static_get_type_code();
+	type_code->methods[14] = ::vnx::addons::FileServer_write_file::static_get_type_code();
 	type_code->methods[15] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
 	type_code->methods[16] = ::vnx::addons::HttpComponent_http_request_chunk::static_get_type_code();
 	type_code->fields.resize(10);
@@ -347,34 +347,16 @@ void FileServerBase::vnx_handle_switch(std::shared_ptr<const vnx::Value> _value)
 
 std::shared_ptr<vnx::Value> FileServerBase::vnx_call_switch(std::shared_ptr<const vnx::Value> _method, const vnx::request_id_t& _request_id) {
 	switch(_method->get_type_hash()) {
-		case 0x17f58f68bf83abc0ull: {
-			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_get_config_object>(_method);
-			auto _return_value = ::vnx::ModuleInterface_vnx_get_config_object_return::create();
-			_return_value->_ret_0 = vnx_get_config_object();
-			return _return_value;
-		}
 		case 0xbbc7f1a01044d294ull: {
 			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_get_config>(_method);
 			auto _return_value = ::vnx::ModuleInterface_vnx_get_config_return::create();
 			_return_value->_ret_0 = vnx_get_config(_args->name);
 			return _return_value;
 		}
-		case 0xca30f814f17f322full: {
-			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_set_config_object>(_method);
-			auto _return_value = ::vnx::ModuleInterface_vnx_set_config_object_return::create();
-			vnx_set_config_object(_args->config);
-			return _return_value;
-		}
-		case 0x362aac91373958b7ull: {
-			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_set_config>(_method);
-			auto _return_value = ::vnx::ModuleInterface_vnx_set_config_return::create();
-			vnx_set_config(_args->name, _args->value);
-			return _return_value;
-		}
-		case 0x305ec4d628960e5dull: {
-			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_get_type_code>(_method);
-			auto _return_value = ::vnx::ModuleInterface_vnx_get_type_code_return::create();
-			_return_value->_ret_0 = vnx_get_type_code();
+		case 0x17f58f68bf83abc0ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_get_config_object>(_method);
+			auto _return_value = ::vnx::ModuleInterface_vnx_get_config_object_return::create();
+			_return_value->_ret_0 = vnx_get_config_object();
 			return _return_value;
 		}
 		case 0xf6d82bdf66d034a1ull: {
@@ -383,16 +365,16 @@ std::shared_ptr<vnx::Value> FileServerBase::vnx_call_switch(std::shared_ptr<cons
 			_return_value->_ret_0 = vnx_get_module_info();
 			return _return_value;
 		}
+		case 0x305ec4d628960e5dull: {
+			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_get_type_code>(_method);
+			auto _return_value = ::vnx::ModuleInterface_vnx_get_type_code_return::create();
+			_return_value->_ret_0 = vnx_get_type_code();
+			return _return_value;
+		}
 		case 0x9e95dc280cecca1bull: {
 			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_restart>(_method);
 			auto _return_value = ::vnx::ModuleInterface_vnx_restart_return::create();
 			vnx_restart();
-			return _return_value;
-		}
-		case 0x7ab49ce3d1bfc0d2ull: {
-			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_stop>(_method);
-			auto _return_value = ::vnx::ModuleInterface_vnx_stop_return::create();
-			vnx_stop();
 			return _return_value;
 		}
 		case 0x6ce3775b41a42697ull: {
@@ -401,16 +383,28 @@ std::shared_ptr<vnx::Value> FileServerBase::vnx_call_switch(std::shared_ptr<cons
 			_return_value->_ret_0 = vnx_self_test();
 			return _return_value;
 		}
-		case 0x36d7fc9c72b884e6ull: {
-			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_read_file>(_method);
-			auto _return_value = ::vnx::addons::FileServer_read_file_return::create();
-			_return_value->_ret_0 = read_file(_args->path);
+		case 0x362aac91373958b7ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_set_config>(_method);
+			auto _return_value = ::vnx::ModuleInterface_vnx_set_config_return::create();
+			vnx_set_config(_args->name, _args->value);
 			return _return_value;
 		}
-		case 0x1294e2e1e6847490ull: {
-			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_read_file_range>(_method);
-			auto _return_value = ::vnx::addons::FileServer_read_file_range_return::create();
-			_return_value->_ret_0 = read_file_range(_args->path, _args->offset, _args->length);
+		case 0xca30f814f17f322full: {
+			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_set_config_object>(_method);
+			auto _return_value = ::vnx::ModuleInterface_vnx_set_config_object_return::create();
+			vnx_set_config_object(_args->config);
+			return _return_value;
+		}
+		case 0x7ab49ce3d1bfc0d2ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::ModuleInterface_vnx_stop>(_method);
+			auto _return_value = ::vnx::ModuleInterface_vnx_stop_return::create();
+			vnx_stop();
+			return _return_value;
+		}
+		case 0x5e72c602475397dull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_delete_file>(_method);
+			auto _return_value = ::vnx::addons::FileServer_delete_file_return::create();
+			delete_file(_args->path);
 			return _return_value;
 		}
 		case 0xd0dde082f276b7f1ull: {
@@ -425,16 +419,22 @@ std::shared_ptr<vnx::Value> FileServerBase::vnx_call_switch(std::shared_ptr<cons
 			_return_value->_ret_0 = read_directory(_args->path);
 			return _return_value;
 		}
+		case 0x36d7fc9c72b884e6ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_read_file>(_method);
+			auto _return_value = ::vnx::addons::FileServer_read_file_return::create();
+			_return_value->_ret_0 = read_file(_args->path);
+			return _return_value;
+		}
+		case 0x1294e2e1e6847490ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_read_file_range>(_method);
+			auto _return_value = ::vnx::addons::FileServer_read_file_range_return::create();
+			_return_value->_ret_0 = read_file_range(_args->path, _args->offset, _args->length);
+			return _return_value;
+		}
 		case 0xf08166843cfcec65ull: {
 			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_write_file>(_method);
 			auto _return_value = ::vnx::addons::FileServer_write_file_return::create();
 			write_file(_args->path, _args->data);
-			return _return_value;
-		}
-		case 0x5e72c602475397dull: {
-			auto _args = std::static_pointer_cast<const ::vnx::addons::FileServer_delete_file>(_method);
-			auto _return_value = ::vnx::addons::FileServer_delete_file_return::create();
-			delete_file(_args->path);
 			return _return_value;
 		}
 		case 0xe0b6c38f619bad92ull: {

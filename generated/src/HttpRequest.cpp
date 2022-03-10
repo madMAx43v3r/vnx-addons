@@ -6,6 +6,8 @@
 #include <vnx/Buffer.hpp>
 #include <vnx/Hash64.hpp>
 #include <vnx/Value.h>
+#include <vnx/addons/HttpRequest_get_header_value.hxx>
+#include <vnx/addons/HttpRequest_get_header_value_return.hxx>
 #include <vnx/addons/HttpSession.hxx>
 
 #include <vnx/vnx.h>
@@ -222,6 +224,8 @@ std::shared_ptr<vnx::TypeCode> HttpRequest::static_create_type_code() {
 	type_code->is_class = true;
 	type_code->native_size = sizeof(::vnx::addons::HttpRequest);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<HttpRequest>(); };
+	type_code->methods.resize(1);
+	type_code->methods[0] = ::vnx::addons::HttpRequest_get_header_value::static_get_type_code();
 	type_code->fields.resize(11);
 	{
 		auto& field = type_code->fields[0];
@@ -291,6 +295,18 @@ std::shared_ptr<vnx::TypeCode> HttpRequest::static_create_type_code() {
 	}
 	type_code->build();
 	return type_code;
+}
+
+std::shared_ptr<vnx::Value> HttpRequest::vnx_call_switch(std::shared_ptr<const vnx::Value> _method) {
+	switch(_method->get_type_hash()) {
+		case 0x34cb501935178974ull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::HttpRequest_get_header_value>(_method);
+			auto _return_value = ::vnx::addons::HttpRequest_get_header_value_return::create();
+			_return_value->_ret_0 = get_header_value(_args->key);
+			return _return_value;
+		}
+	}
+	return nullptr;
 }
 
 

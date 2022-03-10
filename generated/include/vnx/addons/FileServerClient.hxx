@@ -22,6 +22,26 @@ public:
 	
 	FileServerClient(vnx::Hash64 service_addr);
 	
+	::vnx::Buffer read_file(const std::string& path = "");
+	
+	::vnx::Buffer read_file_range(const std::string& path = "", const int64_t& offset = 0, const int64_t& length = 0);
+	
+	::vnx::addons::file_info_t get_file_info(const std::string& path = "");
+	
+	std::vector<::vnx::addons::file_info_t> read_directory(const std::string& path = "");
+	
+	void write_file(const std::string& path = "", const ::vnx::Buffer& data = ::vnx::Buffer());
+	
+	void write_file_async(const std::string& path = "", const ::vnx::Buffer& data = ::vnx::Buffer());
+	
+	void delete_file(const std::string& path = "");
+	
+	void delete_file_async(const std::string& path = "");
+	
+	std::shared_ptr<const ::vnx::addons::HttpResponse> http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request = nullptr, const std::string& sub_path = "");
+	
+	std::shared_ptr<const ::vnx::addons::HttpData> http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request = nullptr, const std::string& sub_path = "", const int64_t& offset = 0, const int64_t& max_bytes = 0);
+	
 	::vnx::Object vnx_get_config_object();
 	
 	::vnx::Variant vnx_get_config(const std::string& name = "");
@@ -47,26 +67,6 @@ public:
 	void vnx_stop_async();
 	
 	vnx::bool_t vnx_self_test();
-	
-	::vnx::Buffer read_file(const std::string& path = "");
-	
-	::vnx::Buffer read_file_range(const std::string& path = "", const int64_t& offset = 0, const int64_t& length = 0);
-	
-	::vnx::addons::file_info_t get_file_info(const std::string& path = "");
-	
-	std::vector<::vnx::addons::file_info_t> read_directory(const std::string& path = "");
-	
-	void write_file(const std::string& path = "", const ::vnx::Buffer& data = ::vnx::Buffer());
-	
-	void write_file_async(const std::string& path = "", const ::vnx::Buffer& data = ::vnx::Buffer());
-	
-	void delete_file(const std::string& path = "");
-	
-	void delete_file_async(const std::string& path = "");
-	
-	std::shared_ptr<const ::vnx::addons::HttpResponse> http_request(std::shared_ptr<const ::vnx::addons::HttpRequest> request = nullptr, const std::string& sub_path = "");
-	
-	std::shared_ptr<const ::vnx::addons::HttpData> http_request_chunk(std::shared_ptr<const ::vnx::addons::HttpRequest> request = nullptr, const std::string& sub_path = "", const int64_t& offset = 0, const int64_t& max_bytes = 0);
 	
 };
 
