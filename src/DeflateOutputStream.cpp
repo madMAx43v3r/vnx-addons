@@ -7,6 +7,7 @@
 
 #include <vnx/addons/DeflateOutputStream.h>
 
+#include <limits>
 
 namespace vnx {
 namespace addons {
@@ -40,7 +41,7 @@ void DeflateOutputStream::write(const void* buf, size_t len)
 	if(is_finished) {
 		throw std::logic_error("DeflateOutputStream::write(): already finished stream");
 	}
-	if(len > UINT_MAX) {
+	if(len > std::numeric_limits<uint32_t>::max()) {
 		throw std::runtime_error("DeflateOutputStream::write(): len > UINT_MAX");
 	}
 	strm.avail_in = len;

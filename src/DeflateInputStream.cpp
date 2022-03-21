@@ -7,6 +7,8 @@
 
 #include <vnx/addons/DeflateInputStream.h>
 
+#include <limits>
+
 
 namespace vnx {
 namespace addons {
@@ -14,7 +16,7 @@ namespace addons {
 DeflateInputStream::DeflateInputStream(const Buffer* buffer_)
 	:	buffer(buffer_)
 {
-	if(buffer->size() > UINT_MAX) {
+	if(buffer->size() > std::numeric_limits<uint32_t>::max()) {
 		throw std::runtime_error("DeflateInputStream: buffer->size() > UINT_MAX");
 	}
 	strm.zalloc = Z_NULL;
@@ -34,7 +36,7 @@ DeflateInputStream::~DeflateInputStream()
 
 size_t DeflateInputStream::read(void* buf, size_t len)
 {
-	if(len > UINT_MAX) {
+	if(len > std::numeric_limits<uint32_t>::max()) {
 		throw std::runtime_error("DeflateInputStream: len > UINT_MAX");
 	}
 	strm.avail_out = len;
