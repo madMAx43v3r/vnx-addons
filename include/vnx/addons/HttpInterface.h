@@ -31,7 +31,8 @@ public:
 	{
 	}
 
-	void http_request(std::shared_ptr<const HttpRequest> request, const std::string& sub_path, const request_id_t& request_id)
+	void http_request(	std::shared_ptr<const HttpRequest> request, const std::string& sub_path,
+						const request_id_t& request_id, std::shared_ptr<const vnx::Request> vnx_request)
 	{
 		if(sub_path.empty()) {
 			throw std::logic_error("path empty");
@@ -46,6 +47,7 @@ public:
 			module->http_request_async_return(request_id, HttpResponse::from_string_json(vnx::to_string(methods)));
 			return;
 		}
+
 		Object args;
 		if(request->payload.size()) {
 			vnx::from_string(request->payload.as_string(), args);
@@ -55,10 +57,11 @@ public:
 			vnx::from_string(entry.second, value);
 			args[entry.first] = value;
 		}
-		if(!request->session) {
-			throw std::logic_error("session not set");
+		if(vnx_request) {
+			vnx_set_session(vnx_request->session);
+		} else {
+			vnx_set_session(Hash64());
 		}
-		vnx_set_session(request->session->vsid);
 		call(method, args,
 			[this, request, request_id](std::shared_ptr<const Value> result) {
 				std::shared_ptr<const HttpResponse> response;
