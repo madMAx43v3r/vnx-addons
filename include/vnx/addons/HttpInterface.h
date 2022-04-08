@@ -32,7 +32,7 @@ public:
 	}
 
 	void http_request(	std::shared_ptr<const HttpRequest> request, const std::string& sub_path,
-						const request_id_t& request_id, std::shared_ptr<const vnx::Request> vnx_request)
+						const request_id_t& request_id, const Hash64& session_id)
 	{
 		if(sub_path.empty()) {
 			throw std::logic_error("path empty");
@@ -57,11 +57,8 @@ public:
 			vnx::from_string(entry.second, value);
 			args[entry.first] = value;
 		}
-		if(vnx_request) {
-			vnx_set_session(vnx_request->session);
-		} else {
-			vnx_set_session(Hash64());
-		}
+		vnx_set_session(session_id);
+
 		call(method, args,
 			[this, request, request_id](std::shared_ptr<const Value> result) {
 				std::shared_ptr<const HttpResponse> response;
