@@ -34,6 +34,9 @@ public:
 	void http_request(	std::shared_ptr<const HttpRequest> request, const std::string& sub_path,
 						const request_id_t& request_id, const Hash64& session_id)
 	{
+		if(request->method != "GET" && request->method != "POST") {
+			throw std::logic_error("invalid method: " + request->method);
+		}
 		if(sub_path.empty()) {
 			throw std::logic_error("path empty");
 		}
