@@ -57,10 +57,10 @@ protected:
 			std::string key;
 			std::string value;
 		} header;
-		vnx::Memory payload;
 		std::string sub_path;
 		std::shared_ptr<vnx::Pipe> pipe;
 		std::shared_ptr<vnx::Stream> stream;
+		std::shared_ptr<vnx::Memory> payload;
 		std::shared_ptr<HttpRequest> request;
 		std::shared_ptr<const HttpResponse> response;
 		std::shared_ptr<DeflateOutputStream> deflate;

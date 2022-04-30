@@ -535,7 +535,10 @@ int HttpServer::on_body(llhttp_t* parser, const char* at, size_t length)
 		::memcpy(chunk->data.data(), at, length);
 		state->stream->send(chunk);
 	} else {
-		char* chunk = state->payload.add_chunk(length);
+		if(!state->payload) {
+			state->payload = std::make_shared<vnx::Memory>();
+		}
+		char* chunk = state->payload->add_chunk(length);
 		::memcpy(chunk, at, length);
 	}
 	state->payload_size += length;
@@ -554,7 +557,9 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 	}
 	else {
 		auto request = state->request;
-		request->payload = vnx::Buffer(state->payload);
+		if(auto payload = state->payload) {
+			request->payload = *payload;
+		}
 		if(request->content_type == "application/x-www-form-urlencoded") {
 			for(const auto& entry : parse_query_string(request->payload.as_string())) {
 				request->query_params[entry.first] = entry.second;
@@ -562,7 +567,7 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 		}
 		self->process(state);
 	}
-	state->payload.clear();
+	state->payload = nullptr;
 	state->payload_size = 0;
 	state->do_keep_alive = llhttp_should_keep_alive(parser);
 	return HPE_PAUSED;
