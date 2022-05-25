@@ -614,6 +614,7 @@ void HttpServer::process(state_t* state)
 		state->module = client;
 		state->sub_path = sub_path;
 		state->is_pending = true;
+		client->vnx_set_session(request->session->vsid);
 		client->http_request(request, sub_path,
 				std::bind(&HttpServer::reply, this, request->id, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, request->id, std::placeholders::_1));
@@ -1037,6 +1038,7 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 	}
 	else if(state->is_chunked_reply && !state->is_chunked_reply_pending) {
 		if(auto client = state->module) {
+			client->vnx_set_session(state->request->session->vsid);
 			client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_chunk_size,
 					std::bind(&HttpServer::on_write_data, this, state->request->id, std::placeholders::_1, true),
 					std::bind(&HttpServer::on_write_error, this, state->request->id, std::placeholders::_1));
