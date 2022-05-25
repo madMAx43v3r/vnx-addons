@@ -8,10 +8,7 @@
 #ifndef INCLUDE_VNX_ADDONS_HTTPINTERFACE_H_
 #define INCLUDE_VNX_ADDONS_HTTPINTERFACE_H_
 
-#include <vnx/addons/HttpComponent.hxx>
 #include <vnx/GenericAsyncClient.h>
-
-#include <vnx/request_id_t.h>
 
 
 namespace vnx {
