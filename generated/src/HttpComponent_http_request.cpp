@@ -148,6 +148,7 @@ std::shared_ptr<vnx::TypeCode> HttpComponent_http_request::static_create_type_co
 		field.name = "sub_path";
 		field.code = {32};
 	}
+	type_code->permission = "vnx.addons.permission_e.HTTP_REQUEST";
 	type_code->build();
 	return type_code;
 }

@@ -12,7 +12,7 @@ namespace addons {
 
 
 const vnx::Hash64 permission_e::VNX_TYPE_HASH(0x50d90a32b3efd091ull);
-const vnx::Hash64 permission_e::VNX_CODE_HASH(0x1c8bc7f3a8ff7303ull);
+const vnx::Hash64 permission_e::VNX_CODE_HASH(0x72f982af3b45f9f7ull);
 
 vnx::Hash64 permission_e::get_type_hash() const {
 	return VNX_TYPE_HASH;
@@ -47,6 +47,7 @@ vnx::bool_t permission_e::is_valid() const {
 		case FILE_DELETE: return true;
 		case FILE_DOWNLOAD: return true;
 		case FILE_UPLOAD: return true;
+		case HTTP_REQUEST: return true;
 		case READ_DIRECTORY: return true;
 	}
 	return false;
@@ -57,6 +58,7 @@ std::string permission_e::to_string() const {
 		case FILE_DELETE: return "\"FILE_DELETE\"";
 		case FILE_DOWNLOAD: return "\"FILE_DOWNLOAD\"";
 		case FILE_UPLOAD: return "\"FILE_UPLOAD\"";
+		case HTTP_REQUEST: return "\"HTTP_REQUEST\"";
 		case READ_DIRECTORY: return "\"READ_DIRECTORY\"";
 	}
 	return std::to_string(value);
@@ -67,6 +69,7 @@ std::string permission_e::to_string_value() const {
 		case FILE_DELETE: return "FILE_DELETE";
 		case FILE_DOWNLOAD: return "FILE_DOWNLOAD";
 		case FILE_UPLOAD: return "FILE_UPLOAD";
+		case HTTP_REQUEST: return "HTTP_REQUEST";
 		case READ_DIRECTORY: return "READ_DIRECTORY";
 	}
 	return std::to_string(value);
@@ -77,6 +80,7 @@ std::string permission_e::to_string_value_full() const {
 		case FILE_DELETE: return "vnx.addons.permission_e.FILE_DELETE";
 		case FILE_DOWNLOAD: return "vnx.addons.permission_e.FILE_DOWNLOAD";
 		case FILE_UPLOAD: return "vnx.addons.permission_e.FILE_UPLOAD";
+		case HTTP_REQUEST: return "vnx.addons.permission_e.HTTP_REQUEST";
 		case READ_DIRECTORY: return "vnx.addons.permission_e.READ_DIRECTORY";
 	}
 	return std::to_string(value);
@@ -95,6 +99,7 @@ void permission_e::from_string_value(const std::string& _name) {
 		if(_name == "FILE_DELETE") value = FILE_DELETE;
 		else if(_name == "FILE_DOWNLOAD") value = FILE_DOWNLOAD;
 		else if(_name == "FILE_UPLOAD") value = FILE_UPLOAD;
+		else if(_name == "HTTP_REQUEST") value = HTTP_REQUEST;
 		else if(_name == "READ_DIRECTORY") value = READ_DIRECTORY;
 		else value = enum_t(vnx::hash64(_name));
 	} else {
@@ -108,6 +113,7 @@ void permission_e::accept(vnx::Visitor& _visitor) const {
 		case FILE_DELETE: _name = "FILE_DELETE"; break;
 		case FILE_DOWNLOAD: _name = "FILE_DOWNLOAD"; break;
 		case FILE_UPLOAD: _name = "FILE_UPLOAD"; break;
+		case HTTP_REQUEST: _name = "HTTP_REQUEST"; break;
 		case READ_DIRECTORY: _name = "READ_DIRECTORY"; break;
 	}
 	_visitor.enum_value(value, _name);
@@ -118,6 +124,7 @@ void permission_e::write(std::ostream& _out) const {
 		case FILE_DELETE: _out << "\"FILE_DELETE\""; break;
 		case FILE_DOWNLOAD: _out << "\"FILE_DOWNLOAD\""; break;
 		case FILE_UPLOAD: _out << "\"FILE_UPLOAD\""; break;
+		case HTTP_REQUEST: _out << "\"HTTP_REQUEST\""; break;
 		case READ_DIRECTORY: _out << "\"READ_DIRECTORY\""; break;
 		default: _out << value;
 	}
@@ -179,7 +186,7 @@ std::shared_ptr<vnx::TypeCode> permission_e::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.permission_e";
 	type_code->type_hash = vnx::Hash64(0x50d90a32b3efd091ull);
-	type_code->code_hash = vnx::Hash64(0x1c8bc7f3a8ff7303ull);
+	type_code->code_hash = vnx::Hash64(0x72f982af3b45f9f7ull);
 	type_code->is_native = true;
 	type_code->is_enum = true;
 	type_code->native_size = sizeof(::vnx::addons::permission_e);
@@ -194,6 +201,7 @@ std::shared_ptr<vnx::TypeCode> permission_e::static_create_type_code() {
 	type_code->enum_map[2726888155] = "FILE_DELETE";
 	type_code->enum_map[1118995787] = "FILE_DOWNLOAD";
 	type_code->enum_map[1788941922] = "FILE_UPLOAD";
+	type_code->enum_map[3568016033] = "HTTP_REQUEST";
 	type_code->enum_map[1875457109] = "READ_DIRECTORY";
 	type_code->build();
 	return type_code;

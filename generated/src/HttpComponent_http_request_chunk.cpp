@@ -180,6 +180,7 @@ std::shared_ptr<vnx::TypeCode> HttpComponent_http_request_chunk::static_create_t
 		field.name = "max_bytes";
 		field.code = {8};
 	}
+	type_code->permission = "vnx.addons.permission_e.HTTP_REQUEST";
 	type_code->build();
 	return type_code;
 }
