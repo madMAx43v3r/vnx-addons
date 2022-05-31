@@ -42,9 +42,11 @@ public:
 	std::map<std::string, std::string> components;
 	std::map<std::string, std::string> charset;
 	std::vector<std::pair<std::string, std::string>> add_headers;
+	std::map<std::string, std::string> token_map;
 	std::string default_access = "VIEWER";
 	std::string cookie_policy = "SameSite=Strict;";
 	std::string session_coookie_name = "hsid";
+	std::string token_header_name = "x-api-token";
 	std::string login_path = "/login";
 	std::string logout_path = "/logout";
 	std::string session_path = "/session";
@@ -97,7 +99,7 @@ protected:
 
 template<typename T>
 void HttpServerBase::accept_generic(T& _visitor) const {
-	_visitor.template type_begin<HttpServerBase>(29);
+	_visitor.template type_begin<HttpServerBase>(31);
 	_visitor.type_field("output_request", 0); _visitor.accept(output_request);
 	_visitor.type_field("output_response", 1); _visitor.accept(output_response);
 	_visitor.type_field("port", 2); _visitor.accept(port);
@@ -121,13 +123,15 @@ void HttpServerBase::accept_generic(T& _visitor) const {
 	_visitor.type_field("components", 20); _visitor.accept(components);
 	_visitor.type_field("charset", 21); _visitor.accept(charset);
 	_visitor.type_field("add_headers", 22); _visitor.accept(add_headers);
-	_visitor.type_field("default_access", 23); _visitor.accept(default_access);
-	_visitor.type_field("cookie_policy", 24); _visitor.accept(cookie_policy);
-	_visitor.type_field("session_coookie_name", 25); _visitor.accept(session_coookie_name);
-	_visitor.type_field("login_path", 26); _visitor.accept(login_path);
-	_visitor.type_field("logout_path", 27); _visitor.accept(logout_path);
-	_visitor.type_field("session_path", 28); _visitor.accept(session_path);
-	_visitor.template type_end<HttpServerBase>(29);
+	_visitor.type_field("token_map", 23); _visitor.accept(token_map);
+	_visitor.type_field("default_access", 24); _visitor.accept(default_access);
+	_visitor.type_field("cookie_policy", 25); _visitor.accept(cookie_policy);
+	_visitor.type_field("session_coookie_name", 26); _visitor.accept(session_coookie_name);
+	_visitor.type_field("token_header_name", 27); _visitor.accept(token_header_name);
+	_visitor.type_field("login_path", 28); _visitor.accept(login_path);
+	_visitor.type_field("logout_path", 29); _visitor.accept(logout_path);
+	_visitor.type_field("session_path", 30); _visitor.accept(session_path);
+	_visitor.template type_end<HttpServerBase>(31);
 }
 
 

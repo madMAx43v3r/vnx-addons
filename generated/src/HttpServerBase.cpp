@@ -41,7 +41,7 @@ namespace addons {
 
 
 const vnx::Hash64 HttpServerBase::VNX_TYPE_HASH(0xf05b2d0ac45a8a7bull);
-const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0xe9bc19242ae5b162ull);
+const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0xc71401723556001cull);
 
 HttpServerBase::HttpServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
@@ -69,9 +69,11 @@ HttpServerBase::HttpServerBase(const std::string& _vnx_name)
 	vnx::read_config(vnx_name + ".components", components);
 	vnx::read_config(vnx_name + ".charset", charset);
 	vnx::read_config(vnx_name + ".add_headers", add_headers);
+	vnx::read_config(vnx_name + ".token_map", token_map);
 	vnx::read_config(vnx_name + ".default_access", default_access);
 	vnx::read_config(vnx_name + ".cookie_policy", cookie_policy);
 	vnx::read_config(vnx_name + ".session_coookie_name", session_coookie_name);
+	vnx::read_config(vnx_name + ".token_header_name", token_header_name);
 	vnx::read_config(vnx_name + ".login_path", login_path);
 	vnx::read_config(vnx_name + ".logout_path", logout_path);
 	vnx::read_config(vnx_name + ".session_path", session_path);
@@ -115,12 +117,14 @@ void HttpServerBase::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[20], 20); vnx::accept(_visitor, components);
 	_visitor.type_field(_type_code->fields[21], 21); vnx::accept(_visitor, charset);
 	_visitor.type_field(_type_code->fields[22], 22); vnx::accept(_visitor, add_headers);
-	_visitor.type_field(_type_code->fields[23], 23); vnx::accept(_visitor, default_access);
-	_visitor.type_field(_type_code->fields[24], 24); vnx::accept(_visitor, cookie_policy);
-	_visitor.type_field(_type_code->fields[25], 25); vnx::accept(_visitor, session_coookie_name);
-	_visitor.type_field(_type_code->fields[26], 26); vnx::accept(_visitor, login_path);
-	_visitor.type_field(_type_code->fields[27], 27); vnx::accept(_visitor, logout_path);
-	_visitor.type_field(_type_code->fields[28], 28); vnx::accept(_visitor, session_path);
+	_visitor.type_field(_type_code->fields[23], 23); vnx::accept(_visitor, token_map);
+	_visitor.type_field(_type_code->fields[24], 24); vnx::accept(_visitor, default_access);
+	_visitor.type_field(_type_code->fields[25], 25); vnx::accept(_visitor, cookie_policy);
+	_visitor.type_field(_type_code->fields[26], 26); vnx::accept(_visitor, session_coookie_name);
+	_visitor.type_field(_type_code->fields[27], 27); vnx::accept(_visitor, token_header_name);
+	_visitor.type_field(_type_code->fields[28], 28); vnx::accept(_visitor, login_path);
+	_visitor.type_field(_type_code->fields[29], 29); vnx::accept(_visitor, logout_path);
+	_visitor.type_field(_type_code->fields[30], 30); vnx::accept(_visitor, session_path);
 	_visitor.type_end(*_type_code);
 }
 
@@ -149,9 +153,11 @@ void HttpServerBase::write(std::ostream& _out) const {
 	_out << ", \"components\": "; vnx::write(_out, components);
 	_out << ", \"charset\": "; vnx::write(_out, charset);
 	_out << ", \"add_headers\": "; vnx::write(_out, add_headers);
+	_out << ", \"token_map\": "; vnx::write(_out, token_map);
 	_out << ", \"default_access\": "; vnx::write(_out, default_access);
 	_out << ", \"cookie_policy\": "; vnx::write(_out, cookie_policy);
 	_out << ", \"session_coookie_name\": "; vnx::write(_out, session_coookie_name);
+	_out << ", \"token_header_name\": "; vnx::write(_out, token_header_name);
 	_out << ", \"login_path\": "; vnx::write(_out, login_path);
 	_out << ", \"logout_path\": "; vnx::write(_out, logout_path);
 	_out << ", \"session_path\": "; vnx::write(_out, session_path);
@@ -190,9 +196,11 @@ vnx::Object HttpServerBase::to_object() const {
 	_object["components"] = components;
 	_object["charset"] = charset;
 	_object["add_headers"] = add_headers;
+	_object["token_map"] = token_map;
 	_object["default_access"] = default_access;
 	_object["cookie_policy"] = cookie_policy;
 	_object["session_coookie_name"] = session_coookie_name;
+	_object["token_header_name"] = token_header_name;
 	_object["login_path"] = login_path;
 	_object["logout_path"] = logout_path;
 	_object["session_path"] = session_path;
@@ -259,6 +267,10 @@ void HttpServerBase::from_object(const vnx::Object& _object) {
 			_entry.second.to(show_warnings);
 		} else if(_entry.first == "stats_interval_ms") {
 			_entry.second.to(stats_interval_ms);
+		} else if(_entry.first == "token_header_name") {
+			_entry.second.to(token_header_name);
+		} else if(_entry.first == "token_map") {
+			_entry.second.to(token_map);
 		}
 	}
 }
@@ -333,6 +345,9 @@ vnx::Variant HttpServerBase::get_field(const std::string& _name) const {
 	if(_name == "add_headers") {
 		return vnx::Variant(add_headers);
 	}
+	if(_name == "token_map") {
+		return vnx::Variant(token_map);
+	}
 	if(_name == "default_access") {
 		return vnx::Variant(default_access);
 	}
@@ -341,6 +356,9 @@ vnx::Variant HttpServerBase::get_field(const std::string& _name) const {
 	}
 	if(_name == "session_coookie_name") {
 		return vnx::Variant(session_coookie_name);
+	}
+	if(_name == "token_header_name") {
+		return vnx::Variant(token_header_name);
 	}
 	if(_name == "login_path") {
 		return vnx::Variant(login_path);
@@ -401,12 +419,16 @@ void HttpServerBase::set_field(const std::string& _name, const vnx::Variant& _va
 		_value.to(charset);
 	} else if(_name == "add_headers") {
 		_value.to(add_headers);
+	} else if(_name == "token_map") {
+		_value.to(token_map);
 	} else if(_name == "default_access") {
 		_value.to(default_access);
 	} else if(_name == "cookie_policy") {
 		_value.to(cookie_policy);
 	} else if(_name == "session_coookie_name") {
 		_value.to(session_coookie_name);
+	} else if(_name == "token_header_name") {
+		_value.to(token_header_name);
 	} else if(_name == "login_path") {
 		_value.to(login_path);
 	} else if(_name == "logout_path") {
@@ -440,7 +462,7 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpServer";
 	type_code->type_hash = vnx::Hash64(0xf05b2d0ac45a8a7bull);
-	type_code->code_hash = vnx::Hash64(0xe9bc19242ae5b162ull);
+	type_code->code_hash = vnx::Hash64(0xc71401723556001cull);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::HttpServerBase);
 	type_code->methods.resize(11);
@@ -455,7 +477,7 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	type_code->methods[8] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
 	type_code->methods[9] = ::vnx::addons::HttpComponent_http_request::static_get_type_code();
 	type_code->methods[10] = ::vnx::addons::HttpComponent_http_request_chunk::static_get_type_code();
-	type_code->fields.resize(29);
+	type_code->fields.resize(31);
 	{
 		auto& field = type_code->fields[0];
 		field.is_extended = true;
@@ -614,40 +636,53 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	{
 		auto& field = type_code->fields[23];
 		field.is_extended = true;
+		field.name = "token_map";
+		field.code = {13, 3, 32, 32};
+	}
+	{
+		auto& field = type_code->fields[24];
+		field.is_extended = true;
 		field.name = "default_access";
 		field.value = vnx::to_string("VIEWER");
 		field.code = {32};
 	}
 	{
-		auto& field = type_code->fields[24];
+		auto& field = type_code->fields[25];
 		field.is_extended = true;
 		field.name = "cookie_policy";
 		field.value = vnx::to_string("SameSite=Strict;");
 		field.code = {32};
 	}
 	{
-		auto& field = type_code->fields[25];
+		auto& field = type_code->fields[26];
 		field.is_extended = true;
 		field.name = "session_coookie_name";
 		field.value = vnx::to_string("hsid");
 		field.code = {32};
 	}
 	{
-		auto& field = type_code->fields[26];
+		auto& field = type_code->fields[27];
+		field.is_extended = true;
+		field.name = "token_header_name";
+		field.value = vnx::to_string("x-api-token");
+		field.code = {32};
+	}
+	{
+		auto& field = type_code->fields[28];
 		field.is_extended = true;
 		field.name = "login_path";
 		field.value = vnx::to_string("/login");
 		field.code = {32};
 	}
 	{
-		auto& field = type_code->fields[27];
+		auto& field = type_code->fields[29];
 		field.is_extended = true;
 		field.name = "logout_path";
 		field.value = vnx::to_string("/logout");
 		field.code = {32};
 	}
 	{
-		auto& field = type_code->fields[28];
+		auto& field = type_code->fields[30];
 		field.is_extended = true;
 		field.name = "session_path";
 		field.value = vnx::to_string("/session");
@@ -853,12 +888,14 @@ void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* t
 			case 20: vnx::read(in, value.components, type_code, _field->code.data()); break;
 			case 21: vnx::read(in, value.charset, type_code, _field->code.data()); break;
 			case 22: vnx::read(in, value.add_headers, type_code, _field->code.data()); break;
-			case 23: vnx::read(in, value.default_access, type_code, _field->code.data()); break;
-			case 24: vnx::read(in, value.cookie_policy, type_code, _field->code.data()); break;
-			case 25: vnx::read(in, value.session_coookie_name, type_code, _field->code.data()); break;
-			case 26: vnx::read(in, value.login_path, type_code, _field->code.data()); break;
-			case 27: vnx::read(in, value.logout_path, type_code, _field->code.data()); break;
-			case 28: vnx::read(in, value.session_path, type_code, _field->code.data()); break;
+			case 23: vnx::read(in, value.token_map, type_code, _field->code.data()); break;
+			case 24: vnx::read(in, value.default_access, type_code, _field->code.data()); break;
+			case 25: vnx::read(in, value.cookie_policy, type_code, _field->code.data()); break;
+			case 26: vnx::read(in, value.session_coookie_name, type_code, _field->code.data()); break;
+			case 27: vnx::read(in, value.token_header_name, type_code, _field->code.data()); break;
+			case 28: vnx::read(in, value.login_path, type_code, _field->code.data()); break;
+			case 29: vnx::read(in, value.logout_path, type_code, _field->code.data()); break;
+			case 30: vnx::read(in, value.session_path, type_code, _field->code.data()); break;
 			default: vnx::skip(in, type_code, _field->code.data());
 		}
 	}
@@ -901,12 +938,14 @@ void write(TypeOutput& out, const ::vnx::addons::HttpServerBase& value, const Ty
 	vnx::write(out, value.components, type_code, type_code->fields[20].code.data());
 	vnx::write(out, value.charset, type_code, type_code->fields[21].code.data());
 	vnx::write(out, value.add_headers, type_code, type_code->fields[22].code.data());
-	vnx::write(out, value.default_access, type_code, type_code->fields[23].code.data());
-	vnx::write(out, value.cookie_policy, type_code, type_code->fields[24].code.data());
-	vnx::write(out, value.session_coookie_name, type_code, type_code->fields[25].code.data());
-	vnx::write(out, value.login_path, type_code, type_code->fields[26].code.data());
-	vnx::write(out, value.logout_path, type_code, type_code->fields[27].code.data());
-	vnx::write(out, value.session_path, type_code, type_code->fields[28].code.data());
+	vnx::write(out, value.token_map, type_code, type_code->fields[23].code.data());
+	vnx::write(out, value.default_access, type_code, type_code->fields[24].code.data());
+	vnx::write(out, value.cookie_policy, type_code, type_code->fields[25].code.data());
+	vnx::write(out, value.session_coookie_name, type_code, type_code->fields[26].code.data());
+	vnx::write(out, value.token_header_name, type_code, type_code->fields[27].code.data());
+	vnx::write(out, value.login_path, type_code, type_code->fields[28].code.data());
+	vnx::write(out, value.logout_path, type_code, type_code->fields[29].code.data());
+	vnx::write(out, value.session_path, type_code, type_code->fields[30].code.data());
 }
 
 void read(std::istream& in, ::vnx::addons::HttpServerBase& value) {
