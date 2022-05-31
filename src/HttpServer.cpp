@@ -220,10 +220,16 @@ void HttpServer::main()
 	if(show_info) {
 		show_warnings = true;
 	}
+	const auto auth = vnx::get_auth_server();
 	{
 		auto session = HttpSession::create();
-		session->vsid = vnx::get_auth_server()->login_anonymous(default_access)->id;
+		session->vsid = auth->login_anonymous(default_access)->id;
 		m_default_session = session;
+	}
+	for(const auto& entry : token_map) {
+		auto session = HttpSession::create();
+		session->vsid = auth->login_anonymous(entry.second)->id;
+		m_token_sessions[entry.first] = session;
 	}
 
 	// setup parser
@@ -334,6 +340,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 	{
 		auto session = create_session();
 
+		// TODO: add POST support
 		auto user = request->query_params.find("user");
 		if(user != request->query_params.end())
 		{
@@ -495,7 +502,6 @@ int HttpServer::on_headers_complete(llhttp_t* parser)
 	}
 
 	// session handling
-	request->session = self->m_default_session;
 	{
 		auto cookie = request->cookies.find(self->session_coookie_name);
 		if(cookie != request->cookies.end()) {
@@ -504,6 +510,19 @@ int HttpServer::on_headers_complete(llhttp_t* parser)
 				request->session = iter->second;
 			}
 		}
+	}
+	if(!request->session) {
+		for(const auto& entry : request->headers) {
+			if(entry.first == self->token_header_name) {
+				auto iter = self->m_token_sessions.find(entry.second);
+				if(iter != self->m_token_sessions.end()) {
+					request->session = iter->second;
+				}
+			}
+		}
+	}
+	if(!request->session) {
+		request->session = self->m_default_session;
 	}
 
 	// TODO: handle streams

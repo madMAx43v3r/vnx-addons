@@ -169,6 +169,7 @@ private:
 	std::vector<std::shared_ptr<vnx::ThreadPool>> m_threads;
 
 	std::shared_ptr<const HttpSession> m_default_session;
+	std::map<std::string, std::shared_ptr<const HttpSession>> m_token_sessions;
 	mutable std::unordered_map<std::string, std::shared_ptr<const HttpSession>> m_session_map;	// [http session id => session]
 	mutable std::multimap<int64_t, std::string> m_session_timeout_queue;						// [deadline => http session id]
 
