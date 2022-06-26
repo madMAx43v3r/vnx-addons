@@ -26,6 +26,7 @@ public:
 		:	GenericAsyncClient(service_addr),
 			module(module)
 	{
+		vnx_set_non_blocking(true);
 	}
 
 	void http_request(	std::shared_ptr<const HttpRequest> request, const std::string& sub_path,
