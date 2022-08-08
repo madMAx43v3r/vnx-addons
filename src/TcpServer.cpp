@@ -364,13 +364,14 @@ void TcpServer::on_disconnect(std::shared_ptr<state_t> state)
 	m_state_map.erase(state->fd);
 	m_client_map.erase(state->id);
 
-	endpoint->close(state->fd);
-	state->fd = -1;
-
-	try {
-		on_disconnect(state->id);
-	} catch(...) {
-		// ignore
+	if(state->fd >= 0) {
+		endpoint->close(state->fd);
+		state->fd = -1;
+		try {
+			on_disconnect(state->id);
+		} catch(...) {
+			// ignore
+		}
 	}
 }
 
