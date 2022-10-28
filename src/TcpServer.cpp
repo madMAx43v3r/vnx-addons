@@ -161,7 +161,9 @@ bool TcpServer::send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data)
 {
 	if(auto state = find_state_by_id(client)) {
 		state->write_queue.emplace_back(data, 0);
-		on_write(state);
+		if(!state->is_blocked) {
+			on_write(state);
+		}
 		return true;
 	}
 	return false;
@@ -273,8 +275,7 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 void TcpServer::on_write(std::shared_ptr<state_t> state)
 {
 	bool is_eof = false;
-	bool is_blocked = false;
-	while(!is_blocked && !state->write_queue.empty())
+	while(!state->write_queue.empty())
 	{
 		const auto iter = state->write_queue.begin();
 		const auto chunk = iter->first;
@@ -298,7 +299,7 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 				state->write_queue.erase(iter);
 			} else {
 				iter->second += res;
-				is_blocked = true;
+				break;
 			}
 		} else {
 #ifdef _WIN32
@@ -307,8 +308,9 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 			if(errno == EAGAIN || errno == EWOULDBLOCK)
 #endif
 			{
-				is_blocked = true;
-			} else {
+				break;
+			}
+			else {
 				if(show_warnings) {
 					log(WARN) << "send() failed with: " << get_socket_error_text();
 				}
@@ -318,6 +320,8 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 			}
 		}
 	}
+	const bool is_blocked = !state->write_queue.empty();
+
 	if(is_blocked && !state->is_blocked) {
 		try {
 			on_pause(state->id);

@@ -992,8 +992,7 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 void HttpServer::on_write(std::shared_ptr<state_t> state)
 {
 	bool is_eof = false;
-	bool is_blocked = false;
-	while(!is_blocked && !state->write_queue.empty())
+	while(!state->write_queue.empty())
 	{
 		const auto iter = state->write_queue.begin();
 		const auto chunk = iter->first;
@@ -1016,7 +1015,7 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 				}
 			} else {
 				iter->second += res;
-				is_blocked = true;
+				break;
 			}
 		} else {
 #ifdef _WIN32
@@ -1025,8 +1024,9 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			if(errno == EAGAIN || errno == EWOULDBLOCK)
 #endif
 			{
-				is_blocked = true;
-			} else {
+				break;
+			}
+			else {
 				if(show_warnings) {
 					log(WARN) << "Error when writing to socket: " << get_socket_error_text();
 				}
@@ -1035,6 +1035,8 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 			}
 		}
 	}
+	const bool is_blocked = !state->write_queue.empty();
+
 	if(state->pipe) {
 		if(is_blocked && !state->is_blocked) {
 			state->pipe->pause();
@@ -1132,7 +1134,9 @@ void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<c
 		chunk = data;
 	}
 	state->write_queue.emplace_back(chunk, 0);
-	on_write(state);
+	if(!state->is_blocked) {
+		on_write(state);
+	}
 }
 
 void HttpServer::on_write_error(uint64_t id, const vnx::exception& ex)
