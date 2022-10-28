@@ -259,9 +259,7 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 		return;
 	}
 	try {
-		if(on_read(state->id, num_bytes)) {
-			state->poll_bits |= POLL_BIT_READ;
-		}
+		on_read(state->id, num_bytes);
 	}
 	catch(const std::exception& ex) {
 		if(show_warnings) {
@@ -486,8 +484,6 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 		const auto& set = fds[i];
 		const auto& state = states[i];
 		if(set.revents & POLLIN) {
-			// reset poll bit first
-			state->poll_bits &= ~POLL_BIT_READ;
 			on_read(state);
 		}
 		if(set.revents & POLLOUT) {

@@ -47,7 +47,7 @@ protected:
 private:
 	void on_buffer(uint64_t client, void*& buffer, size_t& max_bytes) override;
 
-	bool on_read(uint64_t client, size_t num_bytes) override;
+	void on_read(uint64_t client, size_t num_bytes) override;
 
 };
 

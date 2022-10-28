@@ -26,8 +26,14 @@ protected:
 
 	void main() override;
 
+	/**
+	 * Pause reading from client.
+	 */
 	bool pause(uint64_t client);
 
+	/**
+	 * Resume reading from client.
+	 */
 	bool resume(uint64_t client);
 
 	bool disconnect(uint64_t client);
@@ -38,10 +44,7 @@ protected:
 
 	virtual void on_buffer(uint64_t client, void*& buffer, size_t& max_bytes) = 0;
 
-	/**
-	 * Return true to keep reading, false to pause connection.
-	 */
-	virtual bool on_read(uint64_t client, size_t num_bytes) = 0;
+	virtual void on_read(uint64_t client, size_t num_bytes) = 0;
 
 	/**
 	 * Called when write is blocking.

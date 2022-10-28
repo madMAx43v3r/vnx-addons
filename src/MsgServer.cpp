@@ -57,7 +57,7 @@ void MsgServer::on_buffer(uint64_t client, void*& buffer, size_t& max_bytes)
 	buffer = peer->buffer.data(offset);
 }
 
-bool MsgServer::on_read(uint64_t client, size_t num_bytes)
+void MsgServer::on_read(uint64_t client, size_t num_bytes)
 {
 	const auto peer = get_peer_base(client);
 	if(!peer) {
@@ -98,7 +98,6 @@ bool MsgServer::on_read(uint64_t client, size_t num_bytes)
 		peer->in_stream.reset();
 		peer->msg_size = 0;
 	}
-	return true;
 }
 
 
