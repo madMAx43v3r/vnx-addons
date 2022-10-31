@@ -63,6 +63,7 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 	if(!peer) {
 		throw std::logic_error("!peer");
 	}
+	peer->in.max_list_size = max_list_size;
 	peer->bytes_recv += num_bytes;
 	peer->buffer.resize(peer->buffer.size() + num_bytes);
 

@@ -35,6 +35,7 @@ protected:
 		vnx::MemoryOutputStream out_stream;
 		vnx::TypeInput in;
 		vnx::TypeOutput out;
+
 		peer_t() : in_stream(&buffer), out_stream(&data), in(&in_stream), out(&out_stream) {}
 	};
 
