@@ -32,7 +32,7 @@ namespace addons {
 
 
 const vnx::Hash64 MsgServerBase::VNX_TYPE_HASH(0x869f9aab4c662096ull);
-const vnx::Hash64 MsgServerBase::VNX_CODE_HASH(0x8d3be06eb671082full);
+const vnx::Hash64 MsgServerBase::VNX_CODE_HASH(0x9b87e92bae7e016bull);
 
 MsgServerBase::MsgServerBase(const std::string& _vnx_name)
 	:	TcpServer::TcpServer(_vnx_name)
@@ -255,7 +255,7 @@ std::shared_ptr<vnx::TypeCode> MsgServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.MsgServer";
 	type_code->type_hash = vnx::Hash64(0x869f9aab4c662096ull);
-	type_code->code_hash = vnx::Hash64(0x8d3be06eb671082full);
+	type_code->code_hash = vnx::Hash64(0x9b87e92bae7e016bull);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::MsgServerBase);
 	type_code->parents.resize(1);
@@ -357,7 +357,7 @@ std::shared_ptr<vnx::TypeCode> MsgServerBase::static_create_type_code() {
 		auto& field = type_code->fields[12];
 		field.data_size = 4;
 		field.name = "max_list_size";
-		field.value = vnx::to_string(16777216);
+		field.value = vnx::to_string(67108864);
 		field.code = {3};
 	}
 	{

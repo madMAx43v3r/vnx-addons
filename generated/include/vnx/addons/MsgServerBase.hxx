@@ -15,7 +15,7 @@ class VNX_ADDONS_EXPORT MsgServerBase : public ::vnx::addons::TcpServer {
 public:
 	
 	uint32_t max_msg_size = 67108864;
-	uint32_t max_list_size = 16777216;
+	uint32_t max_list_size = 67108864;
 	uint64_t max_write_queue = -1;
 	
 	typedef ::vnx::addons::TcpServer Super;

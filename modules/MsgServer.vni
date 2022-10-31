@@ -4,7 +4,7 @@ module MsgServer extends TcpServer {
 	
 	uint max_msg_size = 67108864;			// bytes
 	
-	uint max_list_size = 16777216;			// elements
+	uint max_list_size = 67108864;			// elements
 	
 	ulong max_write_queue = -1;				// bytes per connection
 	
