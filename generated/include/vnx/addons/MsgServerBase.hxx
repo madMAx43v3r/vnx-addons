@@ -16,6 +16,7 @@ public:
 	
 	uint32_t max_msg_size = 67108864;
 	uint32_t max_list_size = 16777216;
+	uint64_t max_write_queue = -1;
 	
 	typedef ::vnx::addons::TcpServer Super;
 	
@@ -60,7 +61,7 @@ protected:
 
 template<typename T>
 void MsgServerBase::accept_generic(T& _visitor) const {
-	_visitor.template type_begin<MsgServerBase>(13);
+	_visitor.template type_begin<MsgServerBase>(14);
 	_visitor.type_field("port", 0); _visitor.accept(port);
 	_visitor.type_field("host", 1); _visitor.accept(host);
 	_visitor.type_field("max_connections", 2); _visitor.accept(max_connections);
@@ -74,7 +75,8 @@ void MsgServerBase::accept_generic(T& _visitor) const {
 	_visitor.type_field("show_warnings", 10); _visitor.accept(show_warnings);
 	_visitor.type_field("max_msg_size", 11); _visitor.accept(max_msg_size);
 	_visitor.type_field("max_list_size", 12); _visitor.accept(max_list_size);
-	_visitor.template type_end<MsgServerBase>(13);
+	_visitor.type_field("max_write_queue", 13); _visitor.accept(max_write_queue);
+	_visitor.template type_end<MsgServerBase>(14);
 }
 
 

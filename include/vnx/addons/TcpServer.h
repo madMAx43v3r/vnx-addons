@@ -47,14 +47,19 @@ protected:
 	virtual void on_read(uint64_t client, size_t num_bytes) = 0;
 
 	/**
+	 * Notify callback that data was written to socket.
+	 */
+	virtual void on_write(uint64_t client, size_t num_bytes) {}
+
+	/**
 	 * Called when write is blocking.
 	 */
-	virtual void on_pause(uint64_t client) = 0;
+	virtual void on_pause(uint64_t client) {}
 
 	/**
 	 * Called when writing has resumed.
 	 */
-	virtual void on_resume(uint64_t client) = 0;
+	virtual void on_resume(uint64_t client) {}
 
 	virtual void on_connect(uint64_t client, const std::string& address) = 0;
 

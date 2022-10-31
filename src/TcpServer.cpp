@@ -291,6 +291,11 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 #endif
 		if(res >= 0) {
 			if(res > 0) {
+				try {
+					on_write(state->id, res);
+				} catch(...) {
+					// ignore
+				}
 				state->waiting_since = -1;
 			}
 			if(size_t(res) >= num_bytes) {

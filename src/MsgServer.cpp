@@ -18,8 +18,11 @@ MsgServer::MsgServer(const std::string& _vnx_name)
 {
 }
 
-void MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx::Value> msg)
+bool MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx::Value> msg)
 {
+	if(peer->write_queue_size >= max_write_queue) {
+		return false;
+	}
 	auto& out = peer->out;
 	vnx::write(out, uint16_t(vnx::CODE_UINT32));
 	vnx::write(out, uint32_t(0));
@@ -30,12 +33,13 @@ void MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx:
 	peer->data.clear();
 
 	if(buffer->size() > max_msg_size) {
-		return;
+		return false;
 	}
 	*((uint32_t*)buffer->data(2)) = buffer->size() - 6;
 
 	peer->bytes_send += buffer->size();
-	Super::send_to(peer->client, buffer);
+	peer->write_queue_size += buffer->size();
+	return Super::send_to(peer->client, buffer);
 }
 
 void MsgServer::on_buffer(uint64_t client, void*& buffer, size_t& max_bytes)
@@ -98,6 +102,13 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 		peer->buffer.clear();
 		peer->in_stream.reset();
 		peer->msg_size = 0;
+	}
+}
+
+void MsgServer::on_write(uint64_t client, size_t num_bytes)
+{
+	if(auto peer = get_peer_base(client)) {
+		peer->write_queue_size -= std::min(num_bytes, peer->write_queue_size);
 	}
 }
 

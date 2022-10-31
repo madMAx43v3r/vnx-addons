@@ -28,6 +28,7 @@ protected:
 		uint64_t client = 0;
 		uint64_t bytes_send = 0;
 		uint64_t bytes_recv = 0;
+		uint64_t write_queue_size = 0;
 
 		vnx::Memory data;
 		vnx::Buffer buffer;
@@ -39,7 +40,7 @@ protected:
 		peer_t() : in_stream(&buffer), out_stream(&data), in(&in_stream), out(&out_stream) {}
 	};
 
-	void send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx::Value> msg);
+	bool send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx::Value> msg);
 
 	virtual std::shared_ptr<peer_t> get_peer_base(uint64_t client) const = 0;
 
@@ -49,6 +50,8 @@ private:
 	void on_buffer(uint64_t client, void*& buffer, size_t& max_bytes) override;
 
 	void on_read(uint64_t client, size_t num_bytes) override;
+
+	void on_write(uint64_t client, size_t num_bytes) override;
 
 };
 
