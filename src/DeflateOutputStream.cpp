@@ -12,7 +12,7 @@
 namespace vnx {
 namespace addons {
 
-static const size_t DEFAULT_CHUNK_SIZE = 262144;
+static constexpr size_t DEFAULT_CHUNK_SIZE = 262144;
 
 DeflateOutputStream::DeflateOutputStream(Buffer* buffer, int level, int chunk_size)
 	:	buffer(buffer),
@@ -22,7 +22,7 @@ DeflateOutputStream::DeflateOutputStream(Buffer* buffer, int level, int chunk_si
 	strm.zfree = Z_NULL;
 	strm.opaque = Z_NULL;
 	if(::deflateInit(&strm, level) != Z_OK) {
-		throw std::runtime_error("deflateInit() failed!");
+		throw std::runtime_error("DeflateOutputStream: deflateInit() failed!");
 	}
 }
 
