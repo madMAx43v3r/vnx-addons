@@ -6,6 +6,7 @@
  */
 
 #include <vnx/addons/MsgServer.h>
+#include <vnx/addons/DeflatedValue.hxx>
 
 #include <vnx/vnx.h>
 
@@ -23,11 +24,25 @@ bool MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx:
 	if(peer->write_queue_size >= max_write_queue) {
 		return false;
 	}
-	auto& out = peer->out;
-	vnx::write(out, uint16_t(vnx::CODE_UINT32));
-	vnx::write(out, uint32_t(0));
-	vnx::write(out, msg);
-	out.flush();
+	if(compress_level > 0) {
+		if(!peer->deflate_out_stream) {
+			peer->deflate_out_stream = std::make_shared<DeflateOutputStream>(nullptr, compress_level);
+		}
+		auto value = DeflatedValue::create();
+		peer->deflate_out_stream->set_output(&value->data);
+
+		if(!peer->deflate_out) {
+			peer->deflate_out = std::make_shared<vnx::TypeOutput>(peer->deflate_out_stream.get());
+		}
+		vnx::write(*peer->deflate_out, msg);
+		peer->deflate_out->flush();
+		peer->deflate_out_stream->flush();
+		msg = value;
+	}
+	vnx::write(peer->out, uint16_t(vnx::CODE_UINT32));
+	vnx::write(peer->out, uint32_t(0));
+	vnx::write(peer->out, msg);
+	peer->out.flush();
 
 	auto buffer = std::make_shared<vnx::Buffer>(peer->data);
 	peer->data.clear();
@@ -68,6 +83,7 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 		throw std::logic_error("!peer");
 	}
 	peer->in.max_list_size = max_list_size;
+	peer->deflate_in.max_list_size = max_msg_size;
 	peer->bytes_recv += num_bytes;
 	peer->buffer.resize(peer->buffer.size() + num_bytes);
 
@@ -90,6 +106,18 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 	{
 		peer->in.read(6);
 		if(auto value = vnx::read(peer->in)) {
+			if(auto deflated = std::dynamic_pointer_cast<const DeflatedValue>(value)) {
+				try {
+					peer->deflate_in_stream.set_input(&deflated->data);
+					peer->deflate_in.reset();
+					value = vnx::read(peer->deflate_in);
+				}
+				catch(const std::exception& ex) {
+					if(show_warnings) {
+						log(WARN) << "deflate failed with: " << ex.what();
+					}
+				}
+			}
 			try {
 				on_msg(client, value);
 			}
