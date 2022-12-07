@@ -29,8 +29,11 @@ public:
 		return buffer->size() - strm.avail_in;
 	}
 	
+	void set_input(const Buffer* buffer_);
+
 private:
-	const Buffer* buffer = 0;
+	const Buffer* buffer = nullptr;
+
 	z_stream strm = {};
 	
 };
