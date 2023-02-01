@@ -639,7 +639,20 @@ void HttpServer::process(state_t* state)
 				std::bind(&HttpServer::reply, this, request->id, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, request->id, std::placeholders::_1));
 	} else {
-		reply(request->id, HttpResponse::from_status(404));
+		auto response = HttpResponse::create();
+		response->status = 200;
+		response->content_type = "text/html";
+
+		std::string html = "<html><body>\n";
+		for(const auto& entry : components) {
+			const auto& path = entry.first;
+			const auto& module = entry.second;
+			html += "<h3><a href=\"" + path + "\">" + path + "</a>" + " (" + module + ")</h3>\n";
+		}
+		html += "</body></html>\n";
+		response->data = html;
+
+		reply(request->id, response);
 	}
 }
 
