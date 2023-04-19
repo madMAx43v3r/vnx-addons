@@ -461,15 +461,8 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 			try {
 				const auto fd = endpoint->accept(m_socket);
 				if(fd >= 0) {
-					::sockaddr_in sock_addr = {};
-					::socklen_t addr_len = sizeof(sock_addr);
-					::getpeername(fd, (::sockaddr*)&sock_addr, &addr_len);
-
-					char address[INET_ADDRSTRLEN] = {};
-					::inet_ntop(AF_INET, &sock_addr.sin_addr, address, INET_ADDRSTRLEN);
-
 					if(m_state_map.size() < size_t(max_connections)) {
-						on_connect(fd, std::string(address));
+						on_connect(fd, vnx::get_peer_address(fd));
 					} else {
 						if(show_warnings) {
 							log(WARN) << "Refused connection due to limit at " << max_connections;
