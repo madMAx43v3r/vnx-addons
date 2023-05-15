@@ -32,14 +32,13 @@ namespace addons {
 
 
 const vnx::Hash64 MsgServerBase::VNX_TYPE_HASH(0x869f9aab4c662096ull);
-const vnx::Hash64 MsgServerBase::VNX_CODE_HASH(0x7ab4a0f0ab783fbcull);
+const vnx::Hash64 MsgServerBase::VNX_CODE_HASH(0xa3cc748a497e49a8ull);
 
 MsgServerBase::MsgServerBase(const std::string& _vnx_name)
 	:	TcpServer::TcpServer(_vnx_name)
 {
 	vnx::read_config(vnx_name + ".compress_level", compress_level);
 	vnx::read_config(vnx_name + ".max_msg_size", max_msg_size);
-	vnx::read_config(vnx_name + ".max_list_size", max_list_size);
 	vnx::read_config(vnx_name + ".max_write_queue", max_write_queue);
 }
 
@@ -71,8 +70,7 @@ void MsgServerBase::accept(vnx::Visitor& _visitor) const {
 	_visitor.type_field(_type_code->fields[10], 10); vnx::accept(_visitor, show_warnings);
 	_visitor.type_field(_type_code->fields[11], 11); vnx::accept(_visitor, compress_level);
 	_visitor.type_field(_type_code->fields[12], 12); vnx::accept(_visitor, max_msg_size);
-	_visitor.type_field(_type_code->fields[13], 13); vnx::accept(_visitor, max_list_size);
-	_visitor.type_field(_type_code->fields[14], 14); vnx::accept(_visitor, max_write_queue);
+	_visitor.type_field(_type_code->fields[13], 13); vnx::accept(_visitor, max_write_queue);
 	_visitor.type_end(*_type_code);
 }
 
@@ -91,7 +89,6 @@ void MsgServerBase::write(std::ostream& _out) const {
 	_out << ", \"show_warnings\": "; vnx::write(_out, show_warnings);
 	_out << ", \"compress_level\": "; vnx::write(_out, compress_level);
 	_out << ", \"max_msg_size\": "; vnx::write(_out, max_msg_size);
-	_out << ", \"max_list_size\": "; vnx::write(_out, max_list_size);
 	_out << ", \"max_write_queue\": "; vnx::write(_out, max_write_queue);
 	_out << "}";
 }
@@ -118,7 +115,6 @@ vnx::Object MsgServerBase::to_object() const {
 	_object["show_warnings"] = show_warnings;
 	_object["compress_level"] = compress_level;
 	_object["max_msg_size"] = max_msg_size;
-	_object["max_list_size"] = max_list_size;
 	_object["max_write_queue"] = max_write_queue;
 	return _object;
 }
@@ -135,8 +131,6 @@ void MsgServerBase::from_object(const vnx::Object& _object) {
 			_entry.second.to(listen_queue_size);
 		} else if(_entry.first == "max_connections") {
 			_entry.second.to(max_connections);
-		} else if(_entry.first == "max_list_size") {
-			_entry.second.to(max_list_size);
 		} else if(_entry.first == "max_msg_size") {
 			_entry.second.to(max_msg_size);
 		} else if(_entry.first == "max_write_queue") {
@@ -199,9 +193,6 @@ vnx::Variant MsgServerBase::get_field(const std::string& _name) const {
 	if(_name == "max_msg_size") {
 		return vnx::Variant(max_msg_size);
 	}
-	if(_name == "max_list_size") {
-		return vnx::Variant(max_list_size);
-	}
 	if(_name == "max_write_queue") {
 		return vnx::Variant(max_write_queue);
 	}
@@ -235,8 +226,6 @@ void MsgServerBase::set_field(const std::string& _name, const vnx::Variant& _val
 		_value.to(compress_level);
 	} else if(_name == "max_msg_size") {
 		_value.to(max_msg_size);
-	} else if(_name == "max_list_size") {
-		_value.to(max_list_size);
 	} else if(_name == "max_write_queue") {
 		_value.to(max_write_queue);
 	}
@@ -266,7 +255,7 @@ std::shared_ptr<vnx::TypeCode> MsgServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.MsgServer";
 	type_code->type_hash = vnx::Hash64(0x869f9aab4c662096ull);
-	type_code->code_hash = vnx::Hash64(0x7ab4a0f0ab783fbcull);
+	type_code->code_hash = vnx::Hash64(0xa3cc748a497e49a8ull);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::MsgServerBase);
 	type_code->parents.resize(1);
@@ -281,7 +270,7 @@ std::shared_ptr<vnx::TypeCode> MsgServerBase::static_create_type_code() {
 	type_code->methods[6] = ::vnx::ModuleInterface_vnx_set_config::static_get_type_code();
 	type_code->methods[7] = ::vnx::ModuleInterface_vnx_set_config_object::static_get_type_code();
 	type_code->methods[8] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
-	type_code->fields.resize(15);
+	type_code->fields.resize(14);
 	{
 		auto& field = type_code->fields[0];
 		field.data_size = 4;
@@ -373,13 +362,6 @@ std::shared_ptr<vnx::TypeCode> MsgServerBase::static_create_type_code() {
 	}
 	{
 		auto& field = type_code->fields[13];
-		field.data_size = 4;
-		field.name = "max_list_size";
-		field.value = vnx::to_string(67108864);
-		field.code = {3};
-	}
-	{
-		auto& field = type_code->fields[14];
 		field.data_size = 8;
 		field.name = "max_write_queue";
 		field.value = vnx::to_string(-1);
@@ -539,9 +521,6 @@ void read(TypeInput& in, ::vnx::addons::MsgServerBase& value, const TypeCode* ty
 			vnx::read_value(_buf + _field->offset, value.max_msg_size, _field->code.data());
 		}
 		if(const auto* const _field = type_code->field_map[13]) {
-			vnx::read_value(_buf + _field->offset, value.max_list_size, _field->code.data());
-		}
-		if(const auto* const _field = type_code->field_map[14]) {
 			vnx::read_value(_buf + _field->offset, value.max_write_queue, _field->code.data());
 		}
 	}
@@ -566,7 +545,7 @@ void write(TypeOutput& out, const ::vnx::addons::MsgServerBase& value, const Typ
 	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(51);
+	char* const _buf = out.write(47);
 	vnx::write_value(_buf + 0, value.port);
 	vnx::write_value(_buf + 4, value.max_connections);
 	vnx::write_value(_buf + 8, value.listen_queue_size);
@@ -579,8 +558,7 @@ void write(TypeOutput& out, const ::vnx::addons::MsgServerBase& value, const Typ
 	vnx::write_value(_buf + 30, value.show_warnings);
 	vnx::write_value(_buf + 31, value.compress_level);
 	vnx::write_value(_buf + 35, value.max_msg_size);
-	vnx::write_value(_buf + 39, value.max_list_size);
-	vnx::write_value(_buf + 43, value.max_write_queue);
+	vnx::write_value(_buf + 39, value.max_write_queue);
 	vnx::write(out, value.host, type_code, type_code->fields[1].code.data());
 }
 
