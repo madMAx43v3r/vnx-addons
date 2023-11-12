@@ -1104,20 +1104,7 @@ void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<c
 			state->is_chunked_reply_pending = false;
 		}
 		state->payload_size += chunk->data.size();
-		if(auto response = state->response) {
-			if(response->total_size >= 0) {
-				if(state->payload_size > size_t(response->total_size)) {
-					log(WARN) << "Response payload overflow, payload_size=" << state->payload_size << ", total_size=" << response->total_size;
-					on_disconnect(state);
-					return;
-				}
-				if(chunk->is_eof && state->payload_size != size_t(response->total_size)) {
-					log(WARN) << "Response payload underflow, payload_size=" << state->payload_size << ", total_size=" << response->total_size;
-					on_disconnect(state);
-					return;
-				}
-			}
-		}
+
 		switch(state->output_encoding) {
 			case DEFLATE:
 				if(!state->deflate) {
