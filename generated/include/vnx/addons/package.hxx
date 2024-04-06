@@ -20,6 +20,8 @@
 namespace vnx {
 namespace addons {
 
+void register_all_types();
+
 
 class CompressedValue;
 class CompressedValue_decompress;

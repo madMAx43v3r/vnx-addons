@@ -454,7 +454,7 @@ namespace vnx {
 namespace addons {
 
 
-static void register_all_types() {
+void register_all_types() {
 	vnx::register_type_code(::vnx::addons::CompressedValue::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::CompressedValue_decompress::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::CompressedValue_decompress_return::static_create_type_code());
