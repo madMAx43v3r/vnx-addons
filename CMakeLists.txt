@@ -21,11 +21,11 @@ file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
 file(GLOB LLHTTP_SOURCE_FILES lib/llhttp/src/native/*.c)
 
-add_library(url_cpp SHARED
+add_library(url_cpp STATIC
 	${URL_CPP_SOURCE_FILES}
 )
 
-add_library(llhttp SHARED
+add_library(llhttp STATIC
 	${LLHTTP_SOURCE_FILES}
 	lib/src/llhttp.c
 )
