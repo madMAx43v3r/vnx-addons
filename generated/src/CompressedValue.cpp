@@ -4,10 +4,6 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/addons/CompressedValue.hxx>
 #include <vnx/Value.h>
-#include <vnx/addons/CompressedValue_decompress.hxx>
-#include <vnx/addons/CompressedValue_decompress_return.hxx>
-#include <vnx/addons/CompressedValue_vnx_decompress.hxx>
-#include <vnx/addons/CompressedValue_vnx_decompress_return.hxx>
 
 #include <vnx/vnx.h>
 
@@ -109,27 +105,12 @@ std::shared_ptr<vnx::TypeCode> CompressedValue::static_create_type_code() {
 	type_code->is_class = true;
 	type_code->native_size = sizeof(::vnx::addons::CompressedValue);
 	type_code->create_value = []() -> std::shared_ptr<vnx::Value> { return std::make_shared<CompressedValue>(); };
-	type_code->methods.resize(2);
-	type_code->methods[0] = ::vnx::addons::CompressedValue_decompress::static_get_type_code();
-	type_code->methods[1] = ::vnx::addons::CompressedValue_vnx_decompress::static_get_type_code();
 	type_code->build();
 	return type_code;
 }
 
 std::shared_ptr<vnx::Value> CompressedValue::vnx_call_switch(std::shared_ptr<const vnx::Value> _method) {
 	switch(_method->get_type_hash()) {
-		case 0x46eb7f9563805f83ull: {
-			auto _args = std::static_pointer_cast<const ::vnx::addons::CompressedValue_decompress>(_method);
-			auto _return_value = ::vnx::addons::CompressedValue_decompress_return::create();
-			_return_value->_ret_0 = decompress();
-			return _return_value;
-		}
-		case 0xf90e352a977e7f9cull: {
-			auto _args = std::static_pointer_cast<const ::vnx::addons::CompressedValue_vnx_decompress>(_method);
-			auto _return_value = ::vnx::addons::CompressedValue_vnx_decompress_return::create();
-			_return_value->_ret_0 = vnx_decompress();
-			return _return_value;
-		}
 	}
 	return nullptr;
 }

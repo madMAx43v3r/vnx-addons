@@ -24,13 +24,7 @@ void register_all_types();
 
 
 class CompressedValue;
-class CompressedValue_decompress;
-class CompressedValue_decompress_return;
-class CompressedValue_vnx_decompress;
-class CompressedValue_vnx_decompress_return;
 class DeflatedValue;
-class DeflatedValue_decompress;
-class DeflatedValue_decompress_return;
 class FileServerBase;
 class FileServer_delete_file;
 class FileServer_delete_file_return;
@@ -52,8 +46,6 @@ class HttpComponent_http_request_chunk;
 class HttpComponent_http_request_chunk_return;
 class HttpData;
 class HttpRequest;
-class HttpRequest_get_header_value;
-class HttpRequest_get_header_value_return;
 class HttpResponse;
 class HttpServerBase;
 class HttpSession;
@@ -63,13 +55,7 @@ struct file_info_t;
 struct permission_e;
 
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue_decompress; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue_decompress_return; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue_vnx_decompress; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_CompressedValue_vnx_decompress_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue_decompress; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_DeflatedValue_decompress_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServerBase; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_delete_file_return; ///< \private
@@ -90,8 +76,6 @@ VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpCom
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_chunk_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpData; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpRequest; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpRequest_get_header_value; ///< \private
-VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpRequest_get_header_value_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpResponse; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpServerBase; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpSession; ///< \private
@@ -107,13 +91,7 @@ VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_permiss
 namespace vnx {
 
 void read(TypeInput& in, ::vnx::addons::CompressedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::CompressedValue_decompress& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::CompressedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::CompressedValue_vnx_decompress& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::CompressedValue_vnx_decompress_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::DeflatedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::DeflatedValue_decompress& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::DeflatedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_delete_file& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_delete_file_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -135,8 +113,6 @@ void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request_chunk& value,
 void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request_chunk_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpData& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpRequest& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::HttpRequest_get_header_value& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void read(TypeInput& in, ::vnx::addons::HttpRequest_get_header_value_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpResponse& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpSession& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -146,13 +122,7 @@ void read(TypeInput& in, ::vnx::addons::file_info_t& value, const TypeCode* type
 void read(TypeInput& in, ::vnx::addons::permission_e& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 
 void write(TypeOutput& out, const ::vnx::addons::CompressedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::CompressedValue_decompress& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::CompressedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::CompressedValue_vnx_decompress& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::CompressedValue_vnx_decompress_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::DeflatedValue& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::DeflatedValue_decompress& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::DeflatedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_delete_file& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_delete_file_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -174,8 +144,6 @@ void write(TypeOutput& out, const ::vnx::addons::HttpComponent_http_request_chun
 void write(TypeOutput& out, const ::vnx::addons::HttpComponent_http_request_chunk_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpData& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpRequest& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::HttpRequest_get_header_value& value, const TypeCode* type_code, const uint16_t* code); ///< \private
-void write(TypeOutput& out, const ::vnx::addons::HttpRequest_get_header_value_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpResponse& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpServerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpSession& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -185,13 +153,7 @@ void write(TypeOutput& out, const ::vnx::addons::file_info_t& value, const TypeC
 void write(TypeOutput& out, const ::vnx::addons::permission_e& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 
 void read(std::istream& in, ::vnx::addons::CompressedValue& value); ///< \private
-void read(std::istream& in, ::vnx::addons::CompressedValue_decompress& value); ///< \private
-void read(std::istream& in, ::vnx::addons::CompressedValue_decompress_return& value); ///< \private
-void read(std::istream& in, ::vnx::addons::CompressedValue_vnx_decompress& value); ///< \private
-void read(std::istream& in, ::vnx::addons::CompressedValue_vnx_decompress_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::DeflatedValue& value); ///< \private
-void read(std::istream& in, ::vnx::addons::DeflatedValue_decompress& value); ///< \private
-void read(std::istream& in, ::vnx::addons::DeflatedValue_decompress_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServerBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_delete_file& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_delete_file_return& value); ///< \private
@@ -213,8 +175,6 @@ void read(std::istream& in, ::vnx::addons::HttpComponent_http_request_chunk& val
 void read(std::istream& in, ::vnx::addons::HttpComponent_http_request_chunk_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpData& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpRequest& value); ///< \private
-void read(std::istream& in, ::vnx::addons::HttpRequest_get_header_value& value); ///< \private
-void read(std::istream& in, ::vnx::addons::HttpRequest_get_header_value_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpResponse& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpServerBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpSession& value); ///< \private
@@ -224,13 +184,7 @@ void read(std::istream& in, ::vnx::addons::file_info_t& value); ///< \private
 void read(std::istream& in, ::vnx::addons::permission_e& value); ///< \private
 
 void write(std::ostream& out, const ::vnx::addons::CompressedValue& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::CompressedValue_decompress& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::CompressedValue_decompress_return& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::CompressedValue_vnx_decompress& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::CompressedValue_vnx_decompress_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::DeflatedValue& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::DeflatedValue_decompress& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::DeflatedValue_decompress_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServerBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_delete_file& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_delete_file_return& value); ///< \private
@@ -252,8 +206,6 @@ void write(std::ostream& out, const ::vnx::addons::HttpComponent_http_request_ch
 void write(std::ostream& out, const ::vnx::addons::HttpComponent_http_request_chunk_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpData& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpRequest& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::HttpRequest_get_header_value& value); ///< \private
-void write(std::ostream& out, const ::vnx::addons::HttpRequest_get_header_value_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpResponse& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpServerBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpSession& value); ///< \private
@@ -263,13 +215,7 @@ void write(std::ostream& out, const ::vnx::addons::file_info_t& value); ///< \pr
 void write(std::ostream& out, const ::vnx::addons::permission_e& value); ///< \private
 
 void accept(Visitor& visitor, const ::vnx::addons::CompressedValue& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_decompress& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_decompress_return& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_vnx_decompress& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_vnx_decompress_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue_decompress& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue_decompress_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServerBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_delete_file_return& value); ///< \private
@@ -291,8 +237,6 @@ void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request_ch
 void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request_chunk_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpData& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpRequest& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::HttpRequest_get_header_value& value); ///< \private
-void accept(Visitor& visitor, const ::vnx::addons::HttpRequest_get_header_value_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpResponse& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpServerBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpSession& value); ///< \private
@@ -326,98 +270,6 @@ struct type<::vnx::addons::CompressedValue> {
 
 /// \private
 template<>
-struct type<::vnx::addons::CompressedValue_decompress> {
-	void read(TypeInput& in, ::vnx::addons::CompressedValue_decompress& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::CompressedValue_decompress& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::CompressedValue_decompress& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::CompressedValue_decompress& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_decompress& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue_decompress& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::CompressedValue_decompress_return> {
-	void read(TypeInput& in, ::vnx::addons::CompressedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::CompressedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::CompressedValue_decompress_return& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::CompressedValue_decompress_return& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_decompress_return& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue_decompress_return& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::CompressedValue_vnx_decompress> {
-	void read(TypeInput& in, ::vnx::addons::CompressedValue_vnx_decompress& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::CompressedValue_vnx_decompress& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::CompressedValue_vnx_decompress& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::CompressedValue_vnx_decompress& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_vnx_decompress& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue_vnx_decompress& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::CompressedValue_vnx_decompress_return> {
-	void read(TypeInput& in, ::vnx::addons::CompressedValue_vnx_decompress_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::CompressedValue_vnx_decompress_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::CompressedValue_vnx_decompress_return& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::CompressedValue_vnx_decompress_return& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::CompressedValue_vnx_decompress_return& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::CompressedValue_vnx_decompress_return& value, bool special = false);
-};
-
-/// \private
-template<>
 struct type<::vnx::addons::DeflatedValue> {
 	void read(TypeInput& in, ::vnx::addons::DeflatedValue& value, const TypeCode* type_code, const uint16_t* code) {
 		vnx::read(in, value, type_code, code);
@@ -437,52 +289,6 @@ struct type<::vnx::addons::DeflatedValue> {
 	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::DeflatedValue_decompress> {
-	void read(TypeInput& in, ::vnx::addons::DeflatedValue_decompress& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::DeflatedValue_decompress& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::DeflatedValue_decompress& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::DeflatedValue_decompress& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue_decompress& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue_decompress& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::DeflatedValue_decompress_return> {
-	void read(TypeInput& in, ::vnx::addons::DeflatedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::DeflatedValue_decompress_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::DeflatedValue_decompress_return& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::DeflatedValue_decompress_return& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::DeflatedValue_decompress_return& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::DeflatedValue_decompress_return& value, bool special = false);
 };
 
 /// \private
@@ -960,52 +766,6 @@ struct type<::vnx::addons::HttpRequest> {
 	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::HttpRequest_get_header_value> {
-	void read(TypeInput& in, ::vnx::addons::HttpRequest_get_header_value& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::HttpRequest_get_header_value& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::HttpRequest_get_header_value& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::HttpRequest_get_header_value& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::HttpRequest_get_header_value& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest_get_header_value& value, bool special = false);
-};
-
-/// \private
-template<>
-struct type<::vnx::addons::HttpRequest_get_header_value_return> {
-	void read(TypeInput& in, ::vnx::addons::HttpRequest_get_header_value_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::read(in, value, type_code, code);
-	}
-	void write(TypeOutput& out, const ::vnx::addons::HttpRequest_get_header_value_return& value, const TypeCode* type_code, const uint16_t* code) {
-		vnx::write(out, value, type_code, code);
-	}
-	void read(std::istream& in, ::vnx::addons::HttpRequest_get_header_value_return& value) {
-		vnx::read(in, value);
-	}
-	void write(std::ostream& out, const ::vnx::addons::HttpRequest_get_header_value_return& value) {
-		vnx::write(out, value);
-	}
-	void accept(Visitor& visitor, const ::vnx::addons::HttpRequest_get_header_value_return& value) {
-		vnx::accept(visitor, value);
-	}
-	const TypeCode* get_type_code();
-	void create_dynamic_code(std::vector<uint16_t>& code);
-	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpRequest_get_header_value_return& value, bool special = false);
 };
 
 /// \private
