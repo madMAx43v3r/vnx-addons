@@ -9,12 +9,11 @@
 #define INCLUDE_VNX_ADDONS_MSGSERVER_H_
 
 #include <vnx/addons/MsgServerBase.hxx>
-#include <vnx/addons/DeflateInputStream.h>
-#include <vnx/addons/DeflateOutputStream.h>
 
-#include <vnx/Buffer.hpp>
 #include <vnx/Input.hpp>
 #include <vnx/Output.hpp>
+
+#include <zstd.h>
 
 
 namespace vnx {
@@ -27,25 +26,24 @@ public:
 protected:
 	struct peer_t {
 		uint32_t msg_size = 0;
+		uint32_t msg_type = 0;
 		uint64_t client = 0;
 		uint64_t bytes_send = 0;
 		uint64_t bytes_recv = 0;
 		uint64_t write_queue_size = 0;
 
-		vnx::Memory data;
-		vnx::Buffer buffer;
-		vnx::BufferInputStream in_stream;
-		vnx::MemoryOutputStream out_stream;
-		vnx::addons::DeflateInputStream deflate_in_stream;
-		std::shared_ptr<vnx::addons::DeflateOutputStream> deflate_out_stream;
+		std::vector<uint8_t> data;
+		std::vector<uint8_t> buffer;
+		vnx::VectorInputStream in_stream;
+		vnx::VectorOutputStream out_stream;
 		vnx::TypeInput in;
-		vnx::TypeInput deflate_in;
 		vnx::TypeOutput out;
-		std::shared_ptr<vnx::TypeOutput> deflate_out;
 
-		peer_t()
-			:	in_stream(&buffer), out_stream(&data), deflate_in_stream(nullptr),
-				in(&in_stream), deflate_in(&deflate_in_stream), out(&out_stream) {}
+		ZSTD_DCtx* zstd_in = nullptr;
+		ZSTD_CCtx* zstd_out = nullptr;
+
+		peer_t();
+		~peer_t();
 	};
 
 	bool send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx::Value> msg);

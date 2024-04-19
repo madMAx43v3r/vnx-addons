@@ -6,13 +6,32 @@
  */
 
 #include <vnx/addons/MsgServer.h>
-#include <vnx/addons/DeflatedValue.hxx>
+#include <vnx/addons/zstd_utils.h>
 
 #include <vnx/vnx.h>
 
 
 namespace vnx {
 namespace addons {
+
+static const uint32_t HEADER_SIZE = 8;
+static const uint32_t MSG_TYPE_ZSTD = 0x4B277B06;
+static const uint32_t MSG_TYPE_ZSTD_ALT = 0x067B274B;
+
+MsgServer::peer_t::peer_t()
+	:	in_stream(nullptr), out_stream(&data), in(&in_stream), out(&out_stream)
+{
+	in.safe_read = true;
+	zstd_in = ZSTD_createDCtx();
+}
+
+MsgServer::peer_t::~peer_t()
+{
+	if(zstd_out) {
+		ZSTD_freeCCtx(zstd_out);
+	}
+	ZSTD_freeDCtx(zstd_in);
+}
 
 MsgServer::MsgServer(const std::string& _vnx_name)
 	:	MsgServerBase(_vnx_name)
@@ -24,33 +43,25 @@ bool MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx:
 	if(peer->write_queue_size >= max_write_queue) {
 		return false;
 	}
-	if(compress_level > 0) {
-		if(!peer->deflate_out_stream) {
-			peer->deflate_out_stream = std::make_shared<DeflateOutputStream>(nullptr, compress_level);
-		}
-		auto value = DeflatedValue::create();
-		peer->deflate_out_stream->set_output(&value->data);
-
-		if(!peer->deflate_out) {
-			peer->deflate_out = std::make_shared<vnx::TypeOutput>(peer->deflate_out_stream.get());
-		}
-		vnx::write(*peer->deflate_out, msg);
-		peer->deflate_out->flush();
-		peer->deflate_out_stream->flush();
-		msg = value;
+	if(!peer->zstd_out) {
+		auto ctx = ZSTD_createCCtx();
+		ZSTD_CCtx_setParameter(ctx, ZSTD_c_compressionLevel, compress_level);
+		peer->zstd_out = ctx;
 	}
-	vnx::write(peer->out, uint16_t(vnx::CODE_UINT32));
-	vnx::write(peer->out, uint32_t(0));
 	vnx::write(peer->out, msg);
 	peer->out.flush();
 
-	auto buffer = std::make_shared<vnx::Buffer>(peer->data);
+	const auto tmp = zstd_compress(peer->zstd_out, peer->data);
+
 	peer->data.clear();
 
-	if(buffer->size() > max_msg_size) {
-		return false;
-	}
-	*((uint32_t*)buffer->data(2)) = buffer->size() - 6;
+	auto buffer = std::make_shared<vnx::Buffer>(HEADER_SIZE + tmp.size());
+
+	const uint16_t header = vnx::CODE_UINT32;
+	const uint32_t msg_size = tmp.size();
+	::memcpy(buffer->data(0), &msg_size, 4);
+	::memcpy(buffer->data(4), &MSG_TYPE_ZSTD, 4);
+	::memcpy(buffer->data(HEADER_SIZE), tmp.data(), tmp.size());
 
 	peer->bytes_send += buffer->size();
 	peer->write_queue_size += buffer->size();
@@ -65,15 +76,15 @@ void MsgServer::on_buffer(uint64_t client, void*& buffer, size_t& max_bytes)
 	}
 	const auto offset = peer->buffer.size();
 	if(peer->msg_size == 0) {
-		if(offset > 6) {
-			throw std::logic_error("offset > 6");
+		if(offset > HEADER_SIZE) {
+			throw std::logic_error("on_buffer(): offset > HEADER_SIZE");
 		}
-		peer->buffer.reserve(6);
-		max_bytes = 6 - offset;
+		peer->buffer.reserve(HEADER_SIZE);
+		max_bytes = HEADER_SIZE - offset;
 	} else {
-		max_bytes = (6 + peer->msg_size) - offset;
+		max_bytes = (HEADER_SIZE + peer->msg_size) - offset;
 	}
-	buffer = peer->buffer.data(offset);
+	buffer = peer->buffer.data() + offset;
 }
 
 void MsgServer::on_read(uint64_t client, size_t num_bytes)
@@ -82,42 +93,40 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 	if(!peer) {
 		throw std::logic_error("!peer");
 	}
-	peer->in.safe_read = true;
-	peer->deflate_in.safe_read = true;
 	peer->bytes_recv += num_bytes;
 	peer->buffer.resize(peer->buffer.size() + num_bytes);
 
 	if(peer->msg_size == 0) {
-		if(peer->buffer.size() >= 6) {
-			uint16_t code = 0;
-			vnx::read_value(peer->buffer.data(), code);
-			vnx::read_value(peer->buffer.data(2), peer->msg_size, &code);
+		if(peer->buffer.size() >= HEADER_SIZE) {
+			::memcpy(&peer->msg_size, peer->buffer.data(), 4);
+			::memcpy(&peer->msg_type, peer->buffer.data() + 4, 4);
+
+			switch(peer->msg_type) {
+				case MSG_TYPE_ZSTD: break;
+				case MSG_TYPE_ZSTD_ALT:
+					peer->msg_size = vnx::flip_bytes(peer->msg_size);
+					peer->msg_type = vnx::flip_bytes(peer->msg_type);
+					break;
+				default:
+					throw std::logic_error("on_read(): invalid msg type: " + vnx::to_hex_string(peer->msg_type));
+			}
 			if(peer->msg_size > max_msg_size) {
-				throw std::logic_error("message too large");
+				throw std::logic_error("on_read(): message too large: " + std::to_string(peer->msg_size) + " bytes");
 			}
 			if(peer->msg_size > 0) {
-				peer->buffer.reserve(6 + peer->msg_size);
+				peer->buffer.reserve(HEADER_SIZE + peer->msg_size);
 			} else {
 				peer->buffer.clear();
 			}
 		}
 	}
-	else if(peer->buffer.size() == 6 + peer->msg_size)
+	else if(peer->buffer.size() == HEADER_SIZE + peer->msg_size)
 	{
-		peer->in.read(6);
-		if(auto value = vnx::read(peer->in)) {
-			if(auto deflated = std::dynamic_pointer_cast<const DeflatedValue>(value)) {
-				try {
-					peer->deflate_in_stream.set_input(&deflated->data);
-					peer->deflate_in.reset();
-					value = vnx::read(peer->deflate_in);
-				}
-				catch(const std::exception& ex) {
-					if(show_warnings) {
-						log(WARN) << "deflate failed with: " << ex.what();
-					}
-				}
-			}
+		try {
+			const auto tmp = zstd_decompress(peer->zstd_in, peer->buffer, HEADER_SIZE);
+			peer->in_stream.reset(&tmp);
+			peer->in.reset();
+			const auto value = vnx::read(peer->in);
 			try {
 				on_msg(client, value);
 			}
@@ -126,10 +135,14 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 					log(WARN) << "on_msg() failed with: " << ex.what();
 				}
 			}
+		} catch(const std::exception& ex) {
+			if(show_warnings) {
+				log(WARN) << ex.what();
+			}
 		}
 		peer->buffer.clear();
-		peer->in_stream.reset();
 		peer->msg_size = 0;
+		peer->msg_type = 0;
 	}
 }
 

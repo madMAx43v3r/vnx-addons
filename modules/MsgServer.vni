@@ -2,7 +2,7 @@ package vnx.addons;
 
 module MsgServer extends TcpServer {
 	
-	int compress_level = 0;					// deflate compression level (0 to 9, 0 = no compression)
+	int compress_level = 0;					// zstd compression level (0 to 20, 0 = default)
 	
 	uint max_msg_size = 67108864;			// bytes
 	
