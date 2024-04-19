@@ -27,6 +27,7 @@ protected:
 	struct peer_t {
 		uint32_t msg_size = 0;
 		uint32_t msg_type = 0;
+		uint32_t buffer_size = 0;
 		uint64_t client = 0;
 		uint64_t bytes_send = 0;
 		uint64_t bytes_recv = 0;

@@ -74,17 +74,15 @@ void MsgServer::on_buffer(uint64_t client, void*& buffer, size_t& max_bytes)
 	if(!peer) {
 		throw std::logic_error("!peer");
 	}
-	const auto offset = peer->buffer.size();
 	if(peer->msg_size == 0) {
-		if(offset > HEADER_SIZE) {
-			throw std::logic_error("on_buffer(): offset > HEADER_SIZE");
-		}
-		peer->buffer.reserve(HEADER_SIZE);
-		max_bytes = HEADER_SIZE - offset;
-	} else {
-		max_bytes = (HEADER_SIZE + peer->msg_size) - offset;
+		peer->buffer.resize(HEADER_SIZE);
+	}
+	const auto offset = peer->buffer_size;
+	if(offset > peer->buffer.size()) {
+		throw std::logic_error("on_buffer(): offset > buffer.size()");
 	}
 	buffer = peer->buffer.data() + offset;
+	max_bytes = peer->buffer.size() - offset;
 }
 
 void MsgServer::on_read(uint64_t client, size_t num_bytes)
@@ -94,10 +92,10 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 		throw std::logic_error("!peer");
 	}
 	peer->bytes_recv += num_bytes;
-	peer->buffer.resize(peer->buffer.size() + num_bytes);
+	peer->buffer_size += num_bytes;
 
 	if(peer->msg_size == 0) {
-		if(peer->buffer.size() >= HEADER_SIZE) {
+		if(peer->buffer_size >= HEADER_SIZE) {
 			::memcpy(&peer->msg_size, peer->buffer.data(), 4);
 			::memcpy(&peer->msg_type, peer->buffer.data() + 4, 4);
 
@@ -108,19 +106,18 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 					peer->msg_type = vnx::flip_bytes(peer->msg_type);
 					break;
 				default:
-					throw std::logic_error("on_read(): invalid msg type: " + vnx::to_hex_string(peer->msg_type));
+					throw std::logic_error("on_read(): invalid message type: 0x" + vnx::to_hex_string(peer->msg_type));
+			}
+			if(peer->msg_size == 0) {
+				throw std::logic_error("on_read(): zero length message");
 			}
 			if(peer->msg_size > max_msg_size) {
 				throw std::logic_error("on_read(): message too large: " + std::to_string(peer->msg_size) + " bytes");
 			}
-			if(peer->msg_size > 0) {
-				peer->buffer.reserve(HEADER_SIZE + peer->msg_size);
-			} else {
-				peer->buffer.clear();
-			}
+			peer->buffer.resize(HEADER_SIZE + peer->msg_size);
 		}
 	}
-	else if(peer->buffer.size() == HEADER_SIZE + peer->msg_size)
+	else if(peer->buffer_size == HEADER_SIZE + peer->msg_size)
 	{
 		try {
 			const auto tmp = zstd_decompress(peer->zstd_in, peer->buffer, HEADER_SIZE);
@@ -141,6 +138,7 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 			}
 		}
 		peer->buffer.clear();
+		peer->buffer_size = 0;
 		peer->msg_size = 0;
 		peer->msg_type = 0;
 	}
