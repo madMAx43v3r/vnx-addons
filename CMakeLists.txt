@@ -65,13 +65,16 @@ target_include_directories(vnx_addons
 		generated/include
 )
 
-target_link_libraries(vnx_addons vnx_base url_cpp llhttp ZLIB::ZLIB)
+target_link_libraries(vnx_addons vnx_base url_cpp llhttp zstd ZLIB::ZLIB)
 
 if(MSVC)
 	set_target_properties(vnx_addons PROPERTIES LINK_OPTIONS "/NODEFAULTLIB:LIBCMT")
 endif()
 
 if(VNX_ADDONS_BUILD_TESTS)
+	add_executable(test_zstd test/test_zstd.cpp)
+	target_link_libraries(test_zstd vnx_addons)
+	
 	add_executable(test_deflate test/test_deflate.cpp)
 	target_link_libraries(test_deflate vnx_addons)
 	
