@@ -55,9 +55,9 @@ bool MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx:
 
 	peer->data.clear();
 
-	auto buffer = std::make_shared<vnx::Buffer>(HEADER_SIZE + tmp.size());
+	auto buffer = std::make_shared<vnx::Buffer>();
+	buffer->resize(HEADER_SIZE + tmp.size());
 
-	const uint16_t header = vnx::CODE_UINT32;
 	const uint32_t msg_size = tmp.size();
 	::memcpy(buffer->data(0), &msg_size, 4);
 	::memcpy(buffer->data(4), &MSG_TYPE_ZSTD, 4);
@@ -121,11 +121,15 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 	{
 		try {
 			const auto tmp = zstd_decompress(peer->zstd_in, peer->buffer, HEADER_SIZE);
+
 			peer->in_stream.reset(&tmp);
 			peer->in.reset();
+
 			const auto value = vnx::read(peer->in);
 			try {
-				on_msg(client, value);
+				if(value) {
+					on_msg(client, value);
+				}
 			}
 			catch(const std::exception& ex) {
 				if(show_warnings) {
