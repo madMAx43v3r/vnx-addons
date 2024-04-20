@@ -53,6 +53,7 @@ bool MsgServer::send_to(std::shared_ptr<peer_t> peer, std::shared_ptr<const vnx:
 
 	const auto tmp = zstd_compress(peer->zstd_out, peer->data);
 
+	peer->bytes_send_raw += HEADER_SIZE + peer->data.size();
 	peer->data.clear();
 
 	auto buffer = std::make_shared<vnx::Buffer>();

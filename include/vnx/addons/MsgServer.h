@@ -30,6 +30,7 @@ protected:
 		uint32_t buffer_size = 0;
 		uint64_t client = 0;
 		uint64_t bytes_send = 0;
+		uint64_t bytes_send_raw = 0;
 		uint64_t bytes_recv = 0;
 		uint64_t write_queue_size = 0;
 
