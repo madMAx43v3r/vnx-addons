@@ -16,6 +16,10 @@ endif()
 add_compile_definitions(NOGDI NOMINMAX)
 
 find_package(ZLIB REQUIRED)
+if(WIN32)
+	find_package(zstd CONFIG REQUIRED)
+	add_library(zstd ALIAS zstd::libzstd_shared)
+endif()
 
 file(GLOB GENERATED_SOURCE_FILES generated/src/*.cpp)
 file(GLOB URL_CPP_SOURCE_FILES lib/url-cpp/src/*.cpp)
