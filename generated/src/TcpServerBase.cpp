@@ -437,7 +437,7 @@ void read(TypeInput& in, ::vnx::addons::TcpServerBase& value, const TypeCode* ty
 			}
 		}
 	}
-	const char* const _buf = in.read(type_code->total_field_size);
+	const auto* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
 		if(const auto* const _field = type_code->field_map[0]) {
 			vnx::read_value(_buf + _field->offset, value.port, _field->code.data());
@@ -491,7 +491,7 @@ void write(TypeOutput& out, const ::vnx::addons::TcpServerBase& value, const Typ
 	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(31);
+	auto* const _buf = out.write(31);
 	vnx::write_value(_buf + 0, value.port);
 	vnx::write_value(_buf + 4, value.max_connections);
 	vnx::write_value(_buf + 8, value.listen_queue_size);

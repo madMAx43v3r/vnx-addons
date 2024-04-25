@@ -336,7 +336,7 @@ void read(TypeInput& in, ::vnx::addons::HttpRequest& value, const TypeCode* type
 			}
 		}
 	}
-	const char* const _buf = in.read(type_code->total_field_size);
+	const auto* const _buf = in.read(type_code->total_field_size);
 	if(type_code->is_matched) {
 		if(const auto* const _field = type_code->field_map[0]) {
 			vnx::read_value(_buf + _field->offset, value.id, _field->code.data());
@@ -372,7 +372,7 @@ void write(TypeOutput& out, const ::vnx::addons::HttpRequest& value, const TypeC
 	else if(code && code[0] == CODE_STRUCT) {
 		type_code = type_code->depends[code[1]];
 	}
-	char* const _buf = out.write(8);
+	auto* const _buf = out.write(8);
 	vnx::write_value(_buf + 0, value.id);
 	vnx::write(out, value.url, type_code, type_code->fields[1].code.data());
 	vnx::write(out, value.path, type_code, type_code->fields[2].code.data());
