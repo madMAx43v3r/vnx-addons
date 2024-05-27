@@ -80,7 +80,7 @@ void MsgServer::on_buffer(uint64_t client, void*& buffer, size_t& max_bytes)
 	}
 	const auto offset = peer->buffer_size;
 	if(offset > peer->buffer.size()) {
-		throw std::logic_error("on_buffer(): offset > buffer.size()");
+		throw std::logic_error("offset > buffer.size()");
 	}
 	buffer = peer->buffer.data() + offset;
 	max_bytes = peer->buffer.size() - offset;
@@ -107,13 +107,13 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 					peer->msg_type = vnx::flip_bytes(peer->msg_type);
 					break;
 				default:
-					throw std::logic_error("on_read(): invalid message type: 0x" + vnx::to_hex_string(peer->msg_type));
+					throw std::logic_error("invalid message type: 0x" + vnx::to_hex_string(peer->msg_type));
 			}
 			if(peer->msg_size == 0) {
-				throw std::logic_error("on_read(): zero length message");
+				throw std::logic_error("zero length message");
 			}
 			if(peer->msg_size > max_msg_size) {
-				throw std::logic_error("on_read(): message too large: " + std::to_string(peer->msg_size) + " bytes");
+				throw std::logic_error("message too large: " + std::to_string(peer->msg_size) + " bytes");
 			}
 			peer->buffer.resize(HEADER_SIZE + peer->msg_size);
 		}
@@ -131,8 +131,7 @@ void MsgServer::on_read(uint64_t client, size_t num_bytes)
 				if(value) {
 					on_msg(client, value);
 				}
-			}
-			catch(const std::exception& ex) {
+			} catch(const std::exception& ex) {
 				if(show_warnings) {
 					log(WARN) << "on_msg() failed with: " << ex.what();
 				}
