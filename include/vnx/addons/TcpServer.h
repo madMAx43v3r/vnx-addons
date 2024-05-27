@@ -42,6 +42,8 @@ protected:
 
 	uint64_t add_client(int fd, const std::string& address);
 
+	uint64_t connect_client(const vnx::TcpEndpoint& peer);
+
 	virtual void on_buffer(uint64_t client, void*& buffer, size_t& max_bytes) = 0;
 
 	virtual void on_read(uint64_t client, size_t num_bytes) = 0;
@@ -63,7 +65,7 @@ protected:
 
 	virtual void on_connect(uint64_t client, const std::string& address) = 0;
 
-	virtual void on_disconnect(uint64_t client) = 0;
+	virtual void on_disconnect(uint64_t client, const std::string& address) = 0;
 
 	virtual void print_stats();
 
@@ -75,10 +77,12 @@ private:
 
 	struct state_t {
 		bool is_blocked = false;
+		bool is_connect = false;
 		bool do_timeout = true;
 		char poll_bits = 0;
 		int fd = -1;
 		uint64_t id = 0;
+		std::string address;
 		int64_t waiting_since = -1;				// time since waiting on connection [usec]
 		std::shared_ptr<vnx::Pipe> pipe;
 		std::list<std::pair<std::shared_ptr<vnx::Buffer>, size_t>> write_queue;
@@ -88,7 +92,7 @@ private:
 
 	std::shared_ptr<state_t> find_state_by_socket(int fd) const;
 
-	std::shared_ptr<state_t> on_connect(int fd, const std::string& address);
+	std::shared_ptr<state_t> add_socket(int fd, const std::string& address);
 
 	void on_read(std::shared_ptr<state_t> state);
 

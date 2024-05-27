@@ -173,10 +173,33 @@ uint64_t TcpServer::add_client(int fd, const std::string& address)
 {
 	endpoint->set_options(fd);
 
-	if(auto state = on_connect(fd, address)) {
+	if(auto state = add_socket(fd, address)) {
 		return state->id;
 	}
 	throw std::runtime_error("failed to add client");
+}
+
+uint64_t TcpServer::connect_client(const vnx::TcpEndpoint& peer_)
+{
+	auto peer = peer_;
+	peer.non_blocking = true;
+	const auto fd = peer.open();
+	try {
+		peer.connect(fd);
+	} catch(...) {
+		peer.close(fd);
+		throw;
+	}
+	auto state = std::make_shared<state_t>();
+	state->fd = fd;
+	state->id = m_next_id++;
+	state->poll_bits = POLL_BIT_WRITE;
+	state->is_connect = true;
+	state->address = peer.host_name;
+
+	m_state_map[fd] = state;
+	m_client_map[state->id] = state;
+	return state->id;
 }
 
 void TcpServer::print_stats()
@@ -203,12 +226,13 @@ std::shared_ptr<TcpServer::state_t> TcpServer::find_state_by_socket(int fd) cons
 	return nullptr;
 }
 
-std::shared_ptr<TcpServer::state_t> TcpServer::on_connect(int fd, const std::string& address)
+std::shared_ptr<TcpServer::state_t> TcpServer::add_socket(int fd, const std::string& address)
 {
 	auto state = std::make_shared<state_t>();
 	state->fd = fd;
 	state->id = m_next_id++;
 	state->poll_bits = POLL_BIT_READ;
+	state->address = address;
 
 	m_state_map[fd] = state;
 	m_client_map[state->id] = state;
@@ -375,7 +399,7 @@ void TcpServer::on_disconnect(std::shared_ptr<state_t> state)
 		endpoint->close(state->fd);
 		state->fd = -1;
 		try {
-			on_disconnect(state->id);
+			on_disconnect(state->id, state->address);
 		} catch(...) {
 			// ignore
 		}
@@ -437,6 +461,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 			}
 		}
 	}
+
 #ifdef _WIN32
 	if(WSAPoll(fds.data(), fds.size(), timeout_ms) == SOCKET_ERROR) {
 		log(WARN) << "WSAPoll() failed with: " << WSAGetLastError();
@@ -448,6 +473,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 #endif
+
 	if(fds[0].revents & POLLIN) {
 		char buf[1024];
 #ifdef _WIN32
@@ -462,7 +488,7 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 				const auto fd = endpoint->accept(m_socket);
 				if(fd >= 0) {
 					if(m_state_map.size() < size_t(max_connections)) {
-						on_connect(fd, vnx::get_peer_address(fd));
+						add_socket(fd, vnx::get_peer_address(fd));
 					} else {
 						if(show_warnings) {
 							log(WARN) << "Refused connection due to limit at " << max_connections;
@@ -478,16 +504,39 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 			}
 		}
 	}
-	for(size_t i = 2; i < fds.size(); ++i) {
+
+	for(size_t i = 2; i < fds.size(); ++i)
+	{
 		const auto& set = fds[i];
 		const auto& state = states[i];
 		if(set.revents & POLLIN) {
 			on_read(state);
 		}
 		if(set.revents & POLLOUT) {
-			// reset poll bit first
-			state->poll_bits &= ~POLL_BIT_WRITE;
-			on_write(state);
+			state->poll_bits &= ~POLL_BIT_WRITE;	// reset poll bit first
+			if(state->is_connect) {
+				state->is_connect = false;
+				try {
+					int err = 0;
+					::socklen_t len = sizeof(err);
+					::getsockopt(state->fd, SOL_SOCKET, SO_ERROR, (char*)&err, &len);
+					if(err) {
+						if(show_warnings) {
+							log(WARN) << "connect() to " << state->address << " failed with: " << get_socket_error_text(err);
+						}
+						on_disconnect(state);
+					} else {
+						m_connect_counter++;
+						state->poll_bits |= POLL_BIT_READ;	// set poll bit first
+						on_connect(state->id, state->address);
+						// nothing should be after on_connect(), since it can throw
+					}
+				} catch(...) {
+					on_disconnect(state);
+				}
+			} else {
+				on_write(state);
+			}
 		}
 	}
 	for(const auto& state : timeout_list) {
