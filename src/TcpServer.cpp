@@ -261,6 +261,9 @@ void TcpServer::on_read(std::shared_ptr<state_t> state)
 		on_disconnect(state);		// buffer error
 		return;
 	}
+	if(state->fd < 0) {
+		return;						// handle disconnect in on_buffer() callback
+	}
 
 	const auto num_bytes = ::recv(state->fd, (char*)buffer, max_bytes, 0);
 	if(num_bytes < 0) {
@@ -319,6 +322,9 @@ void TcpServer::on_write(std::shared_ptr<state_t> state)
 					on_write(state->id, res);
 				} catch(...) {
 					// ignore
+				}
+				if(state->fd < 0) {
+					return;				// handle disconnect in on_write() callback
 				}
 				state->waiting_since = -1;
 			}
@@ -514,6 +520,9 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 		}
 		if(set.revents & POLLIN) {
 			on_read(state);
+		}
+		if(state->fd < 0) {
+			continue;
 		}
 		if(set.revents & POLLOUT) {
 			state->poll_bits &= ~POLL_BIT_WRITE;	// reset poll bit first
