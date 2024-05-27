@@ -161,7 +161,7 @@ bool TcpServer::send_to(uint64_t client, std::shared_ptr<vnx::Buffer> data)
 {
 	if(auto state = find_state_by_id(client)) {
 		state->write_queue.emplace_back(data, 0);
-		if(!state->is_blocked) {
+		if(!state->is_blocked && !state->is_connect) {
 			on_write(state);
 		}
 		return true;
@@ -515,44 +515,53 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 	{
 		const auto& set = fds[i];
 		const auto& state = states[i];
-		if(state->fd < 0) {
-			continue;
-		}
-		if(set.revents & POLLIN) {
-			on_read(state);
-		}
-		if(state->fd < 0) {
-			continue;
-		}
-		if(set.revents & POLLOUT) {
-			state->poll_bits &= ~POLL_BIT_WRITE;	// reset poll bit first
-			if(state->is_connect) {
-				state->is_connect = false;
-				try {
-					int err = 0;
-					::socklen_t len = sizeof(err);
-					::getsockopt(state->fd, SOL_SOCKET, SO_ERROR, (char*)&err, &len);
-					if(err) {
-						if(show_warnings) {
-							log(WARN) << "connect() to " << state->address << " failed with: " << get_socket_error_text(err);
+		try {
+			if(state->fd < 0) {
+				continue;
+			}
+			if(set.revents & POLLIN) {
+				on_read(state);
+			}
+			if(state->fd < 0) {
+				continue;
+			}
+			if(set.revents & POLLOUT) {
+				state->poll_bits &= ~POLL_BIT_WRITE;	// reset poll bit first
+				if(state->is_connect) {
+					state->is_connect = false;
+					try {
+						int err = 0;
+						::socklen_t len = sizeof(err);
+						::getsockopt(state->fd, SOL_SOCKET, SO_ERROR, (char*)&err, &len);
+						if(err) {
+							if(show_warnings) {
+								log(WARN) << "connect() to " << state->address << " failed with: " << get_socket_error_text(err);
+							}
+							on_disconnect(state);
+						} else {
+							m_connect_counter++;
+							state->poll_bits |= POLL_BIT_READ;	// set poll bit first
+							on_connect(state->id, state->address);
+							// nothing should be after on_connect(), since it can throw
 						}
+					} catch(...) {
 						on_disconnect(state);
-					} else {
-						m_connect_counter++;
-						state->poll_bits |= POLL_BIT_READ;	// set poll bit first
-						on_connect(state->id, state->address);
-						// nothing should be after on_connect(), since it can throw
 					}
-				} catch(...) {
-					on_disconnect(state);
 				}
-			} else {
 				on_write(state);
 			}
+		} catch(const std::exception& ex) {
+			// should never get here
+			log(WARN) << "do_poll(): " << ex.what();
 		}
 	}
+
 	for(const auto& state : timeout_list) {
-		on_timeout(state);
+		try {
+			on_timeout(state);
+		} catch(...) {
+			// ignore
+		}
 	}
 }
 
