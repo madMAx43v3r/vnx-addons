@@ -509,6 +509,9 @@ void TcpServer::do_poll(int timeout_ms) noexcept
 	{
 		const auto& set = fds[i];
 		const auto& state = states[i];
+		if(state->fd < 0) {
+			continue;
+		}
 		if(set.revents & POLLIN) {
 			on_read(state);
 		}
