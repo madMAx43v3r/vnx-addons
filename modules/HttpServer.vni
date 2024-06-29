@@ -13,6 +13,7 @@ module HttpServer implements HttpComponent {
 	bool show_warnings = false;				// if to show access failures
 	bool error_payload = true;				// if to enable error message replies (text/plain)
 	bool auto_session = false;				// if to create sessions automatically
+	bool allow_anon_login = false;			// if to allow anonymous sessions
 	bool enable_deflate = true;				// if to enable deflate compression
 	
 	int num_threads = 4;					// number of threads for compression etc

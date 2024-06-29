@@ -28,6 +28,7 @@ public:
 	vnx::bool_t show_warnings = false;
 	vnx::bool_t error_payload = true;
 	vnx::bool_t auto_session = false;
+	vnx::bool_t allow_anon_login = false;
 	vnx::bool_t enable_deflate = true;
 	int32_t num_threads = 4;
 	int32_t session_size = 3;
@@ -99,7 +100,7 @@ protected:
 
 template<typename T>
 void HttpServerBase::accept_generic(T& _visitor) const {
-	_visitor.template type_begin<HttpServerBase>(31);
+	_visitor.template type_begin<HttpServerBase>(32);
 	_visitor.type_field("output_request", 0); _visitor.accept(output_request);
 	_visitor.type_field("output_response", 1); _visitor.accept(output_response);
 	_visitor.type_field("port", 2); _visitor.accept(port);
@@ -109,29 +110,30 @@ void HttpServerBase::accept_generic(T& _visitor) const {
 	_visitor.type_field("show_warnings", 6); _visitor.accept(show_warnings);
 	_visitor.type_field("error_payload", 7); _visitor.accept(error_payload);
 	_visitor.type_field("auto_session", 8); _visitor.accept(auto_session);
-	_visitor.type_field("enable_deflate", 9); _visitor.accept(enable_deflate);
-	_visitor.type_field("num_threads", 10); _visitor.accept(num_threads);
-	_visitor.type_field("session_size", 11); _visitor.accept(session_size);
-	_visitor.type_field("listen_queue_size", 12); _visitor.accept(listen_queue_size);
-	_visitor.type_field("stats_interval_ms", 13); _visitor.accept(stats_interval_ms);
-	_visitor.type_field("connection_timeout_ms", 14); _visitor.accept(connection_timeout_ms);
-	_visitor.type_field("session_timeout", 15); _visitor.accept(session_timeout);
-	_visitor.type_field("max_payload_size", 16); _visitor.accept(max_payload_size);
-	_visitor.type_field("max_chunk_size", 17); _visitor.accept(max_chunk_size);
-	_visitor.type_field("min_compress_size", 18); _visitor.accept(min_compress_size);
-	_visitor.type_field("do_compress", 19); _visitor.accept(do_compress);
-	_visitor.type_field("components", 20); _visitor.accept(components);
-	_visitor.type_field("charset", 21); _visitor.accept(charset);
-	_visitor.type_field("add_headers", 22); _visitor.accept(add_headers);
-	_visitor.type_field("token_map", 23); _visitor.accept(token_map);
-	_visitor.type_field("default_access", 24); _visitor.accept(default_access);
-	_visitor.type_field("cookie_policy", 25); _visitor.accept(cookie_policy);
-	_visitor.type_field("session_coookie_name", 26); _visitor.accept(session_coookie_name);
-	_visitor.type_field("token_header_name", 27); _visitor.accept(token_header_name);
-	_visitor.type_field("login_path", 28); _visitor.accept(login_path);
-	_visitor.type_field("logout_path", 29); _visitor.accept(logout_path);
-	_visitor.type_field("session_path", 30); _visitor.accept(session_path);
-	_visitor.template type_end<HttpServerBase>(31);
+	_visitor.type_field("allow_anon_login", 9); _visitor.accept(allow_anon_login);
+	_visitor.type_field("enable_deflate", 10); _visitor.accept(enable_deflate);
+	_visitor.type_field("num_threads", 11); _visitor.accept(num_threads);
+	_visitor.type_field("session_size", 12); _visitor.accept(session_size);
+	_visitor.type_field("listen_queue_size", 13); _visitor.accept(listen_queue_size);
+	_visitor.type_field("stats_interval_ms", 14); _visitor.accept(stats_interval_ms);
+	_visitor.type_field("connection_timeout_ms", 15); _visitor.accept(connection_timeout_ms);
+	_visitor.type_field("session_timeout", 16); _visitor.accept(session_timeout);
+	_visitor.type_field("max_payload_size", 17); _visitor.accept(max_payload_size);
+	_visitor.type_field("max_chunk_size", 18); _visitor.accept(max_chunk_size);
+	_visitor.type_field("min_compress_size", 19); _visitor.accept(min_compress_size);
+	_visitor.type_field("do_compress", 20); _visitor.accept(do_compress);
+	_visitor.type_field("components", 21); _visitor.accept(components);
+	_visitor.type_field("charset", 22); _visitor.accept(charset);
+	_visitor.type_field("add_headers", 23); _visitor.accept(add_headers);
+	_visitor.type_field("token_map", 24); _visitor.accept(token_map);
+	_visitor.type_field("default_access", 25); _visitor.accept(default_access);
+	_visitor.type_field("cookie_policy", 26); _visitor.accept(cookie_policy);
+	_visitor.type_field("session_coookie_name", 27); _visitor.accept(session_coookie_name);
+	_visitor.type_field("token_header_name", 28); _visitor.accept(token_header_name);
+	_visitor.type_field("login_path", 29); _visitor.accept(login_path);
+	_visitor.type_field("logout_path", 30); _visitor.accept(logout_path);
+	_visitor.type_field("session_path", 31); _visitor.accept(session_path);
+	_visitor.template type_end<HttpServerBase>(32);
 }
 
 

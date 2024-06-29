@@ -339,7 +339,7 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 
 	if(sub_path == login_path)
 	{
-		auto session = create_session();
+		std::shared_ptr<HttpSession> session;
 
 		// TODO: add POST support
 		auto user = request->query_params.find("user");
@@ -366,13 +366,20 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 				http_request_async_return(request_id, HttpResponse::from_status(403));
 				return;
 			}
+			session = create_session();
 			session->user = user->second;
 			session->vsid = vnx_session->id;
 			log(INFO) << "User '" << user->second << "' logged in successfully.";
-		} else {
+		}
+		else if(allow_anon_login) {
 			// anonymous login
+			session = create_session();
 			session->vsid = m_default_session->vsid;
 			log(INFO) << "Anonymous user logged in successfully.";
+		}
+		else {
+			http_request_async_return(request_id, HttpResponse::from_status(403));
+			return;
 		}
 		add_session(session);
 
