@@ -44,7 +44,7 @@ public:
 	std::map<std::string, std::string> charset;
 	std::vector<std::pair<std::string, std::string>> add_headers;
 	std::map<std::string, std::string> token_map;
-	std::string default_access = "VIEWER";
+	std::string default_access;
 	std::string cookie_policy = "SameSite=Strict;";
 	std::string session_coookie_name = "hsid";
 	std::string token_header_name = "x-api-token";

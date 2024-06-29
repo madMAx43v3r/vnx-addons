@@ -41,7 +41,7 @@ namespace addons {
 
 
 const vnx::Hash64 HttpServerBase::VNX_TYPE_HASH(0xf05b2d0ac45a8a7bull);
-const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0x81fca77e87c14ccfull);
+const vnx::Hash64 HttpServerBase::VNX_CODE_HASH(0xbce31c1e5826be9eull);
 
 HttpServerBase::HttpServerBase(const std::string& _vnx_name)
 	:	Module::Module(_vnx_name)
@@ -473,7 +473,7 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 	auto type_code = std::make_shared<vnx::TypeCode>();
 	type_code->name = "vnx.addons.HttpServer";
 	type_code->type_hash = vnx::Hash64(0xf05b2d0ac45a8a7bull);
-	type_code->code_hash = vnx::Hash64(0x81fca77e87c14ccfull);
+	type_code->code_hash = vnx::Hash64(0xbce31c1e5826be9eull);
 	type_code->is_native = true;
 	type_code->native_size = sizeof(::vnx::addons::HttpServerBase);
 	type_code->methods.resize(11);
@@ -661,7 +661,6 @@ std::shared_ptr<vnx::TypeCode> HttpServerBase::static_create_type_code() {
 		auto& field = type_code->fields[25];
 		field.is_extended = true;
 		field.name = "default_access";
-		field.value = vnx::to_string("VIEWER");
 		field.code = {32};
 	}
 	{

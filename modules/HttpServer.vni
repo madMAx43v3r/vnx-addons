@@ -36,7 +36,7 @@ module HttpServer implements HttpComponent {
 	
 	map<string, string> token_map;					// for token based authentication [token => access_level]
 	
-	string default_access = "VIEWER";				// default access role for anonymous clients
+	string default_access;							// default access role for anonymous clients
 	string cookie_policy = "SameSite=Strict;";		// See: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/
 	string session_coookie_name = "hsid";
 	string token_header_name = "x-api-token";
