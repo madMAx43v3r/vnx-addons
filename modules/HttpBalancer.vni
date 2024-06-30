@@ -1,0 +1,9 @@
+package vnx.addons;
+
+module HttpBalancer implements HttpComponent {
+	
+	bool non_blocking = true;
+	
+	vector<vnx.Hash64> backend;
+	
+}

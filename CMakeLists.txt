@@ -58,6 +58,7 @@ add_library(vnx_addons SHARED
 	src/HttpRequest.cpp
 	src/HttpResponse.cpp
 	src/HttpServer.cpp
+	src/HttpBalancer.cpp
 	src/TcpServer.cpp
 	src/FileServer.cpp
 	src/MsgServer.cpp
