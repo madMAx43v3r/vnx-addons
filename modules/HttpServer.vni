@@ -18,6 +18,7 @@ module HttpServer implements HttpComponent {
 	
 	int num_threads = 4;					// number of threads for compression etc
 	int session_size = 3;					// number of 64-bit values for session ids
+	int deflate_level = 6;					// deflate compression level
 	int listen_queue_size = 1000;
 	int stats_interval_ms = 10000;			// -1 = disable [ms]
 	int connection_timeout_ms = 30000;		// -1 = disable [ms]

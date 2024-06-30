@@ -1115,7 +1115,7 @@ void HttpServer::do_write_data(std::shared_ptr<state_t> state, std::shared_ptr<c
 		switch(state->output_encoding) {
 			case DEFLATE:
 				if(!state->deflate) {
-					state->deflate = std::make_shared<DeflateOutputStream>(nullptr, 6, 32768);
+					state->deflate = std::make_shared<DeflateOutputStream>(nullptr, deflate_level, 32768);
 				}
 				m_threads[state->fd % m_threads.size()]->add_task(std::bind(&HttpServer::deflate_write_task, this, state->request->id, state->deflate, chunk));
 				return;
