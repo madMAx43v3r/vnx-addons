@@ -38,6 +38,7 @@ class FileServer_read_file_range;
 class FileServer_read_file_range_return;
 class FileServer_write_file;
 class FileServer_write_file_return;
+class HttpBalancerBase;
 class HttpChunk;
 class HttpComponent;
 class HttpComponent_http_request;
@@ -69,6 +70,7 @@ VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileSer
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpBalancerBase; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpChunk; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_return; ///< \private
@@ -105,6 +107,7 @@ void read(TypeInput& in, ::vnx::addons::FileServer_read_file_range& value, const
 void read(TypeInput& in, ::vnx::addons::FileServer_read_file_range_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_write_file& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::FileServer_write_file_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::HttpBalancerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpChunk& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpComponent& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -136,6 +139,7 @@ void write(TypeOutput& out, const ::vnx::addons::FileServer_read_file_range& val
 void write(TypeOutput& out, const ::vnx::addons::FileServer_read_file_range_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_write_file& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::FileServer_write_file_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::HttpBalancerBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpChunk& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpComponent& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpComponent_http_request& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -167,6 +171,7 @@ void read(std::istream& in, ::vnx::addons::FileServer_read_file_range& value); /
 void read(std::istream& in, ::vnx::addons::FileServer_read_file_range_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_write_file& value); ///< \private
 void read(std::istream& in, ::vnx::addons::FileServer_write_file_return& value); ///< \private
+void read(std::istream& in, ::vnx::addons::HttpBalancerBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpChunk& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpComponent& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpComponent_http_request& value); ///< \private
@@ -198,6 +203,7 @@ void write(std::ostream& out, const ::vnx::addons::FileServer_read_file_range& v
 void write(std::ostream& out, const ::vnx::addons::FileServer_read_file_range_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_write_file& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::FileServer_write_file_return& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::HttpBalancerBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpChunk& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpComponent& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpComponent_http_request& value); ///< \private
@@ -229,6 +235,7 @@ void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_file_range& v
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_read_file_range_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_write_file& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::FileServer_write_file_return& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::HttpBalancerBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpChunk& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpComponent& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpComponent_http_request& value); ///< \private
@@ -585,6 +592,26 @@ struct type<::vnx::addons::FileServer_write_file_return> {
 	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::FileServer_write_file_return& value, bool special = false);
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::HttpBalancerBase> {
+	void read(TypeInput& in, ::vnx::addons::HttpBalancerBase& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::HttpBalancerBase& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::HttpBalancerBase& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::HttpBalancerBase& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::HttpBalancerBase& value) {
+		vnx::accept(visitor, value);
+	}
 };
 
 /// \private

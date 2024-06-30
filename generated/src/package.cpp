@@ -16,6 +16,7 @@
 #include <vnx/addons/FileServer_read_file_range_return.hxx>
 #include <vnx/addons/FileServer_write_file.hxx>
 #include <vnx/addons/FileServer_write_file_return.hxx>
+#include <vnx/addons/HttpBalancerBase.hxx>
 #include <vnx/addons/HttpChunk.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
@@ -366,6 +367,7 @@ void register_all_types() {
 	vnx::register_type_code(::vnx::addons::FileServer_read_file_range_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::FileServer_write_file::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::FileServer_write_file_return::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpBalancerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpChunk::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request_return::static_create_type_code());
@@ -403,6 +405,7 @@ const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range = vnx
 const vnx::TypeCode* const vnx_native_type_code_FileServer_read_file_range_return = vnx::get_type_code(vnx::Hash64(0x19b4b9347295c6eaull));
 const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file = vnx::get_type_code(vnx::Hash64(0xf08166843cfcec65ull));
 const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file_return = vnx::get_type_code(vnx::Hash64(0x88bc45fec5f73d30ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpBalancerBase = vnx::get_type_code(vnx::Hash64(0x1cdf20ac3e728017ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpChunk = vnx::get_type_code(vnx::Hash64(0x34dddafe7f03674bull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request = vnx::get_type_code(vnx::Hash64(0xe0b6c38f619bad92ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_return = vnx::get_type_code(vnx::Hash64(0x767ca843058ef233ull));
