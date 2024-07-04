@@ -1266,10 +1266,10 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 #endif
 	}
 	if(fds[1].revents & POLLIN) {
-		while(true) {
+		while(m_state_map.size() < size_t(max_connections)) {
 			const int fd = ::accept(m_socket, 0, 0);
 			if(fd >= 0) {
-				if(m_state_map.size() >= size_t(max_connections) || set_socket_nonblocking(fd) < 0) {
+				if(set_socket_nonblocking(fd) < 0) {
 					closesocket(fd);
 					continue;
 				}
