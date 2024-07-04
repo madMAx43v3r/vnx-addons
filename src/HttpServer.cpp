@@ -1269,7 +1269,7 @@ void HttpServer::do_poll(int timeout_ms) noexcept
 		while(true) {
 			const int fd = ::accept(m_socket, 0, 0);
 			if(fd >= 0) {
-				if(set_socket_nonblocking(fd) < 0) {
+				if(m_state_map.size() >= size_t(max_connections) || set_socket_nonblocking(fd) < 0) {
 					closesocket(fd);
 					continue;
 				}
