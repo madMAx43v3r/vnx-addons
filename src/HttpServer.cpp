@@ -500,6 +500,7 @@ int HttpServer::on_headers_complete(llhttp_t* parser)
 	try {
 		Url::Url parsed(request->url);
 		parsed.abspath();
+		parsed.unescape();
 		request->path = parsed.path();
 		for(const auto& entry : parse_query_string(parsed.query())) {
 			request->query_params[entry.first] = entry.second;
