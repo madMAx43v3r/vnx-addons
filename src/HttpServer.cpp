@@ -589,7 +589,10 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 			request->payload = *payload;
 		}
 		if(request->content_type == "application/x-www-form-urlencoded") {
-			for(const auto& entry : parse_query_string(request->payload.as_string())) {
+			Url::Url tmp("");
+			tmp.setQuery(request->payload.as_string());
+			tmp.unescape();
+			for(const auto& entry : parse_query_string(tmp.query())) {
 				request->query_params[entry.first] = entry.second;
 			}
 		}
