@@ -577,6 +577,9 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 {
 	auto state = (state_t*)parser->data;
 	auto self = state->server;
+
+	state->do_keep_alive = llhttp_should_keep_alive(parser);
+
 	if(state->stream) {
 		auto chunk = HttpChunk::create();
 		chunk->id = state->request->id;
@@ -588,6 +591,9 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 		if(auto payload = state->payload) {
 			request->payload = *payload;
 		}
+		state->payload = nullptr;
+		state->payload_size = 0;
+
 		if(request->content_type == "application/x-www-form-urlencoded") {
 			Url::Url tmp("");
 			tmp.setQuery(request->payload.as_string());
@@ -598,9 +604,7 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 		}
 		self->process(state);
 	}
-	state->payload = nullptr;
-	state->payload_size = 0;
-	state->do_keep_alive = llhttp_should_keep_alive(parser);
+	// Note: state could be deleted already here
 	return HPE_PAUSED;
 }
 
