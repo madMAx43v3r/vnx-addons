@@ -49,20 +49,36 @@ int main(int argc, char** argv)
 	addons::HttpClientClient client("HttpClient");
 
 	std::shared_ptr<const addons::HttpResponse> res;
-
-	if(is_post) {
-		if(json.size()) {
-			res = client.post_json(url, json, options);
+	try {
+		if(is_post) {
+			if(json.size()) {
+				res = client.post_json(url, json, options);
+			} else {
+				res = client.post_text(url, text, options);
+			}
 		} else {
-			res = client.post_text(url, text, options);
+			res = client.get(url, options);
 		}
-	} else {
-		res = client.get(url, options);
-	}
+		if(!res) {
+			throw std::logic_error("!res");
+		}
+		vnx::PrettyPrinter printer(std::cout);
+		vnx::accept(printer, res);
+		std::cout << std::endl;
 
-	vnx::PrettyPrinter printer(std::cout);
-	vnx::accept(printer, res);
-	std::cout << std::endl;
+		if(res->content_type.find("text/") == 0) {
+			std::cout << res->data.as_string();
+		}
+		else if(res->content_type.find("application/json") == 0) {
+			vnx::Variant data;
+			vnx::from_string(res->data.as_string(), data);
+			vnx::accept(printer, data);
+			std::cout << std::endl;
+		}
+	}
+	catch(std::exception& ex) {
+		std::cerr << ex.what();
+	}
 
 	vnx::close();
 }

@@ -9,6 +9,10 @@ module HttpClient extends TcpServer {
 	
 	HttpResponse* get(string url, http_request_options_t options) const async;
 	
+	vnx.Variant   get_json(string url, http_request_options_t options) const async;
+	
+	string        get_text(string url, http_request_options_t options) const async;
+	
 	HttpResponse* post(string url, vnx.Buffer data, http_request_options_t options) const async;
 	
 	HttpResponse* post_json(string url, string data, http_request_options_t options) const async;

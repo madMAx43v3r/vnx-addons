@@ -55,6 +55,12 @@ protected:
 	void get_async(const std::string& url, const http_request_options_t& options,
 			const vnx::request_id_t& request_id) const override;
 
+	void get_json_async(const std::string& url, const http_request_options_t& options,
+			const vnx::request_id_t& request_id) const override;
+
+	void get_text_async(const std::string& url, const http_request_options_t& options,
+			const vnx::request_id_t& request_id) const override;
+
 	void post_async(const std::string& url, const ::vnx::Buffer& data,
 			const http_request_options_t& options, const vnx::request_id_t& request_id) const override;
 

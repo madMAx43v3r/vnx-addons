@@ -77,7 +77,6 @@ std::shared_ptr<HttpClient::state_t> HttpClient::new_state(
 	state->parser.data = state.get();
 
 	auto response = HttpResponse::create();
-	response->method = method;
 
 	auto new_url = url;
 	bool has_query = url.find('?') != std::string::npos;
@@ -121,6 +120,30 @@ void HttpClient::get_async(const std::string& url, const http_request_options_t&
 
 	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
 		get_async_return(request_id, response);
+	};
+
+	((HttpClient*)this)->connect(state);
+}
+
+void HttpClient::get_json_async(const std::string& url, const http_request_options_t& options, const vnx::request_id_t& request_id) const
+{
+	const auto state = new_state("GET", url, options, request_id);
+
+	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
+		vnx::Variant value;
+		vnx::from_string(response->data.as_string(), value);
+		get_json_async_return(request_id, value);
+	};
+
+	((HttpClient*)this)->connect(state);
+}
+
+void HttpClient::get_text_async(const std::string& url, const http_request_options_t& options, const vnx::request_id_t& request_id) const
+{
+	const auto state = new_state("GET", url, options, request_id);
+
+	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
+		get_text_async_return(request_id, response->data.as_string());
 	};
 
 	((HttpClient*)this)->connect(state);

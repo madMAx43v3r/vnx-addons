@@ -8,8 +8,6 @@ class HttpResponse extends HttpData {
 	
 	string url;						// request url
 	
-	string method;					// request method
-	
 	string content_type;			// MIME type of payload
 	
 	vector<pair<string, string>> headers;		// HTTP headers
