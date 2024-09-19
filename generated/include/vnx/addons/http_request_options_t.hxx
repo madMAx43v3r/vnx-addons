@@ -11,7 +11,7 @@
 namespace vnx {
 namespace addons {
 
-struct VNX_ADDONS_EXPORT http_request_options_t {
+struct VNX_ADDONS_EXPORT http_request_options_t : vnx::struct_t {
 	
 	
 	vnx::optional<std::string> content_type;

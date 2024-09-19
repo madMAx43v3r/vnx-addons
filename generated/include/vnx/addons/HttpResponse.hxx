@@ -40,6 +40,10 @@ public:
 	std::string get_type_name() const override;
 	const vnx::TypeCode* get_type_code() const override;
 	
+	virtual vnx::bool_t is_json() const;
+	virtual vnx::bool_t is_text() const;
+	virtual std::string parse_text() const;
+	virtual ::vnx::Variant parse_json() const;
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_status(const int32_t& status = 0);
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_text(const std::string& content = "");
 	static std::shared_ptr<const ::vnx::addons::HttpResponse> from_text_ex(const std::string& content = "", const int32_t& status = 0);
