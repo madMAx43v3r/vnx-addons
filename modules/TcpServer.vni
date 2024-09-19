@@ -2,12 +2,12 @@ package vnx.addons;
 
 module TcpServer {
 	
-	int port = 9090;
+	int port = -1;							// set to enable server
 	string host = "localhost";				// use "0.0.0.0" to listen on all interfaces
 	
 	int max_connections = -1;				// -1 = infinite
 	int listen_queue_size = 100;
-	int stats_interval_ms = 10000;			// -1 = disable [ms]
+	int stats_interval_ms = -1;				// -1 = disable [ms]
 	int connection_timeout_ms = -1;			// -1 = disable [ms]
 	
 	int send_buffer_size;					// 0 = default
