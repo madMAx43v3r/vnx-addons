@@ -994,10 +994,11 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 	const auto num_bytes = ::recv(state->fd, state->buffer + state->offset, max_bytes, 0);
 	if(num_bytes < 0) {
 #ifdef _WIN32
-		if(WSAGetLastError() != WSAEWOULDBLOCK) {
+		if(WSAGetLastError() != WSAEWOULDBLOCK)
 #else
-		if(errno != EAGAIN && errno != EWOULDBLOCK) {
+		if(errno != EAGAIN && errno != EWOULDBLOCK)
 #endif
+		{
 			on_disconnect(state);	// broken connection
 			return;
 		}
