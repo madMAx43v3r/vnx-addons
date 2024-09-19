@@ -14,11 +14,11 @@ namespace addons {
 class VNX_ADDONS_EXPORT TcpServerBase : public ::vnx::Module {
 public:
 	
-	int32_t port = 9090;
+	int32_t port = -1;
 	std::string host = "localhost";
 	int32_t max_connections = -1;
 	int32_t listen_queue_size = 100;
-	int32_t stats_interval_ms = 10000;
+	int32_t stats_interval_ms = -1;
 	int32_t connection_timeout_ms = -1;
 	int32_t send_buffer_size = 0;
 	int32_t receive_buffer_size = 0;

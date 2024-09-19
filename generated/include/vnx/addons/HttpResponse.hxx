@@ -20,6 +20,8 @@ public:
 	
 	vnx::bool_t is_chunked = 0;
 	int32_t status = 0;
+	std::string url;
+	std::string method;
 	std::string content_type;
 	std::vector<std::pair<std::string, std::string>> headers;
 	::vnx::Hash64 stream;
@@ -87,17 +89,19 @@ protected:
 
 template<typename T>
 void HttpResponse::accept_generic(T& _visitor) const {
-	_visitor.template type_begin<HttpResponse>(9);
+	_visitor.template type_begin<HttpResponse>(11);
 	_visitor.type_field("data", 0); _visitor.accept(data);
 	_visitor.type_field("is_eof", 1); _visitor.accept(is_eof);
 	_visitor.type_field("is_chunked", 2); _visitor.accept(is_chunked);
 	_visitor.type_field("status", 3); _visitor.accept(status);
-	_visitor.type_field("content_type", 4); _visitor.accept(content_type);
-	_visitor.type_field("headers", 5); _visitor.accept(headers);
-	_visitor.type_field("stream", 6); _visitor.accept(stream);
-	_visitor.type_field("total_size", 7); _visitor.accept(total_size);
-	_visitor.type_field("error_text", 8); _visitor.accept(error_text);
-	_visitor.template type_end<HttpResponse>(9);
+	_visitor.type_field("url", 4); _visitor.accept(url);
+	_visitor.type_field("method", 5); _visitor.accept(method);
+	_visitor.type_field("content_type", 6); _visitor.accept(content_type);
+	_visitor.type_field("headers", 7); _visitor.accept(headers);
+	_visitor.type_field("stream", 8); _visitor.accept(stream);
+	_visitor.type_field("total_size", 9); _visitor.accept(total_size);
+	_visitor.type_field("error_text", 10); _visitor.accept(error_text);
+	_visitor.template type_end<HttpResponse>(11);
 }
 
 

@@ -18,6 +18,15 @@
 #include <vnx/addons/FileServer_write_file_return.hxx>
 #include <vnx/addons/HttpBalancerBase.hxx>
 #include <vnx/addons/HttpChunk.hxx>
+#include <vnx/addons/HttpClientBase.hxx>
+#include <vnx/addons/HttpClient_get.hxx>
+#include <vnx/addons/HttpClient_get_return.hxx>
+#include <vnx/addons/HttpClient_post.hxx>
+#include <vnx/addons/HttpClient_post_return.hxx>
+#include <vnx/addons/HttpClient_post_json.hxx>
+#include <vnx/addons/HttpClient_post_json_return.hxx>
+#include <vnx/addons/HttpClient_post_text.hxx>
+#include <vnx/addons/HttpClient_post_text_return.hxx>
 #include <vnx/addons/HttpComponent_http_request.hxx>
 #include <vnx/addons/HttpComponent_http_request_return.hxx>
 #include <vnx/addons/HttpComponent_http_request_chunk.hxx>
@@ -30,6 +39,7 @@
 #include <vnx/addons/MsgServerBase.hxx>
 #include <vnx/addons/TcpServerBase.hxx>
 #include <vnx/addons/file_info_t.hxx>
+#include <vnx/addons/http_request_options_t.hxx>
 #include <vnx/addons/permission_e.hxx>
 
 #include <vnx/addons/package.hxx>
@@ -219,6 +229,102 @@ void type<::vnx::addons::HttpChunk>::create_dynamic_code(std::vector<uint16_t>& 
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::HttpClient_get>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_get;
+}
+
+void type<::vnx::addons::HttpClient_get>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_get());
+}
+
+void type<::vnx::addons::HttpClient_get>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_get_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_get_return;
+}
+
+void type<::vnx::addons::HttpClient_get_return>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_get_return());
+}
+
+void type<::vnx::addons::HttpClient_get_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_post>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_post;
+}
+
+void type<::vnx::addons::HttpClient_post>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_post());
+}
+
+void type<::vnx::addons::HttpClient_post>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_post& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_post_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_post_return;
+}
+
+void type<::vnx::addons::HttpClient_post_return>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_post_return());
+}
+
+void type<::vnx::addons::HttpClient_post_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_post_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_post_json>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_post_json;
+}
+
+void type<::vnx::addons::HttpClient_post_json>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_post_json());
+}
+
+void type<::vnx::addons::HttpClient_post_json>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_post_json& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_post_json_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_post_json_return;
+}
+
+void type<::vnx::addons::HttpClient_post_json_return>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_post_json_return());
+}
+
+void type<::vnx::addons::HttpClient_post_json_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_post_json_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_post_text>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_post_text;
+}
+
+void type<::vnx::addons::HttpClient_post_text>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_post_text());
+}
+
+void type<::vnx::addons::HttpClient_post_text>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_post_text& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
+const TypeCode* type<::vnx::addons::HttpClient_post_text_return>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_HttpClient_post_text_return;
+}
+
+void type<::vnx::addons::HttpClient_post_text_return>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::HttpClient_post_text_return());
+}
+
+void type<::vnx::addons::HttpClient_post_text_return>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_post_text_return& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 const TypeCode* type<::vnx::addons::HttpComponent_http_request>::get_type_code() {
 	return vnx::addons::vnx_native_type_code_HttpComponent_http_request;
 }
@@ -327,6 +433,18 @@ void type<::vnx::addons::file_info_t>::create_dynamic_code(std::vector<uint16_t>
 	code.push_back(CODE_OBJECT);
 }
 
+const TypeCode* type<::vnx::addons::http_request_options_t>::get_type_code() {
+	return vnx::addons::vnx_native_type_code_http_request_options_t;
+}
+
+void type<::vnx::addons::http_request_options_t>::create_dynamic_code(std::vector<uint16_t>& code) {
+	create_dynamic_code(code, ::vnx::addons::http_request_options_t());
+}
+
+void type<::vnx::addons::http_request_options_t>::create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::http_request_options_t& value, bool special) {
+	code.push_back(CODE_OBJECT);
+}
+
 const TypeCode* type<::vnx::addons::permission_e>::get_type_code() {
 	return vnx::addons::vnx_native_type_code_permission_e;
 }
@@ -369,6 +487,15 @@ void register_all_types() {
 	vnx::register_type_code(::vnx::addons::FileServer_write_file_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpBalancerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpChunk::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClientBase::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_get::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_get_return::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_post::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_post_return::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_post_json::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_post_json_return::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_post_text::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::HttpClient_post_text_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request_return::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::HttpComponent_http_request_chunk::static_create_type_code());
@@ -381,6 +508,7 @@ void register_all_types() {
 	vnx::register_type_code(::vnx::addons::MsgServerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::TcpServerBase::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::file_info_t::static_create_type_code());
+	vnx::register_type_code(::vnx::addons::http_request_options_t::static_create_type_code());
 	vnx::register_type_code(::vnx::addons::permission_e::static_create_type_code());
 }
 
@@ -407,6 +535,15 @@ const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file = vnx::get
 const vnx::TypeCode* const vnx_native_type_code_FileServer_write_file_return = vnx::get_type_code(vnx::Hash64(0x88bc45fec5f73d30ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpBalancerBase = vnx::get_type_code(vnx::Hash64(0x1cdf20ac3e728017ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpChunk = vnx::get_type_code(vnx::Hash64(0x34dddafe7f03674bull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClientBase = vnx::get_type_code(vnx::Hash64(0xda72143ea1487390ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_get = vnx::get_type_code(vnx::Hash64(0xa1ae3645458beb92ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_get_return = vnx::get_type_code(vnx::Hash64(0xd48ba7f0a662e953ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_post = vnx::get_type_code(vnx::Hash64(0xf3daddd4b4790a17ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_return = vnx::get_type_code(vnx::Hash64(0x3c517ba2f35d5e30ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_json = vnx::get_type_code(vnx::Hash64(0x24279bfc48ad24e7ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_json_return = vnx::get_type_code(vnx::Hash64(0x6dbbdc9e7a17456eull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_text = vnx::get_type_code(vnx::Hash64(0xfe8f5b2f275a8496ull));
+const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_text_return = vnx::get_type_code(vnx::Hash64(0x113289fa88f4392cull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request = vnx::get_type_code(vnx::Hash64(0xe0b6c38f619bad92ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_return = vnx::get_type_code(vnx::Hash64(0x767ca843058ef233ull));
 const vnx::TypeCode* const vnx_native_type_code_HttpComponent_http_request_chunk = vnx::get_type_code(vnx::Hash64(0x97e79d08440406d5ull));
@@ -419,6 +556,7 @@ const vnx::TypeCode* const vnx_native_type_code_HttpSession = vnx::get_type_code
 const vnx::TypeCode* const vnx_native_type_code_MsgServerBase = vnx::get_type_code(vnx::Hash64(0x869f9aab4c662096ull));
 const vnx::TypeCode* const vnx_native_type_code_TcpServerBase = vnx::get_type_code(vnx::Hash64(0x336d98e915472200ull));
 const vnx::TypeCode* const vnx_native_type_code_file_info_t = vnx::get_type_code(vnx::Hash64(0x7a1208fc71e8e919ull));
+const vnx::TypeCode* const vnx_native_type_code_http_request_options_t = vnx::get_type_code(vnx::Hash64(0xbcbc7959257c806full));
 const vnx::TypeCode* const vnx_native_type_code_permission_e = vnx::get_type_code(vnx::Hash64(0x50d90a32b3efd091ull));
 
 } // namespace vnx
