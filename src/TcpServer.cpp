@@ -97,11 +97,13 @@ void TcpServer::main()
 	endpoint->receive_buffer_size = receive_buffer_size;
 	endpoint->listen_queue_size = listen_queue_size;
 
-	m_socket = endpoint->open();
-	endpoint->bind(m_socket);
-	endpoint->listen(m_socket);
+	if(port > 0) {
+		m_socket = endpoint->open();
+		endpoint->bind(m_socket);
+		endpoint->listen(m_socket);
 
-	log(INFO) << "Running on " << host << ":" << port;
+		log(INFO) << "Running on " << host << ":" << port;
+	}
 
 	if(stats_interval_ms > 0) {
 		set_timer_millis(stats_interval_ms, std::bind(&TcpServer::print_stats, this));
