@@ -1,0 +1,11 @@
+package vnx.addons;
+
+struct http_request_options_t {
+	
+	optional<string> content_type;
+	
+	map<string, string> query;
+	
+	vector<pair<string, string>> headers;
+	
+}

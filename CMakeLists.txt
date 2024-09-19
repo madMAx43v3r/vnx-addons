@@ -58,6 +58,7 @@ add_library(vnx_addons SHARED
 	src/HttpRequest.cpp
 	src/HttpResponse.cpp
 	src/HttpServer.cpp
+	src/HttpClient.cpp
 	src/HttpBalancer.cpp
 	src/TcpServer.cpp
 	src/FileServer.cpp
@@ -85,6 +86,9 @@ if(VNX_ADDONS_BUILD_TESTS)
 	
 	add_executable(test_http_server test/test_http_server.cpp)
 	target_link_libraries(test_http_server vnx_addons)
+	
+	add_executable(test_http_client test/test_http_client.cpp)
+	target_link_libraries(test_http_client vnx_addons)
 endif()
 
 install(DIRECTORY include/ DESTINATION include)

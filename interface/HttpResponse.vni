@@ -6,6 +6,10 @@ class HttpResponse extends HttpData {
 	
 	int status;						// HTTP status code
 	
+	string url;						// request url
+	
+	string method;					// request method
+	
 	string content_type;			// MIME type of payload
 	
 	vector<pair<string, string>> headers;		// HTTP headers

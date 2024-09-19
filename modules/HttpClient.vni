@@ -1,0 +1,18 @@
+package vnx.addons;
+
+module HttpClient extends TcpServer {
+	
+	vnx.TopicPtr output_response;
+	
+	long max_payload_size = 16777216;		// -1 = unlimited [bytes]
+	
+	
+	HttpResponse* get(string url, http_request_options_t options) const async;
+	
+	HttpResponse* post(string url, vnx.Buffer data, http_request_options_t options) const async;
+	
+	HttpResponse* post_json(string url, string data, http_request_options_t options) const async;
+	
+	HttpResponse* post_text(string url, string data, http_request_options_t options) const async;
+	
+}
