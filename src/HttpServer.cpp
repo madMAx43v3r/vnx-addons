@@ -549,7 +549,7 @@ int HttpServer::on_body(llhttp_t* parser, const char* at, size_t length)
 {
 	auto state = (state_t*)parser->data;
 	auto self = state->server;
-	if(state->payload_size + length > self->max_payload_size) {
+	if(self->max_payload_size >= 0 && state->payload_size + length > self->max_payload_size) {
 		if(self->show_warnings) {
 			self->log(WARN) << "Maximum payload size of " << self->max_payload_size << " bytes exceeded!";
 		}
