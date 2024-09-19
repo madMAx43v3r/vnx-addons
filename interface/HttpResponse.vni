@@ -19,6 +19,14 @@ class HttpResponse extends HttpData {
 	string error_text;				// optional error description
 	
 	
+	bool is_json() const;
+	bool is_text() const;
+	
+	string parse_text() const;
+	
+	vnx.Variant parse_json() const;
+	
+	
 	static HttpResponse* from_status(int status);
 
 	static HttpResponse* from_text(string content);

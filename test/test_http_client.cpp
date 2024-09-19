@@ -66,13 +66,11 @@ int main(int argc, char** argv)
 		vnx::accept(printer, res);
 		std::cout << std::endl;
 
-		if(res->content_type.find("text/") == 0) {
-			std::cout << res->data.as_string();
+		if(res->is_text()) {
+			std::cout << res->parse_text();
 		}
-		else if(res->content_type.find("application/json") == 0) {
-			vnx::Variant data;
-			vnx::from_string(res->data.as_string(), data);
-			vnx::accept(printer, data);
+		else if(res->is_json()) {
+			vnx::accept(printer, res->parse_json());
 			std::cout << std::endl;
 		}
 	}

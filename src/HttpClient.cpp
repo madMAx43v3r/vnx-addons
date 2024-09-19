@@ -99,6 +99,9 @@ std::shared_ptr<HttpClient::state_t> HttpClient::new_state(
 
 void HttpClient::connect(std::shared_ptr<state_t> state)
 {
+	if(state->scheme.empty() || state->host.empty()) {
+		throw std::logic_error("invalid url: " + state->response->url);
+	}
 	if(state->scheme != "http") {
 		throw std::logic_error("unsupported scheme: " + state->scheme);
 	}
@@ -176,7 +179,11 @@ void HttpClient::post_json_async(
 		state->options.content_type = "application/json; charset=utf-8";
 	}
 	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
-		post_json_async_return(request_id, response);
+		if(response->status == 200) {
+			post_json_async_return(request_id, response);
+		} else {
+			vnx_async_return_ex_what(request_id, "HTTP status " + std::to_string(response->status));
+		}
 	};
 
 	((HttpClient*)this)->connect(state);
@@ -194,7 +201,11 @@ void HttpClient::post_text_async(
 		state->options.content_type = "text/plain; charset=utf-8";
 	}
 	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
-		post_text_async_return(request_id, response);
+		if(response->status == 200) {
+			post_text_async_return(request_id, response);
+		} else {
+			vnx_async_return_ex_what(request_id, "HTTP status " + std::to_string(response->status));
+		}
 	};
 
 	((HttpClient*)this)->connect(state);

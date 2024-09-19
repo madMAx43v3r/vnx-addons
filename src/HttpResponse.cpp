@@ -12,6 +12,36 @@
 namespace vnx {
 namespace addons {
 
+vnx::bool_t HttpResponse::is_text() const
+{
+	return content_type.find("text/") == 0;
+}
+
+vnx::bool_t HttpResponse::is_json() const
+{
+	return content_type.find("application/json") == 0;
+}
+
+std::string HttpResponse::parse_text() const
+{
+	if(content_type.empty() || is_text())
+	{
+		return data.as_string();
+	}
+	return std::string();
+}
+
+vnx::Variant HttpResponse::parse_json() const
+{
+	if(content_type.empty() || is_json())
+	{
+		vnx::Variant out;
+		vnx::from_string(data.as_string(), out);
+		return out;
+	}
+	return vnx::Variant();
+}
+
 std::shared_ptr<const HttpResponse> HttpResponse::from_status(const int32_t& status)
 {
 	auto result = HttpResponse::create();
