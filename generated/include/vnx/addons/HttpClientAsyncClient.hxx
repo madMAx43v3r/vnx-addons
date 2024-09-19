@@ -7,6 +7,7 @@
 #include <vnx/AsyncClient.h>
 #include <vnx/Buffer.hpp>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpResponse.hxx>
 #include <vnx/addons/TcpServer.h>
 #include <vnx/addons/http_request_options_t.hxx>
@@ -23,6 +24,14 @@ public:
 	
 	uint64_t get(const std::string& url = "", const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t(), 
 			const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback = std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>(),
+			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
+	
+	uint64_t get_json(const std::string& url = "", const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t(), 
+			const std::function<void(const ::vnx::Variant&)>& _callback = std::function<void(const ::vnx::Variant&)>(),
+			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
+	
+	uint64_t get_text(const std::string& url = "", const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t(), 
+			const std::function<void(const std::string&)>& _callback = std::function<void(const std::string&)>(),
 			const std::function<void(const vnx::exception&)>& _error_callback = std::function<void(const vnx::exception&)>());
 	
 	uint64_t post(const std::string& url = "", const ::vnx::Buffer& data = ::vnx::Buffer(), const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t(), 
@@ -80,6 +89,8 @@ protected:
 	
 private:
 	std::unordered_map<uint64_t, std::pair<std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>, std::function<void(const vnx::exception&)>>> vnx_queue_get;
+	std::unordered_map<uint64_t, std::pair<std::function<void(const ::vnx::Variant&)>, std::function<void(const vnx::exception&)>>> vnx_queue_get_json;
+	std::unordered_map<uint64_t, std::pair<std::function<void(const std::string&)>, std::function<void(const vnx::exception&)>>> vnx_queue_get_text;
 	std::unordered_map<uint64_t, std::pair<std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>, std::function<void(const vnx::exception&)>>> vnx_queue_post;
 	std::unordered_map<uint64_t, std::pair<std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>, std::function<void(const vnx::exception&)>>> vnx_queue_post_json;
 	std::unordered_map<uint64_t, std::pair<std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>, std::function<void(const vnx::exception&)>>> vnx_queue_post_text;

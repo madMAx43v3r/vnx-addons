@@ -7,6 +7,7 @@
 #include <vnx/addons/package.hxx>
 #include <vnx/Buffer.hpp>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpResponse.hxx>
 #include <vnx/addons/TcpServer.h>
 #include <vnx/addons/http_request_options_t.hxx>
@@ -58,6 +59,10 @@ protected:
 	
 	virtual void get_async(const std::string& url, const ::vnx::addons::http_request_options_t& options, const vnx::request_id_t& _request_id) const = 0;
 	void get_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
+	virtual void get_json_async(const std::string& url, const ::vnx::addons::http_request_options_t& options, const vnx::request_id_t& _request_id) const = 0;
+	void get_json_async_return(const vnx::request_id_t& _request_id, const ::vnx::Variant& _ret_0) const;
+	virtual void get_text_async(const std::string& url, const ::vnx::addons::http_request_options_t& options, const vnx::request_id_t& _request_id) const = 0;
+	void get_text_async_return(const vnx::request_id_t& _request_id, const std::string& _ret_0) const;
 	virtual void post_async(const std::string& url, const ::vnx::Buffer& data, const ::vnx::addons::http_request_options_t& options, const vnx::request_id_t& _request_id) const = 0;
 	void post_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const;
 	virtual void post_json_async(const std::string& url, const std::string& data, const ::vnx::addons::http_request_options_t& options, const vnx::request_id_t& _request_id) const = 0;

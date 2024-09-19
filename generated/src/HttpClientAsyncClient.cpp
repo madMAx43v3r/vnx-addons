@@ -23,8 +23,13 @@
 #include <vnx/ModuleInterface_vnx_stop.hxx>
 #include <vnx/ModuleInterface_vnx_stop_return.hxx>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpClient_get.hxx>
 #include <vnx/addons/HttpClient_get_return.hxx>
+#include <vnx/addons/HttpClient_get_json.hxx>
+#include <vnx/addons/HttpClient_get_json_return.hxx>
+#include <vnx/addons/HttpClient_get_text.hxx>
+#include <vnx/addons/HttpClient_get_text_return.hxx>
 #include <vnx/addons/HttpClient_post.hxx>
 #include <vnx/addons/HttpClient_post_return.hxx>
 #include <vnx/addons/HttpClient_post_json.hxx>
@@ -66,6 +71,34 @@ uint64_t HttpClientAsyncClient::get(const std::string& url, const ::vnx::addons:
 	return _request_id;
 }
 
+uint64_t HttpClientAsyncClient::get_json(const std::string& url, const ::vnx::addons::http_request_options_t& options, const std::function<void(const ::vnx::Variant&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::HttpClient_get_json::create();
+	_method->url = url;
+	_method->options = options;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_pending[_request_id] = 1;
+		vnx_queue_get_json[_request_id] = std::make_pair(_callback, _error_callback);
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
+uint64_t HttpClientAsyncClient::get_text(const std::string& url, const ::vnx::addons::http_request_options_t& options, const std::function<void(const std::string&)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
+	auto _method = ::vnx::addons::HttpClient_get_text::create();
+	_method->url = url;
+	_method->options = options;
+	const auto _request_id = ++vnx_next_id;
+	{
+		std::lock_guard<std::mutex> _lock(vnx_mutex);
+		vnx_pending[_request_id] = 2;
+		vnx_queue_get_text[_request_id] = std::make_pair(_callback, _error_callback);
+	}
+	vnx_request(_method, _request_id);
+	return _request_id;
+}
+
 uint64_t HttpClientAsyncClient::post(const std::string& url, const ::vnx::Buffer& data, const ::vnx::addons::http_request_options_t& options, const std::function<void(std::shared_ptr<const ::vnx::addons::HttpResponse>)>& _callback, const std::function<void(const vnx::exception&)>& _error_callback) {
 	auto _method = ::vnx::addons::HttpClient_post::create();
 	_method->url = url;
@@ -74,7 +107,7 @@ uint64_t HttpClientAsyncClient::post(const std::string& url, const ::vnx::Buffer
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 1;
+		vnx_pending[_request_id] = 3;
 		vnx_queue_post[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -89,7 +122,7 @@ uint64_t HttpClientAsyncClient::post_json(const std::string& url, const std::str
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 2;
+		vnx_pending[_request_id] = 4;
 		vnx_queue_post_json[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -104,7 +137,7 @@ uint64_t HttpClientAsyncClient::post_text(const std::string& url, const std::str
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 3;
+		vnx_pending[_request_id] = 5;
 		vnx_queue_post_text[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -116,7 +149,7 @@ uint64_t HttpClientAsyncClient::vnx_get_config_object(const std::function<void(c
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 4;
+		vnx_pending[_request_id] = 6;
 		vnx_queue_vnx_get_config_object[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -129,7 +162,7 @@ uint64_t HttpClientAsyncClient::vnx_get_config(const std::string& name, const st
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 5;
+		vnx_pending[_request_id] = 7;
 		vnx_queue_vnx_get_config[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -142,7 +175,7 @@ uint64_t HttpClientAsyncClient::vnx_set_config_object(const ::vnx::Object& confi
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 6;
+		vnx_pending[_request_id] = 8;
 		vnx_queue_vnx_set_config_object[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -156,7 +189,7 @@ uint64_t HttpClientAsyncClient::vnx_set_config(const std::string& name, const ::
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 7;
+		vnx_pending[_request_id] = 9;
 		vnx_queue_vnx_set_config[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -168,7 +201,7 @@ uint64_t HttpClientAsyncClient::vnx_get_type_code(const std::function<void(const
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 8;
+		vnx_pending[_request_id] = 10;
 		vnx_queue_vnx_get_type_code[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -180,7 +213,7 @@ uint64_t HttpClientAsyncClient::vnx_get_module_info(const std::function<void(std
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 9;
+		vnx_pending[_request_id] = 11;
 		vnx_queue_vnx_get_module_info[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -192,7 +225,7 @@ uint64_t HttpClientAsyncClient::vnx_restart(const std::function<void()>& _callba
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 10;
+		vnx_pending[_request_id] = 12;
 		vnx_queue_vnx_restart[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -204,7 +237,7 @@ uint64_t HttpClientAsyncClient::vnx_stop(const std::function<void()>& _callback,
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 11;
+		vnx_pending[_request_id] = 13;
 		vnx_queue_vnx_stop[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -216,7 +249,7 @@ uint64_t HttpClientAsyncClient::vnx_self_test(const std::function<void(const vnx
 	const auto _request_id = ++vnx_next_id;
 	{
 		std::lock_guard<std::mutex> _lock(vnx_mutex);
-		vnx_pending[_request_id] = 12;
+		vnx_pending[_request_id] = 14;
 		vnx_queue_vnx_self_test[_request_id] = std::make_pair(_callback, _error_callback);
 	}
 	vnx_request(_method, _request_id);
@@ -245,6 +278,30 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			break;
 		}
 		case 1: {
+			const auto _iter = vnx_queue_get_json.find(_request_id);
+			if(_iter != vnx_queue_get_json.end()) {
+				const auto _callback = std::move(_iter->second.second);
+				vnx_queue_get_json.erase(_iter);
+				_lock.unlock();
+				if(_callback) {
+					_callback(_ex);
+				}
+			}
+			break;
+		}
+		case 2: {
+			const auto _iter = vnx_queue_get_text.find(_request_id);
+			if(_iter != vnx_queue_get_text.end()) {
+				const auto _callback = std::move(_iter->second.second);
+				vnx_queue_get_text.erase(_iter);
+				_lock.unlock();
+				if(_callback) {
+					_callback(_ex);
+				}
+			}
+			break;
+		}
+		case 3: {
 			const auto _iter = vnx_queue_post.find(_request_id);
 			if(_iter != vnx_queue_post.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -256,7 +313,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 2: {
+		case 4: {
 			const auto _iter = vnx_queue_post_json.find(_request_id);
 			if(_iter != vnx_queue_post_json.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -268,7 +325,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 3: {
+		case 5: {
 			const auto _iter = vnx_queue_post_text.find(_request_id);
 			if(_iter != vnx_queue_post_text.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -280,7 +337,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 4: {
+		case 6: {
 			const auto _iter = vnx_queue_vnx_get_config_object.find(_request_id);
 			if(_iter != vnx_queue_vnx_get_config_object.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -292,7 +349,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 5: {
+		case 7: {
 			const auto _iter = vnx_queue_vnx_get_config.find(_request_id);
 			if(_iter != vnx_queue_vnx_get_config.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -304,7 +361,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 6: {
+		case 8: {
 			const auto _iter = vnx_queue_vnx_set_config_object.find(_request_id);
 			if(_iter != vnx_queue_vnx_set_config_object.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -316,7 +373,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 7: {
+		case 9: {
 			const auto _iter = vnx_queue_vnx_set_config.find(_request_id);
 			if(_iter != vnx_queue_vnx_set_config.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -328,7 +385,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 8: {
+		case 10: {
 			const auto _iter = vnx_queue_vnx_get_type_code.find(_request_id);
 			if(_iter != vnx_queue_vnx_get_type_code.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -340,7 +397,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 9: {
+		case 11: {
 			const auto _iter = vnx_queue_vnx_get_module_info.find(_request_id);
 			if(_iter != vnx_queue_vnx_get_module_info.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -352,7 +409,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 10: {
+		case 12: {
 			const auto _iter = vnx_queue_vnx_restart.find(_request_id);
 			if(_iter != vnx_queue_vnx_restart.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -364,7 +421,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 11: {
+		case 13: {
 			const auto _iter = vnx_queue_vnx_stop.find(_request_id);
 			if(_iter != vnx_queue_vnx_stop.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -376,7 +433,7 @@ int32_t HttpClientAsyncClient::vnx_purge_request(uint64_t _request_id, const vnx
 			}
 			break;
 		}
-		case 12: {
+		case 14: {
 			const auto _iter = vnx_queue_vnx_self_test.find(_request_id);
 			if(_iter != vnx_queue_vnx_self_test.end()) {
 				const auto _callback = std::move(_iter->second.second);
@@ -421,6 +478,44 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			break;
 		}
 		case 1: {
+			const auto _iter = vnx_queue_get_json.find(_request_id);
+			if(_iter == vnx_queue_get_json.end()) {
+				throw std::runtime_error("HttpClientAsyncClient: callback not found");
+			}
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_get_json.erase(_iter);
+			_lock.unlock();
+			if(_callback) {
+				if(auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpClient_get_json_return>(_value)) {
+					_callback(_result->_ret_0);
+				} else if(_value && !_value->is_void()) {
+					_callback(_value->get_field_by_index(0).to<::vnx::Variant>());
+				} else {
+					throw std::logic_error("HttpClientAsyncClient: invalid return value");
+				}
+			}
+			break;
+		}
+		case 2: {
+			const auto _iter = vnx_queue_get_text.find(_request_id);
+			if(_iter == vnx_queue_get_text.end()) {
+				throw std::runtime_error("HttpClientAsyncClient: callback not found");
+			}
+			const auto _callback = std::move(_iter->second.first);
+			vnx_queue_get_text.erase(_iter);
+			_lock.unlock();
+			if(_callback) {
+				if(auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpClient_get_text_return>(_value)) {
+					_callback(_result->_ret_0);
+				} else if(_value && !_value->is_void()) {
+					_callback(_value->get_field_by_index(0).to<std::string>());
+				} else {
+					throw std::logic_error("HttpClientAsyncClient: invalid return value");
+				}
+			}
+			break;
+		}
+		case 3: {
 			const auto _iter = vnx_queue_post.find(_request_id);
 			if(_iter == vnx_queue_post.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -439,7 +534,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 2: {
+		case 4: {
 			const auto _iter = vnx_queue_post_json.find(_request_id);
 			if(_iter == vnx_queue_post_json.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -458,7 +553,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 3: {
+		case 5: {
 			const auto _iter = vnx_queue_post_text.find(_request_id);
 			if(_iter == vnx_queue_post_text.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -477,7 +572,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 4: {
+		case 6: {
 			const auto _iter = vnx_queue_vnx_get_config_object.find(_request_id);
 			if(_iter == vnx_queue_vnx_get_config_object.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -496,7 +591,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 5: {
+		case 7: {
 			const auto _iter = vnx_queue_vnx_get_config.find(_request_id);
 			if(_iter == vnx_queue_vnx_get_config.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -515,7 +610,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 6: {
+		case 8: {
 			const auto _iter = vnx_queue_vnx_set_config_object.find(_request_id);
 			if(_iter == vnx_queue_vnx_set_config_object.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -528,7 +623,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 7: {
+		case 9: {
 			const auto _iter = vnx_queue_vnx_set_config.find(_request_id);
 			if(_iter == vnx_queue_vnx_set_config.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -541,7 +636,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 8: {
+		case 10: {
 			const auto _iter = vnx_queue_vnx_get_type_code.find(_request_id);
 			if(_iter == vnx_queue_vnx_get_type_code.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -560,7 +655,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 9: {
+		case 11: {
 			const auto _iter = vnx_queue_vnx_get_module_info.find(_request_id);
 			if(_iter == vnx_queue_vnx_get_module_info.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -579,7 +674,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 10: {
+		case 12: {
 			const auto _iter = vnx_queue_vnx_restart.find(_request_id);
 			if(_iter == vnx_queue_vnx_restart.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -592,7 +687,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 11: {
+		case 13: {
 			const auto _iter = vnx_queue_vnx_stop.find(_request_id);
 			if(_iter == vnx_queue_vnx_stop.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");
@@ -605,7 +700,7 @@ int32_t HttpClientAsyncClient::vnx_callback_switch(uint64_t _request_id, std::sh
 			}
 			break;
 		}
-		case 12: {
+		case 14: {
 			const auto _iter = vnx_queue_vnx_self_test.find(_request_id);
 			if(_iter == vnx_queue_vnx_self_test.end()) {
 				throw std::runtime_error("HttpClientAsyncClient: callback not found");

@@ -24,8 +24,13 @@
 #include <vnx/ModuleInterface_vnx_stop.hxx>
 #include <vnx/ModuleInterface_vnx_stop_return.hxx>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpClient_get.hxx>
 #include <vnx/addons/HttpClient_get_return.hxx>
+#include <vnx/addons/HttpClient_get_json.hxx>
+#include <vnx/addons/HttpClient_get_json_return.hxx>
+#include <vnx/addons/HttpClient_get_text.hxx>
+#include <vnx/addons/HttpClient_get_text_return.hxx>
 #include <vnx/addons/HttpClient_post.hxx>
 #include <vnx/addons/HttpClient_post_return.hxx>
 #include <vnx/addons/HttpClient_post_json.hxx>
@@ -261,7 +266,7 @@ std::shared_ptr<vnx::TypeCode> HttpClientBase::static_create_type_code() {
 	type_code->native_size = sizeof(::vnx::addons::HttpClientBase);
 	type_code->parents.resize(1);
 	type_code->parents[0] = ::vnx::addons::TcpServerBase::static_get_type_code();
-	type_code->methods.resize(13);
+	type_code->methods.resize(15);
 	type_code->methods[0] = ::vnx::ModuleInterface_vnx_get_config::static_get_type_code();
 	type_code->methods[1] = ::vnx::ModuleInterface_vnx_get_config_object::static_get_type_code();
 	type_code->methods[2] = ::vnx::ModuleInterface_vnx_get_module_info::static_get_type_code();
@@ -272,9 +277,11 @@ std::shared_ptr<vnx::TypeCode> HttpClientBase::static_create_type_code() {
 	type_code->methods[7] = ::vnx::ModuleInterface_vnx_set_config_object::static_get_type_code();
 	type_code->methods[8] = ::vnx::ModuleInterface_vnx_stop::static_get_type_code();
 	type_code->methods[9] = ::vnx::addons::HttpClient_get::static_get_type_code();
-	type_code->methods[10] = ::vnx::addons::HttpClient_post::static_get_type_code();
-	type_code->methods[11] = ::vnx::addons::HttpClient_post_json::static_get_type_code();
-	type_code->methods[12] = ::vnx::addons::HttpClient_post_text::static_get_type_code();
+	type_code->methods[10] = ::vnx::addons::HttpClient_get_json::static_get_type_code();
+	type_code->methods[11] = ::vnx::addons::HttpClient_get_text::static_get_type_code();
+	type_code->methods[12] = ::vnx::addons::HttpClient_post::static_get_type_code();
+	type_code->methods[13] = ::vnx::addons::HttpClient_post_json::static_get_type_code();
+	type_code->methods[14] = ::vnx::addons::HttpClient_post_text::static_get_type_code();
 	type_code->fields.resize(13);
 	{
 		auto& field = type_code->fields[0];
@@ -440,6 +447,16 @@ std::shared_ptr<vnx::Value> HttpClientBase::vnx_call_switch(std::shared_ptr<cons
 			get_async(_args->url, _args->options, _request_id);
 			return nullptr;
 		}
+		case 0x46b39af927f1d92cull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::HttpClient_get_json>(_method);
+			get_json_async(_args->url, _args->options, _request_id);
+			return nullptr;
+		}
+		case 0x9c1b5a2a4806795dull: {
+			auto _args = std::static_pointer_cast<const ::vnx::addons::HttpClient_get_text>(_method);
+			get_text_async(_args->url, _args->options, _request_id);
+			return nullptr;
+		}
 		case 0xf3daddd4b4790a17ull: {
 			auto _args = std::static_pointer_cast<const ::vnx::addons::HttpClient_post>(_method);
 			post_async(_args->url, _args->data, _args->options, _request_id);
@@ -463,6 +480,18 @@ std::shared_ptr<vnx::Value> HttpClientBase::vnx_call_switch(std::shared_ptr<cons
 
 void HttpClientBase::get_async_return(const vnx::request_id_t& _request_id, const std::shared_ptr<const ::vnx::addons::HttpResponse>& _ret_0) const {
 	auto _return_value = ::vnx::addons::HttpClient_get_return::create();
+	_return_value->_ret_0 = _ret_0;
+	vnx_async_return(_request_id, _return_value);
+}
+
+void HttpClientBase::get_json_async_return(const vnx::request_id_t& _request_id, const ::vnx::Variant& _ret_0) const {
+	auto _return_value = ::vnx::addons::HttpClient_get_json_return::create();
+	_return_value->_ret_0 = _ret_0;
+	vnx_async_return(_request_id, _return_value);
+}
+
+void HttpClientBase::get_text_async_return(const vnx::request_id_t& _request_id, const std::string& _ret_0) const {
+	auto _return_value = ::vnx::addons::HttpClient_get_text_return::create();
 	_return_value->_ret_0 = _ret_0;
 	vnx_async_return(_request_id, _return_value);
 }

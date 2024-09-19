@@ -23,8 +23,13 @@
 #include <vnx/ModuleInterface_vnx_stop.hxx>
 #include <vnx/ModuleInterface_vnx_stop_return.hxx>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpClient_get.hxx>
 #include <vnx/addons/HttpClient_get_return.hxx>
+#include <vnx/addons/HttpClient_get_json.hxx>
+#include <vnx/addons/HttpClient_get_json_return.hxx>
+#include <vnx/addons/HttpClient_get_text.hxx>
+#include <vnx/addons/HttpClient_get_text_return.hxx>
 #include <vnx/addons/HttpClient_post.hxx>
 #include <vnx/addons/HttpClient_post_return.hxx>
 #include <vnx/addons/HttpClient_post_json.hxx>
@@ -61,6 +66,34 @@ std::shared_ptr<const ::vnx::addons::HttpResponse> HttpClientClient::get(const s
 		return _result->_ret_0;
 	} else if(_return_value && !_return_value->is_void()) {
 		return _return_value->get_field_by_index(0).to<std::shared_ptr<const ::vnx::addons::HttpResponse>>();
+	} else {
+		throw std::logic_error("HttpClientClient: invalid return value");
+	}
+}
+
+::vnx::Variant HttpClientClient::get_json(const std::string& url, const ::vnx::addons::http_request_options_t& options) {
+	auto _method = ::vnx::addons::HttpClient_get_json::create();
+	_method->url = url;
+	_method->options = options;
+	auto _return_value = vnx_request(_method, false);
+	if(auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpClient_get_json_return>(_return_value)) {
+		return _result->_ret_0;
+	} else if(_return_value && !_return_value->is_void()) {
+		return _return_value->get_field_by_index(0).to<::vnx::Variant>();
+	} else {
+		throw std::logic_error("HttpClientClient: invalid return value");
+	}
+}
+
+std::string HttpClientClient::get_text(const std::string& url, const ::vnx::addons::http_request_options_t& options) {
+	auto _method = ::vnx::addons::HttpClient_get_text::create();
+	_method->url = url;
+	_method->options = options;
+	auto _return_value = vnx_request(_method, false);
+	if(auto _result = std::dynamic_pointer_cast<const ::vnx::addons::HttpClient_get_text_return>(_return_value)) {
+		return _result->_ret_0;
+	} else if(_return_value && !_return_value->is_void()) {
+		return _return_value->get_field_by_index(0).to<std::string>();
 	} else {
 		throw std::logic_error("HttpClientClient: invalid return value");
 	}

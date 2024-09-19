@@ -43,6 +43,10 @@ class HttpChunk;
 class HttpClientBase;
 class HttpClient_get;
 class HttpClient_get_return;
+class HttpClient_get_json;
+class HttpClient_get_json_return;
+class HttpClient_get_text;
+class HttpClient_get_text_return;
 class HttpClient_post;
 class HttpClient_post_return;
 class HttpClient_post_json;
@@ -85,6 +89,10 @@ VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpChu
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClientBase; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_get; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_get_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_get_json; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_get_json_return; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_get_text; ///< \private
+VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_get_text_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_post; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_return; ///< \private
 VNX_ADDONS_EXPORT extern const vnx::TypeCode* const vnx_native_type_code_HttpClient_post_json; ///< \private
@@ -132,6 +140,10 @@ void read(TypeInput& in, ::vnx::addons::HttpChunk& value, const TypeCode* type_c
 void read(TypeInput& in, ::vnx::addons::HttpClientBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpClient_get& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpClient_get_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::HttpClient_get_json& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::HttpClient_get_json_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::HttpClient_get_text& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void read(TypeInput& in, ::vnx::addons::HttpClient_get_text_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpClient_post& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpClient_post_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void read(TypeInput& in, ::vnx::addons::HttpClient_post_json& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -174,6 +186,10 @@ void write(TypeOutput& out, const ::vnx::addons::HttpChunk& value, const TypeCod
 void write(TypeOutput& out, const ::vnx::addons::HttpClientBase& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpClient_get& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_json& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_json_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_text& value, const TypeCode* type_code, const uint16_t* code); ///< \private
+void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_text_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpClient_post& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpClient_post_return& value, const TypeCode* type_code, const uint16_t* code); ///< \private
 void write(TypeOutput& out, const ::vnx::addons::HttpClient_post_json& value, const TypeCode* type_code, const uint16_t* code); ///< \private
@@ -216,6 +232,10 @@ void read(std::istream& in, ::vnx::addons::HttpChunk& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpClientBase& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpClient_get& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpClient_get_return& value); ///< \private
+void read(std::istream& in, ::vnx::addons::HttpClient_get_json& value); ///< \private
+void read(std::istream& in, ::vnx::addons::HttpClient_get_json_return& value); ///< \private
+void read(std::istream& in, ::vnx::addons::HttpClient_get_text& value); ///< \private
+void read(std::istream& in, ::vnx::addons::HttpClient_get_text_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpClient_post& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpClient_post_return& value); ///< \private
 void read(std::istream& in, ::vnx::addons::HttpClient_post_json& value); ///< \private
@@ -258,6 +278,10 @@ void write(std::ostream& out, const ::vnx::addons::HttpChunk& value); ///< \priv
 void write(std::ostream& out, const ::vnx::addons::HttpClientBase& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpClient_get& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpClient_get_return& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::HttpClient_get_json& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::HttpClient_get_json_return& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::HttpClient_get_text& value); ///< \private
+void write(std::ostream& out, const ::vnx::addons::HttpClient_get_text_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpClient_post& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpClient_post_return& value); ///< \private
 void write(std::ostream& out, const ::vnx::addons::HttpClient_post_json& value); ///< \private
@@ -300,6 +324,10 @@ void accept(Visitor& visitor, const ::vnx::addons::HttpChunk& value); ///< \priv
 void accept(Visitor& visitor, const ::vnx::addons::HttpClientBase& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_return& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_json& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_json_return& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_text& value); ///< \private
+void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_text_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpClient_post& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpClient_post_return& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::HttpClient_post_json& value); ///< \private
@@ -771,6 +799,98 @@ struct type<::vnx::addons::HttpClient_get_return> {
 	const TypeCode* get_type_code();
 	void create_dynamic_code(std::vector<uint16_t>& code);
 	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get_return& value, bool special = false);
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::HttpClient_get_json> {
+	void read(TypeInput& in, ::vnx::addons::HttpClient_get_json& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_json& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::HttpClient_get_json& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::HttpClient_get_json& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_json& value) {
+		vnx::accept(visitor, value);
+	}
+	const TypeCode* get_type_code();
+	void create_dynamic_code(std::vector<uint16_t>& code);
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get_json& value, bool special = false);
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::HttpClient_get_json_return> {
+	void read(TypeInput& in, ::vnx::addons::HttpClient_get_json_return& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_json_return& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::HttpClient_get_json_return& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::HttpClient_get_json_return& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_json_return& value) {
+		vnx::accept(visitor, value);
+	}
+	const TypeCode* get_type_code();
+	void create_dynamic_code(std::vector<uint16_t>& code);
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get_json_return& value, bool special = false);
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::HttpClient_get_text> {
+	void read(TypeInput& in, ::vnx::addons::HttpClient_get_text& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_text& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::HttpClient_get_text& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::HttpClient_get_text& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_text& value) {
+		vnx::accept(visitor, value);
+	}
+	const TypeCode* get_type_code();
+	void create_dynamic_code(std::vector<uint16_t>& code);
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get_text& value, bool special = false);
+};
+
+/// \private
+template<>
+struct type<::vnx::addons::HttpClient_get_text_return> {
+	void read(TypeInput& in, ::vnx::addons::HttpClient_get_text_return& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::read(in, value, type_code, code);
+	}
+	void write(TypeOutput& out, const ::vnx::addons::HttpClient_get_text_return& value, const TypeCode* type_code, const uint16_t* code) {
+		vnx::write(out, value, type_code, code);
+	}
+	void read(std::istream& in, ::vnx::addons::HttpClient_get_text_return& value) {
+		vnx::read(in, value);
+	}
+	void write(std::ostream& out, const ::vnx::addons::HttpClient_get_text_return& value) {
+		vnx::write(out, value);
+	}
+	void accept(Visitor& visitor, const ::vnx::addons::HttpClient_get_text_return& value) {
+		vnx::accept(visitor, value);
+	}
+	const TypeCode* get_type_code();
+	void create_dynamic_code(std::vector<uint16_t>& code);
+	void create_dynamic_code(std::vector<uint16_t>& code, const ::vnx::addons::HttpClient_get_text_return& value, bool special = false);
 };
 
 /// \private

@@ -7,6 +7,7 @@
 #include <vnx/Client.h>
 #include <vnx/Buffer.hpp>
 #include <vnx/TopicPtr.hpp>
+#include <vnx/Variant.hpp>
 #include <vnx/addons/HttpResponse.hxx>
 #include <vnx/addons/TcpServer.h>
 #include <vnx/addons/http_request_options_t.hxx>
@@ -22,6 +23,10 @@ public:
 	HttpClientClient(vnx::Hash64 service_addr);
 	
 	std::shared_ptr<const ::vnx::addons::HttpResponse> get(const std::string& url = "", const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t());
+	
+	::vnx::Variant get_json(const std::string& url = "", const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t());
+	
+	std::string get_text(const std::string& url = "", const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t());
 	
 	std::shared_ptr<const ::vnx::addons::HttpResponse> post(const std::string& url = "", const ::vnx::Buffer& data = ::vnx::Buffer(), const ::vnx::addons::http_request_options_t& options = ::vnx::addons::http_request_options_t());
 	
