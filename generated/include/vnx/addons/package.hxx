@@ -350,6 +350,77 @@ void accept(Visitor& visitor, const ::vnx::addons::file_info_t& value); ///< \pr
 void accept(Visitor& visitor, const ::vnx::addons::http_request_options_t& value); ///< \private
 void accept(Visitor& visitor, const ::vnx::addons::permission_e& value); ///< \private
 
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::CompressedValue> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::DeflatedValue> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_delete_file> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_delete_file_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_get_file_info> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_get_file_info_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_read_directory> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_read_directory_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_read_file> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_read_file_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_read_file_range> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_read_file_range_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_write_file> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::FileServer_write_file_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpChunk> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_get> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_get_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_get_json> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_get_json_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_get_text> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_get_text_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_post> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_post_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_post_json> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_post_json_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_post_text> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpClient_post_text_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpComponent_http_request> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpComponent_http_request_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpComponent_http_request_chunk> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpComponent_http_request_chunk_return> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpData> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpRequest> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpResponse> value); ///< \private
+template<typename V>
+void accept_generic(V& visitor, std::shared_ptr<const ::vnx::addons::HttpSession> value); ///< \private
+
 /// \private
 template<>
 struct type<::vnx::addons::CompressedValue> {
