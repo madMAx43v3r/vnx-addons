@@ -133,9 +133,11 @@ void HttpClient::get_json_async(const std::string& url, const http_request_optio
 	const auto state = new_state("GET", url, options, request_id);
 
 	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
-		vnx::Variant value;
-		vnx::from_string(response->data.as_string(), value);
-		get_json_async_return(request_id, value);
+		if(response->status == 200) {
+			get_json_async_return(request_id, vnx::from_string<vnx::Variant>(response->data.as_string()));
+		} else {
+			vnx_async_return_ex_what(request_id, "HTTP status " + std::to_string(response->status));
+		}
 	};
 
 	((HttpClient*)this)->connect(state);
@@ -146,7 +148,11 @@ void HttpClient::get_text_async(const std::string& url, const http_request_optio
 	const auto state = new_state("GET", url, options, request_id);
 
 	state->async_return = [this, request_id](std::shared_ptr<HttpResponse> response) {
-		get_text_async_return(request_id, response->data.as_string());
+		if(response->status == 200) {
+			get_text_async_return(request_id, response->data.as_string());
+		} else {
+			vnx_async_return_ex_what(request_id, "HTTP status " + std::to_string(response->status));
+		}
 	};
 
 	((HttpClient*)this)->connect(state);
