@@ -522,6 +522,7 @@ void HttpClientBase::post_text_async_return(const vnx::request_id_t& _request_id
 namespace vnx {
 
 void read(TypeInput& in, ::vnx::addons::HttpClientBase& value, const TypeCode* type_code, const uint16_t* code) {
+	TypeInput::recursion_t tag(in);
 	if(code) {
 		switch(code[0]) {
 			case CODE_OBJECT:

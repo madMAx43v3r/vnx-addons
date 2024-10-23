@@ -851,6 +851,7 @@ void HttpServerBase::http_request_chunk_async_return(const vnx::request_id_t& _r
 namespace vnx {
 
 void read(TypeInput& in, ::vnx::addons::HttpServerBase& value, const TypeCode* type_code, const uint16_t* code) {
+	TypeInput::recursion_t tag(in);
 	if(code) {
 		switch(code[0]) {
 			case CODE_OBJECT:

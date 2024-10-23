@@ -161,6 +161,7 @@ std::shared_ptr<vnx::TypeCode> HttpComponent_http_request::static_create_type_co
 namespace vnx {
 
 void read(TypeInput& in, ::vnx::addons::HttpComponent_http_request& value, const TypeCode* type_code, const uint16_t* code) {
+	TypeInput::recursion_t tag(in);
 	if(code) {
 		switch(code[0]) {
 			case CODE_OBJECT:

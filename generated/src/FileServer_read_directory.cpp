@@ -143,6 +143,7 @@ std::shared_ptr<vnx::TypeCode> FileServer_read_directory::static_create_type_cod
 namespace vnx {
 
 void read(TypeInput& in, ::vnx::addons::FileServer_read_directory& value, const TypeCode* type_code, const uint16_t* code) {
+	TypeInput::recursion_t tag(in);
 	if(code) {
 		switch(code[0]) {
 			case CODE_OBJECT:

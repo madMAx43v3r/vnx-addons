@@ -179,6 +179,7 @@ std::shared_ptr<vnx::Value> HttpChunk::vnx_call_switch(std::shared_ptr<const vnx
 namespace vnx {
 
 void read(TypeInput& in, ::vnx::addons::HttpChunk& value, const TypeCode* type_code, const uint16_t* code) {
+	TypeInput::recursion_t tag(in);
 	if(code) {
 		switch(code[0]) {
 			case CODE_OBJECT:
