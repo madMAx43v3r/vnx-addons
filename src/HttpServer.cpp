@@ -139,6 +139,8 @@ namespace addons {
 HttpServer::HttpServer(const std::string& _vnx_name)
 	:	HttpServerBase(_vnx_name)
 {
+	vnx::protect_config(vnx_name + ".token_map");
+
 	do_compress.insert("text");
 	do_compress.insert("application/json");
 	do_compress.insert("application/javascript");
