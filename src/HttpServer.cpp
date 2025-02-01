@@ -573,6 +573,23 @@ int HttpServer::on_headers_complete(llhttp_t* parser)
 		request->session = self->m_default_session;
 	}
 
+	bool send_continue = false;
+	for(const auto& entry : request->headers) {
+		if(entry.first == "expect") {
+			if(entry.second == "100-continue") {
+				send_continue = true;
+			}
+		}
+	}
+
+	if(send_continue) {
+		auto data = HttpData::create();
+		data->data = std::string("HTTP/1.1 100 Continue\r\n\r\n");
+		data->is_eof = false;
+		state->write_queue.emplace_back(data, 0);
+		state->poll_bits |= POLL_BIT_WRITE;
+	}
+
 	// TODO: handle streams
 	if(false) {
 		const auto dst_mac = Hash64::rand();
