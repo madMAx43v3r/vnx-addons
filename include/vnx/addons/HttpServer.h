@@ -36,19 +36,21 @@ protected:
 	};
 
 	struct state_t {
-		bool is_blocked = false;
-		bool is_pending = false;
+		bool is_blocked = false;				// write to socket
+		bool is_pending = false;				// request to module
 		bool is_chunked_reply = false;
 		bool is_chunked_reply_pending = false;
 		bool is_chunked_transfer = false;
 		bool do_keep_alive = false;
 		bool do_timeout = true;
+		bool is_complete = false;				// entire request received
 		char poll_bits = 0;
 		encoding_type_e input_encoding = IDENTITY;
 		encoding_type_e output_encoding = IDENTITY;
 		char buffer[16384];
 		int fd = -1;
-		uint32_t offset = 0;					// offset into buffer
+		uint32_t read_offset = 0;				// offset into buffer
+		uint32_t write_offset = 0;				// offset into buffer
 		int64_t waiting_since = -1;				// time since waiting on connection [usec]
 		size_t payload_size = 0;
 		HttpServer* server = nullptr;
@@ -87,7 +89,7 @@ protected:
 							const vnx::request_id_t& _request_id) const override;
 
 private:
-	void process(state_t* state);
+	void process(std::shared_ptr<state_t> state);
 
 	void reply(uint64_t id, std::shared_ptr<const HttpResponse> response);
 
@@ -109,8 +111,6 @@ private:
 
 	void on_connect(int fd);
 
-	void on_request(std::shared_ptr<state_t> state);
-
 	void on_resume(std::shared_ptr<state_t> state);
 
 	void on_parse(std::shared_ptr<state_t> state);
@@ -121,9 +121,9 @@ private:
 
 	void on_deflate(std::shared_ptr<state_t> state);
 
-	void on_finish(std::shared_ptr<state_t> state);
-
 	void on_timeout(std::shared_ptr<state_t> state);
+
+	void on_reset(std::shared_ptr<state_t> state);
 
 	void on_disconnect(std::shared_ptr<state_t> state);
 

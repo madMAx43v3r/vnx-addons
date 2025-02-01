@@ -578,7 +578,7 @@ int HttpServer::on_headers_complete(llhttp_t* parser)
 		const auto dst_mac = Hash64::rand();
 		state->stream = std::make_shared<Stream>(dst_mac);
 		state->request->stream = dst_mac;
-		self->process(state);
+//		self->process(state);
 		return HPE_PAUSED;
 	}
 	return 0;
@@ -617,41 +617,17 @@ int HttpServer::on_message_complete(llhttp_t* parser)
 	auto state = (state_t*)parser->data;
 	auto self = state->server;
 
+	state->is_complete = true;
 	state->do_keep_alive = llhttp_should_keep_alive(parser);
-
-	if(state->stream) {
-		auto chunk = HttpChunk::create();
-		chunk->id = state->request->id;
-		chunk->is_eof = true;
-		state->stream->send(chunk);
-	}
-	else {
-		auto request = state->request;
-		if(auto payload = state->payload) {
-			request->payload = *payload;
-		}
-		state->payload = nullptr;
-		state->payload_size = 0;
-
-		if(request->content_type == "application/x-www-form-urlencoded") {
-			Url::Url tmp("");
-			tmp.setQuery(request->payload.as_string());
-			tmp.unescape();
-			for(const auto& entry : parse_query_string(tmp.query())) {
-				request->query_params[entry.first] = entry.second;
-			}
-		}
-		self->process(state);
-	}
-	// Note: state could be deleted already here
 	return HPE_PAUSED;
 }
 
-void HttpServer::process(state_t* state)
+void HttpServer::process(std::shared_ptr<state_t> state)
 {
-	m_request_counter++;
-	auto request = state->request;
+	const auto request = state->request;
+
 	publish(request, output_request);
+	m_request_counter++;
 
 	if(request->method == "OPTIONS")
 	{
@@ -664,6 +640,16 @@ void HttpServer::process(state_t* state)
 		reply(request->id, result);
 		return;
 	}
+
+	if(request->content_type == "application/x-www-form-urlencoded") {
+		Url::Url tmp("");
+		tmp.setQuery(request->payload.as_string());
+		tmp.unescape();
+		for(const auto& entry : parse_query_string(tmp.query())) {
+			request->query_params[entry.first] = entry.second;
+		}
+	}
+
 	std::string prefix;
 	std::string sub_path;
 	size_t best_match_length = 0;
@@ -681,6 +667,7 @@ void HttpServer::process(state_t* state)
 			client = entry.second;
 		}
 	}
+
 	if(client) {
 		if(show_info) {
 			log(INFO) << request->method << " '" << request->path << "' => '" << components[prefix] << sub_path << "'";
@@ -692,7 +679,8 @@ void HttpServer::process(state_t* state)
 		client->http_request(request, sub_path,
 				std::bind(&HttpServer::reply, this, request->id, std::placeholders::_1),
 				std::bind(&HttpServer::reply_error, this, request->id, std::placeholders::_1));
-	} else {
+	}
+	else if(request->path == "/") {
 		auto response = HttpResponse::create();
 		response->status = 200;
 		response->content_type = "text/html";
@@ -706,6 +694,11 @@ void HttpServer::process(state_t* state)
 		html += "</body></html>\n";
 		response->data = html;
 
+		reply(request->id, response);
+	}
+	else {
+		auto response = HttpResponse::create();
+		response->status = 404;
 		reply(request->id, response);
 	}
 }
@@ -989,52 +982,87 @@ void HttpServer::on_connect(int fd)
 	auto state = std::make_shared<state_t>();
 	state->fd = fd;
 	state->server = this;
-	on_request(state);
+	state->poll_bits |= POLL_BIT_READ;
+
+	llhttp_init(&state->parser, HTTP_REQUEST, &m_settings);
+	state->parser.data = state.get();
 
 	m_state_map[fd] = state;
 	m_connect_counter++;
 }
 
-void HttpServer::on_request(std::shared_ptr<state_t> state)
-{
-	state->poll_bits = POLL_BIT_READ;
-	state->request = HttpRequest::create();
-	state->request->id = m_next_id++;
-
-	llhttp_init(&state->parser, HTTP_REQUEST, &m_settings);
-	state->parser.data = state.get();
-
-	m_request_map[state->request->id] = state;
-}
-
 void HttpServer::on_resume(std::shared_ptr<state_t> state)
 {
-	llhttp_resume(&state->parser);
+	if(state->is_complete) {
+		on_reset(state);
+		llhttp_reset(&state->parser);
+	} else {
+		llhttp_resume(&state->parser);
+	}
 	on_parse(state);
 }
 
 void HttpServer::on_parse(std::shared_ptr<state_t> state)
 {
-	const auto ret = llhttp_execute(&state->parser, state->buffer, state->offset);
-	switch(ret) {
-		case HPE_OK:
-			state->offset = 0;
-			state->poll_bits |= POLL_BIT_READ;
-			break;
-		case HPE_PAUSED:
-			break;
-		default:
-			if(show_warnings) {
-				log(WARN) << "HTTP parsing failed with: " << llhttp_errno_name(ret);
-			}
-			on_disconnect(state);
+	if(state->is_complete) {
+		return;		// wait for response to be sent before parsing next request
 	}
+	auto const parser = &state->parser;
+
+	while(state->write_offset > state->read_offset)
+	{
+		if(!state->request) {
+			state->request = HttpRequest::create();
+			state->request->id = m_next_id++;
+			m_request_map[state->request->id] = state;
+		}
+		const auto num_bytes = state->write_offset - state->read_offset;
+		const auto ret = llhttp_execute(parser, state->buffer + state->read_offset, num_bytes);
+		state->read_offset = parser->error_pos - state->buffer;
+
+		switch(ret) {
+			case HPE_OK:
+			case HPE_PAUSED:
+				break;
+			default:
+				if(show_warnings) {
+					log(WARN) << "HTTP parsing failed with: " << llhttp_errno_name(ret);
+				}
+				on_disconnect(state);
+				return;
+		}
+
+		if(state->is_complete) {
+			if(state->stream) {
+				auto chunk = HttpChunk::create();
+				chunk->id = state->request->id;
+				chunk->is_eof = true;
+				state->stream->send(chunk);
+				on_disconnect(state);
+				return;
+			} else {
+				auto request = state->request;
+				if(auto payload = state->payload) {
+					request->payload = *payload;
+				}
+				state->payload = nullptr;
+				state->payload_size = 0;
+				process(state);
+			}
+		}
+		if(ret == HPE_PAUSED) {
+			return;		// need to preserve buffer state
+		}
+	}
+	state->read_offset = 0;
+	state->write_offset = 0;
+	state->poll_bits |= POLL_BIT_READ;
 }
 
 void HttpServer::on_read(std::shared_ptr<state_t> state)
 {
-	const auto max_bytes = sizeof(state->buffer) - state->offset;
-	const auto num_bytes = ::recv(state->fd, state->buffer + state->offset, max_bytes, 0);
+	const auto max_bytes = sizeof(state->buffer) - state->write_offset;
+	const auto num_bytes = ::recv(state->fd, state->buffer + state->write_offset, max_bytes, 0);
 	if(num_bytes < 0) {
 #ifdef _WIN32
 		if(WSAGetLastError() != WSAEWOULDBLOCK)
@@ -1047,12 +1075,16 @@ void HttpServer::on_read(std::shared_ptr<state_t> state)
 		}
 	}
 	else if(num_bytes > 0) {
-		state->offset += num_bytes;
+		state->write_offset += num_bytes;
 		state->waiting_since = -1;
 	}
 	else if(max_bytes > 0) {
-		on_disconnect(state);		// normal disconnect
-		return;
+		if(llhttp_message_needs_eof(&state->parser)) {
+			llhttp_finish(&state->parser);
+		} else {
+			on_disconnect(state);		// normal disconnect
+			return;
+		}
 	}
 	on_parse(state);
 }
@@ -1117,16 +1149,13 @@ void HttpServer::on_write(std::shared_ptr<state_t> state)
 
 	if(is_blocked) {
 		state->poll_bits |= POLL_BIT_WRITE;
-	}
-	else if(is_eof) {
+	} else if(is_eof) {
 		if(state->do_keep_alive) {
-			on_finish(state);
-			on_request(state);
+			on_resume(state);
 		} else {
 			on_disconnect(state);
 		}
-	}
-	else if(state->is_chunked_reply && !state->is_chunked_reply_pending) {
+	} else if(state->is_chunked_reply && !state->is_chunked_reply_pending) {
 		if(auto client = state->module) {
 			client->vnx_set_session(state->request->session->vsid);
 			client->http_request_chunk(state->request, state->sub_path, state->payload_size, max_chunk_size,
@@ -1207,22 +1236,6 @@ void HttpServer::on_write_error(uint64_t id, const vnx::exception& ex)
 	}
 }
 
-void HttpServer::on_finish(std::shared_ptr<state_t> state)
-{
-	if(auto request = state->request) {
-		m_request_map.erase(request->id);
-	}
-	if(auto pipe = state->pipe) {
-		pipe->close();
-	}
-	llhttp_reset(&state->parser);
-
-	const auto fd = state->fd;
-	*state = state_t();
-	state->fd = fd;
-	state->server = this;
-}
-
 void HttpServer::on_timeout(std::shared_ptr<state_t> state)
 {
 	if(state->do_timeout) {
@@ -1231,9 +1244,38 @@ void HttpServer::on_timeout(std::shared_ptr<state_t> state)
 	}
 }
 
+void HttpServer::on_reset(std::shared_ptr<state_t> state)
+{
+	if(auto request = state->request) {
+		m_request_map.erase(request->id);
+	}
+	if(auto pipe = state->pipe) {
+		pipe->close();
+	}
+	if(auto stream = state->stream) {
+		stream->close();
+	}
+	state->pipe = nullptr;
+	state->stream = nullptr;
+	state->request = nullptr;
+	state->payload = nullptr;
+	state->payload_size = 0;
+	state->response = nullptr;
+	state->deflate = nullptr;
+	state->module = nullptr;
+	state->sub_path.clear();
+
+	state->is_complete = false;
+	state->is_chunked_reply = false;
+	state->is_chunked_reply_pending = false;
+	state->is_chunked_transfer = false;
+	state->input_encoding = IDENTITY;
+	state->output_encoding = IDENTITY;
+}
+
 void HttpServer::on_disconnect(std::shared_ptr<state_t> state)
 {
-	on_finish(state);
+	on_reset(state);
 	m_state_map.erase(state->fd);
 	closesocket(state->fd);
 	state->fd = -1;
