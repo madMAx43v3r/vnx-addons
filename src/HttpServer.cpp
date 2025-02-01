@@ -1052,7 +1052,13 @@ void HttpServer::on_parse(std::shared_ptr<state_t> state)
 				if(show_warnings) {
 					log(WARN) << "HTTP parsing failed with: " << llhttp_errno_name(ret);
 				}
-				on_disconnect(state);
+				auto data = HttpData::create();
+				data->data = std::string("HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
+				data->is_eof = true;
+				state->is_complete = true;
+				state->do_keep_alive = false;
+				state->write_queue.emplace_back(data, 0);
+				on_write(state);
 				return;
 		}
 
