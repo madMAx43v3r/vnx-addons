@@ -337,41 +337,78 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 									const std::string& sub_path,
 									const vnx::request_id_t& request_id) const
 {
+	const bool is_post = (request->method == "POST");
+	const auto& params = request->query_params;
+	vnx::Object args;
+	if(is_post) {
+		vnx::from_string(request->payload.as_string(), args);
+	}
 	std::shared_ptr<HttpResponse> response;
 
 	if(sub_path == login_path)
 	{
 		std::shared_ptr<HttpSession> session;
 
-		// TODO: add POST support
-		auto user = request->query_params.find("user");
-		if(user != request->query_params.end())
-		{
-			auto passwd_hex = request->query_params.find("passwd_hex");
-			auto passwd_plain = request->query_params.find("passwd_plain");
+		vnx::optional<std::string> user_opt;
+		if(is_post) {
+			auto iter = args.field.find("user");
+			if(iter != args.field.end()) {
+				user_opt = iter->second.to_string_value();
+			}
+		} else {
+			auto iter = params.find("user");
+			if(iter != params.end()) {
+				user_opt = iter->second;
+			}
+		}
+
+		if(user_opt) {
+			const auto user = *user_opt;
+			vnx::optional<std::string> passwd_hex;
+			vnx::optional<std::string> passwd_plain;
+
+			if(is_post) {
+				if(!args["passwd_hex"].empty()) {
+					passwd_hex = args["passwd_hex"].to_string_value();
+				}
+				else if(!args["passwd_plain"].empty()) {
+					passwd_plain = args["passwd_plain"].to_string_value();
+				}
+			} else {
+				auto iter = params.find("passwd_hex");
+				if(iter != params.end()) {
+					passwd_hex = iter->second;
+				} else {
+					auto iter = params.find("passwd_plain");
+					if(iter != params.end()) {
+						passwd_plain = iter->second;
+					}
+				}
+			}
 
 			std::string passwd;
-			if(passwd_hex != request->query_params.end()) {
-				passwd = passwd_hex->second;
+			if(passwd_hex) {
+				passwd = *passwd_hex;
 			}
-			else if(passwd_plain != request->query_params.end()) {
-				passwd = vnx::sha256_str(passwd_plain->second);
+			else if(passwd_plain) {
+				passwd = vnx::sha256_str(*passwd_plain);
 			}
 			else {
 				// no password = no bueno
 				http_request_async_return(request_id, HttpResponse::from_status(403));
 				return;
 			}
-			auto vnx_session = vnx::get_auth_server()->login(user->second, passwd);
-			if(!vnx_session || vnx_session->user != user->second) {
+
+			auto vnx_session = vnx::get_auth_server()->login(user, passwd);
+			if(!vnx_session || vnx_session->user != user) {
 				// login failed
 				http_request_async_return(request_id, HttpResponse::from_status(403));
 				return;
 			}
 			session = create_session();
-			session->user = user->second;
+			session->user = user;
 			session->vsid = vnx_session->id;
-			log(INFO) << "User '" << user->second << "' logged in successfully.";
+			log(INFO) << "User '" << user << "' logged in successfully.";
 		}
 		else if(allow_anon_login) {
 			// anonymous login
@@ -423,8 +460,8 @@ void HttpServer::http_request_async(std::shared_ptr<const HttpRequest> request,
 	}
 
 	if(response) {
-		auto redirect = request->query_params.find("redirect");
-		if(redirect != request->query_params.end()) {
+		auto redirect = params.find("redirect");
+		if(redirect != params.end()) {
 			response->status = 303;
 			response->headers.emplace_back("Location", redirect->second);
 		}
