@@ -534,6 +534,13 @@ int HttpServer::on_headers_complete(llhttp_t* parser)
 	auto self = state->server;
 	auto request = state->request;
 
+	if(self->max_payload_size >= 0 && parser->content_length > self->max_payload_size) {
+		if(self->show_warnings) {
+			self->log(WARN) << "Request payload too large: " << std::to_string(parser->content_length) << " bytes";
+		}
+		return -1;
+	}
+
 	// url parsing
 	request->method = llhttp_method_name(llhttp_method(parser->method));
 	try {
