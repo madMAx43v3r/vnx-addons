@@ -24,6 +24,16 @@ void check_permission(std::shared_ptr<const HttpRequest> request, const T& perm)
 	}
 }
 
+void check_path(const std::string& path)
+{
+	if(path == ".."
+		|| path.find("/..") != std::string::npos
+		|| path.find("\\..") != std::string::npos)
+	{
+		throw std::logic_error("parent traversal not allowed");
+	}
+}
+
 
 FileServer::FileServer(const std::string& _vnx_name)
 	:	FileServerBase(_vnx_name)
@@ -76,6 +86,8 @@ void FileServer::main()
 
 vnx::Buffer FileServer::read_file(const std::string& path) const
 {
+	check_path(path);
+
 	vnx::File file(www_root + path);
 	file.open("rb");
 
@@ -88,6 +100,8 @@ vnx::Buffer FileServer::read_file(const std::string& path) const
 
 vnx::Buffer FileServer::read_file_range(const std::string& path, const int64_t& offset, const int64_t& length) const
 {
+	check_path(path);
+
 	vnx::File file(www_root + path);
 	const int64_t file_size = file.file_size();
 
@@ -115,6 +129,8 @@ vnx::Buffer FileServer::read_file_range(const std::string& path, const int64_t& 
 
 file_info_t FileServer::get_file_info(const std::string& path) const
 {
+	check_path(path);
+
 	vnx::File file(www_root + path);
 	file_info_t info;
 	info.name = file.get_name();
@@ -126,6 +142,8 @@ file_info_t FileServer::get_file_info(const std::string& path) const
 
 std::vector<file_info_t> FileServer::read_directory(const std::string& path) const
 {
+	check_path(path);
+
 	std::vector<file_info_t> files;
 	vnx::Directory dir(www_root + path);
 	dir.open();
@@ -169,6 +187,8 @@ void FileServer::write_file_internal(const std::string& path, const vnx::Buffer&
 	if(read_only) {
 		throw std::runtime_error("permission denied (read only)");
 	}
+	check_path(path);
+
 	vnx::File file(www_root + path);
 	file.open("wb");
 	file.out.write(data.data(), data.size());
@@ -185,6 +205,8 @@ void FileServer::delete_file_internal(const std::string& path) const
 	if(read_only) {
 		throw std::runtime_error("permission denied (read only)");
 	}
+	check_path(path);
+
 	vnx::File file(www_root + path);
 	file.remove();
 }
@@ -266,6 +288,8 @@ bool FileServer::http_request_boilerplate(	std::shared_ptr<const HttpRequest> re
 	if(file_path.empty()) {
 		file_path = "/";
 	}
+	check_path(file_path);
+
 	try {
 		if(request->method == "GET" || request->method == "HEAD") {
 			if(file_path.back() == '/') {
