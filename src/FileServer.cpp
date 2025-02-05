@@ -8,6 +8,7 @@
 #include <vnx/addons/FileServer.h>
 #include <vnx/addons/permission_e.hxx>
 #include <vnx/vnx.h>
+#include <algorithm>
 
 
 namespace vnx {
@@ -24,14 +25,55 @@ void check_permission(std::shared_ptr<const HttpRequest> request, const T& perm)
 	}
 }
 
-void check_path(const std::string& path)
+static bool is_valid_path(const std::string& path)
 {
-	if(path == ".."
-		|| path.find("/..") != std::string::npos
-		|| path.find("\\..") != std::string::npos)
-	{
-		throw std::logic_error("parent traversal not allowed");
+	std::string normalized = path + "/";
+	std::replace(normalized.begin(), normalized.end(), '\\', '/');
+
+	return normalized.substr(0, 3) != "../"
+		&& normalized.find("/../") == std::string::npos;
+}
+
+static void check_path(const std::string& path)
+{
+	if(!is_valid_path(path)) {
+		throw std::runtime_error("invalid path: '" + path + "'");
 	}
+}
+
+static void assert_invalid_path(const std::string& path)
+{
+	if(is_valid_path(path)) {
+		throw std::runtime_error("path not invalid: '" + path + "'");
+	}
+}
+
+static void valid_path_tests()
+{
+	assert_invalid_path("..");
+	assert_invalid_path("../");
+	assert_invalid_path("..//");
+	assert_invalid_path("/..");
+	assert_invalid_path("//..");
+	assert_invalid_path("/../");
+	assert_invalid_path("//..//");
+	assert_invalid_path("/../..");
+	assert_invalid_path("//..//..");
+	assert_invalid_path("/../test");
+	assert_invalid_path("/../../test");
+	assert_invalid_path("../test");
+	assert_invalid_path("../../test");
+	assert_invalid_path("test/../../test");
+	assert_invalid_path("..\\");
+	assert_invalid_path("..\\\\");
+	assert_invalid_path("\\..");
+	assert_invalid_path("\\\\..");
+	assert_invalid_path("\\..\\..");
+	assert_invalid_path("\\\\..\\\\..");
+	assert_invalid_path("\\..\\..\\test");
+	assert_invalid_path("test\\..");
+	assert_invalid_path("\\test\\..\\");
+	assert_invalid_path("test\\..\\..\\test");
 }
 
 
@@ -73,6 +115,8 @@ void FileServer::init()
 
 void FileServer::main()
 {
+	valid_path_tests();
+
 	if(www_root.empty()) {
 		throw std::logic_error("www_root not set");
 	}
